@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Voxel Bed Wars · Multiplayer</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Voxel Bed Wars · Multiplayer v6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -80,10 +80,12 @@
 #chatInputWrap.show{display:block}
 #chatInput{width:100%;font-family:'Courier New',monospace;font-size:13px;background:rgba(0,0,0,.75);color:#fff;border:2px solid #7ff5e8;border-radius:5px;padding:8px 10px;outline:none;letter-spacing:1px}
 #chatHint{position:fixed;left:12px;bottom:158px;font-size:11px;color:#9fb4d9;text-shadow:1px 1px 0 #000;letter-spacing:1px;z-index:11;pointer-events:none;opacity:.75}
+#pingDisplay{position:absolute;left:10px;top:34px;font-size:12px;color:#9fe0ff;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.45);padding:4px 10px;border-radius:5px;font-weight:bold;pointer-events:none;border:1px solid rgba(255,255,255,.15);letter-spacing:1px;z-index:12;min-width:72px;text-align:center}
 </style></head><body>
 <div id="hud">
   <div id="crosshair"></div>
   <div id="fpsCounter">FPS: --</div>
+  <div id="pingDisplay">PING: --</div>
   <div id="cooldownBar"><div id="cooldownFill"></div></div>
   <div id="bowChargeWrap"><div id="bowChargeFill"></div></div>
   <div id="leftPanel">
@@ -133,7 +135,7 @@
 
 <div id="lobby">
   <h1>VOXEL BED WARS</h1>
-  <h2>◆ MULTIPLAYER v5 ◆</h2>
+  <h2>◆ MULTIPLAYER v6 ◆</h2>
   <div class="lobby-box">
     <div id="lobbyTabs">
       <div class="tab active" data-tab="host">CREATE ROOM</div>
@@ -167,16 +169,19 @@
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
 /* ============================================================================
-   VOXEL BED WARS — MULTIPLAYER EDITION v5
-   v5 MAPS + WEAPONS PATCH:
-   - 4 new themed maps: Arena, Jungle, Desert, Winter (map selector in lobby)
-   - New themed blocks: sandstone, cactus, ice, snow, packed ice, jungle log,
-     jungle leaves, stone bricks, mossy cobble, marble, dark/spruce planks
-   - Blast-Resistant Glass (immune to TNT & fireballs)
-   - Fireball (throwable explosive with knockback)
-   - Ender Pearl (teleport throwable, self-damage on impact)
-   - Ice physics (reduced friction)
-   - Cactus special placement/breaking
+   VOXEL BED WARS — MULTIPLAYER EDITION v6
+   v6 KNOCKBACK / LATENCY / ATTACK-COOLDOWN PATCH:
+   - Knockback rewritten: dedicated impulse system, no downward "sink into hole"
+     behaviour, fall-damage immunity after blasts, radial + vertical forcing.
+   - Attack cooldown now matches Java Edition: attack_speed attribute per tool,
+     damage scale = base*(0.2+0.8*p^2) + enchant*p, crit/kb require p>=0.848,
+     hotbar switch and block break reset the cooldown, target invulnerability
+     window = 10 ticks (0.5s).
+   - Latency: host arbitrates block changes, target authority for health,
+     adaptive remote interpolation, state sequence numbers, ping readout.
+   - TNT now networks properly (fuse synced, host explodes).
+   - Numerous small fixes (item cooldown on switch, remote HP prediction,
+     fall damage suppression, hoe attack speeds corrected, etc.)
    ========================================================================== */
 
 import * as THREE from 'three';
@@ -410,8 +415,30 @@ const BLOCKS = {
 };
 const SPEC_BY_BLOCK = { 17: 0.34, 18: 0.92, 20: 0.95, 22: 0.86, 23: 0.86, 21: 0.45, 29: 0.50, 27: 0.30, 43: 0.30, 40: 0.18, 38: 0.30, 34: 0.40 };
 const TOOL_SPEED = { wood: 2, copper: 3, stone: 4, iron: 6, diamond: 8, netherite: 9, gold: 12 };
-const TOOL_STATS = { sword: { wood: { dmg: 4, speed: 1.6 }, copper: { dmg: 5, speed: 1.6 }, stone: { dmg: 5, speed: 1.6 }, iron: { dmg: 6, speed: 1.6 }, diamond: { dmg: 7, speed: 1.6 }, netherite: { dmg: 8, speed: 1.6 } }, axe: { wood: { dmg: 7, speed: 0.8 }, copper: { dmg: 8, speed: 0.8 }, stone: { dmg: 9, speed: 0.8 }, iron: { dmg: 9, speed: 0.9 }, diamond: { dmg: 9, speed: 1.0 }, netherite: { dmg: 10, speed: 1.0 } }, pickaxe: { wood: { dmg: 2, speed: 1.2 }, copper: { dmg: 2, speed: 1.2 }, stone: { dmg: 3, speed: 1.2 }, iron: { dmg: 4, speed: 1.2 }, diamond: { dmg: 5, speed: 1.2 }, netherite: { dmg: 6, speed: 1.2 }, gold: { dmg: 2, speed: 1.2 } }, shovel: { wood: { dmg: 2.5, speed: 1.0 }, copper: { dmg: 3, speed: 1.0 }, stone: { dmg: 3.5, speed: 1.0 }, iron: { dmg: 4.5, speed: 1.0 }, diamond: { dmg: 5.5, speed: 1.0 }, netherite: { dmg: 6.5, speed: 1.0 } }, hoe: { wood: { dmg: 1, speed: 1.0 }, copper: { dmg: 1, speed: 2.0 }, stone: { dmg: 1, speed: 3.0 }, iron: { dmg: 1, speed: 4.0 }, diamond: { dmg: 1, speed: 4.0 }, netherite: { dmg: 1, speed: 4.0 } }, stick: { wood: { dmg: 1, speed: 1.8 } }, shears: { iron: { dmg: 2, speed: 1.4 } } };
-function getAttackSpeed(tool, material) { if (!tool) return 4.0; if (tool === 'sword') return 1.6; if (tool === 'axe') { if (material === 'wood' || material === 'copper' || material === 'stone') return 0.8; if (material === 'iron') return 0.9; return 1.0; } if (tool === 'pickaxe') return 1.2; if (tool === 'shovel') return 1.0; if (tool === 'hoe') { if (material === 'wood') return 1.0; if (material === 'copper') return 2.0; if (material === 'stone') return 3.0; return 4.0; } if (tool === 'stick') return 1.8; if (tool === 'shears') return 1.4; return 4.0; }
+const TOOL_STATS = { sword: { wood: { dmg: 4, speed: 1.6 }, copper: { dmg: 5, speed: 1.6 }, stone: { dmg: 5, speed: 1.6 }, iron: { dmg: 6, speed: 1.6 }, diamond: { dmg: 7, speed: 1.6 }, netherite: { dmg: 8, speed: 1.6 } }, axe: { wood: { dmg: 7, speed: 0.8 }, copper: { dmg: 8, speed: 0.8 }, stone: { dmg: 9, speed: 0.8 }, iron: { dmg: 9, speed: 0.9 }, diamond: { dmg: 9, speed: 1.0 }, netherite: { dmg: 10, speed: 1.0 } }, pickaxe: { wood: { dmg: 2, speed: 1.2 }, copper: { dmg: 2, speed: 1.2 }, stone: { dmg: 3, speed: 1.2 }, iron: { dmg: 4, speed: 1.2 }, diamond: { dmg: 5, speed: 1.2 }, netherite: { dmg: 6, speed: 1.2 } }, shovel: { wood: { dmg: 2.5, speed: 1.0 }, copper: { dmg: 3, speed: 1.0 }, stone: { dmg: 3.5, speed: 1.0 }, iron: { dmg: 4.5, speed: 1.0 }, diamond: { dmg: 5.5, speed: 1.0 }, netherite: { dmg: 6.5, speed: 1.0 } }, hoe: { wood: { dmg: 1, speed: 1.0 }, copper: { dmg: 1, speed: 2.0 }, stone: { dmg: 1, speed: 2.0 }, iron: { dmg: 1, speed: 3.0 }, diamond: { dmg: 1, speed: 4.0 }, netherite: { dmg: 1, speed: 4.0 } }, stick: { wood: { dmg: 1, speed: 1.8 } }, shears: { iron: { dmg: 2, speed: 1.4 } } };
+
+/* v6: attack speed matches Java Edition table exactly */
+function getAttackSpeed(tool, material) {
+  if (!tool) return 4.0;
+  if (tool === 'sword') return 1.6;
+  if (tool === 'axe') {
+    if (material === 'wood' || material === 'copper' || material === 'stone') return 0.8;
+    if (material === 'iron') return 0.9;
+    return 1.0; // diamond, netherite, gold
+  }
+  if (tool === 'pickaxe') return 1.2;
+  if (tool === 'shovel') return 1.0;
+  if (tool === 'hoe') {
+    if (material === 'wood' || material === 'gold') return 1.0;
+    if (material === 'copper' || material === 'stone') return 2.0;
+    if (material === 'iron') return 3.0;
+    return 4.0; // diamond, netherite
+  }
+  if (tool === 'stick') return 1.8;
+  if (tool === 'shears') return 1.4;
+  return 4.0;
+}
+
 const ITEMS = {}; const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 TOOLKINDS.forEach((tk, ti) => { MATS.forEach((mat, mi) => { const id = mat + '_' + tk; ITEMS[id] = { id, name: cap(mat) + ' ' + cap(tk), tile: ITEM_START + ti * 6 + mi, stack: 1, tool: tk, material: mat, kind: 'tool' }; }); });
 for (const [bid, def] of Object.entries(BLOCKS)) { const id = 'b' + bid; ITEMS[id] = { id, name: def.name, tile: def.tiles[2], stack: 64, block: Number(bid), kind: 'block' }; }
@@ -429,7 +456,6 @@ ITEMS['gold_pickaxe'] = { id: 'gold_pickaxe', name: 'Gold Pickaxe', tile: 101, s
 ITEMS['potion_speed'] = { id: 'potion_speed', name: 'Speed Potion', tile: 95, stack: 1, kind: 'consumable', heal: 0, effect: 'speed', effectDuration: 30 };
 ITEMS['potion_jump'] = { id: 'potion_jump', name: 'Jump Potion', tile: 96, stack: 1, kind: 'consumable', heal: 0, effect: 'jump', effectDuration: 30 };
 ITEMS['potion_invis'] = { id: 'potion_invis', name: 'Invisibility Potion', tile: 97, stack: 1, kind: 'consumable', heal: 0, effect: 'invis', effectDuration: 20 };
-/* NEW THROWABLES */
 ITEMS['fireball'] = { id: 'fireball', name: 'Fireball', tile: T.fireball, stack: 16, kind: 'throwable', throwType: 'fireball' };
 ITEMS['ender_pearl'] = { id: 'ender_pearl', name: 'Ender Pearl', tile: T.ender_pearl, stack: 16, kind: 'throwable', throwType: 'ender_pearl' };
 ARMOR_TIERS.forEach((tier, ti) => { ARMOR_PIECES.forEach((piece, pi) => { const id = tier.key + '_' + piece.key; ITEMS[id] = { id, name: tier.name + ' ' + piece.name, tile: ARMOR_TILE_BASE + ti * 4 + pi, stack: 1, kind: 'armor', tier: tier.tier, tierName: tier.name, slot: piece.key, slotName: piece.name, armorPoints: tier.pts[piece.key], toughness: tier.tough }; }); });
@@ -865,7 +891,6 @@ function makeFlagPole(cx, cy, cz, team) {
   setBlock(cx + 1, cy + 3, cz, woolId); setBlock(cx + 2, cy + 3, cz, woolId); setBlock(cx + 3, cy + 3, cz, woolId);
 }
 
-/* ----- COMMON TEAM BASE SETUP ----- */
 function placeTeamBase(team, opts) {
   opts = opts || {};
   const floorId = opts.floorId || 1;
@@ -925,17 +950,14 @@ function buildLighthouse(cx, cz) {
 
 /* ==================== MAP: ARENA ==================== */
 function generateArena() {
-  // Small corner bases - fast pace
   for (const team of TEAMS) {
-    makeIsland(team.x, team.z, 7, 3, 3); // stone surface
+    makeIsland(team.x, team.z, 7, 3, 3);
     placeTeamBase(team, { floorId: 3 });
     makeTree(team.x - 5, BASE_Y + 1, team.z - 5);
     makeTree(team.x + 5, BASE_Y + 1, team.z - 5);
   }
-  // Central coliseum
   buildArenaColiseum(0, 0);
-  // All diamond gens inside coliseum wall ring
-  const diaAngles = [0.25, 0.75, 1.25, 1.75]; // four gen spots
+  const diaAngles = [0.25, 0.75, 1.25, 1.75];
   for (let i = 0; i < diaAngles.length; i++) {
     const a = diaAngles[i] * Math.PI;
     const r = 6.5;
@@ -943,7 +965,6 @@ function generateArena() {
     setBlock(gx, BASE_Y, gz, 22);
     generators.push(makeGen(new THREE.Vector3(gx + 0.5, BASE_Y + 1, gz + 0.5), 'diamond', 30.0));
   }
-  // Emerald gens at exact center
   setBlock(1, BASE_Y, 1, 23); setBlock(-1, BASE_Y, -1, 23);
   generators.push(makeGen(new THREE.Vector3(1.5, BASE_Y + 1, 1.5), 'emerald', 15.0));
   generators.push(makeGen(new THREE.Vector3(-0.5, BASE_Y + 1, -0.5), 'emerald', 15.0));
@@ -951,32 +972,26 @@ function generateArena() {
 function buildArenaColiseum(cx, cz) {
   const y0 = BASE_Y + 1;
   const BRICK = 38, MARBLE = 40, DARK = 41, STONE = 3, PLANKS = 7, LOG = 6, GLOW = 20;
-  // Outer floor
   for (let dx = -10; dx <= 10; dx++) for (let dz = -10; dz <= 10; dz++) {
     const d = Math.hypot(dx, dz);
     if (d > 10) continue;
     setBlock(cx + dx, y0 - 1, cz + dz, d < 6 ? MARBLE : BRICK);
     if (d > 9.5) setBlock(cx + dx, y0 - 2, cz + dz, STONE);
   }
-  // Ring wall
   const wallR = 9.5;
   for (let a = 0; a < 360; a += 3) {
     const rad = a * Math.PI / 180;
     const wx = Math.round(cx + Math.cos(rad) * wallR);
     const wz = Math.round(cz + Math.sin(rad) * wallR);
     for (let h = 0; h < 4; h++) setBlock(wx, y0 + h, wz, (h % 2 === 0) ? BRICK : MARBLE);
-    // Wood trim
     setBlock(wx, y0 + 4, wz, DARK);
-    // Regular pillars with glow
     if (a % 30 === 0) {
       for (let h = 0; h < 7; h++) setBlock(wx, y0 + h, wz, h < 5 ? MARBLE : GLOW);
     }
-    // Gaps every 90 for entrances
     if (a >= 88 && a <= 92 || a >= 178 && a <= 182 || a >= 268 && a <= 272 || a >= 358) {
       for (let h = 0; h < 4; h++) setBlock(wx, y0 + h, wz, 0);
     }
   }
-  // Wooden auditorium tiers around inner ring (r=7)
   for (let a = 20; a < 340; a += 8) {
     const rad = a * Math.PI / 180;
     const tier = 7;
@@ -988,11 +1003,8 @@ function buildArenaColiseum(cx, cz) {
       setBlock(wx, y0 + step + 1, wz, 0);
     }
   }
-  // Corridor around (using stone as path already set)
-  // Central pedestal
   for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) setBlock(cx + dx, y0 - 1, cz + dz, MARBLE);
-  setBlock(cx, y0, cz, 23); // emerald block as marker
-  // Decorations: log support pillars at corners
+  setBlock(cx, y0, cz, 23);
   for (const [px, pz] of [[-7, -7], [7, -7], [-7, 7], [7, 7]]) {
     for (let h = 0; h < 3; h++) setBlock(cx + px, y0 + h, cz + pz, LOG);
     setBlock(cx + px, y0 + 3, cz + pz, GLOW);
@@ -1001,39 +1013,31 @@ function buildArenaColiseum(cx, cz) {
 
 /* ==================== MAP: JUNGLE ==================== */
 function generateJungle() {
-  // Team islands pushed further out
   for (const team of TEAMS) {
-    // Far islands
     const tx = team.x * 1.15;
     const tz = team.z * 1.15;
     team.x = Math.round(tx); team.z = Math.round(tz);
     makeIsland(team.x, team.z, 8, 1, 2);
     placeTeamBase(team);
-    // Dense vegetation - multiple trees but not covering gens/shop/bed
     makeTree(team.x - 5, BASE_Y + 1, team.z - 6, { logId: 35, leafId: 36, height: 5 });
     makeTree(team.x + 6, BASE_Y + 1, team.z - 6, { logId: 35, leafId: 36, height: 5 });
     makeTree(team.x - 6, BASE_Y + 1, team.z + 6, { logId: 35, leafId: 36, height: 6 });
     makeTree(team.x + 6, BASE_Y + 1, team.z + 6, { logId: 35, leafId: 36, height: 5 });
-    // Stratified - smaller trees around edges
     makeTree(team.x - 3, BASE_Y + 1, team.z - 8, { logId: 35, leafId: 36, height: 3, spread: 1, heightVar: 1 });
     makeTree(team.x + 7, BASE_Y + 1, team.z + 1, { logId: 35, leafId: 36, height: 3, spread: 1, heightVar: 1 });
   }
-  // Diamond gens - medium distance
   const dSpots = [[22, 0], [-22, 0], [0, 22], [0, -22]];
   for (const [mx, mz] of dSpots) {
     makeIsland(mx, mz, 4, 1, 2);
     setBlock(mx, BASE_Y, mz, 22);
     generators.push(makeGen(new THREE.Vector3(mx + 0.5, BASE_Y + 1, mz + 0.5), 'diamond', 30.0));
-    // A couple of trees but not blocking
     makeTree(mx + 3, BASE_Y + 1, mz + 1, { logId: 35, leafId: 36, height: 4 });
   }
-  // Central giant tree on a large island
   makeIsland(0, 0, 11, 1, 2);
   buildGiantJungleTree(0, 0);
   setBlock(4, BASE_Y, 4, 23); setBlock(-4, BASE_Y, -4, 23);
   generators.push(makeGen(new THREE.Vector3(4.5, BASE_Y + 1, 4.5), 'emerald', 15.0));
   generators.push(makeGen(new THREE.Vector3(-4.5, BASE_Y + 1, -4.5), 'emerald', 15.0));
-  // Mossy accents
   const rnd = mulberry32(7100);
   for (let i = 0; i < 60; i++) {
     const a = rnd() * Math.PI * 2, r = 6 + rnd() * 5;
@@ -1044,13 +1048,11 @@ function generateJungle() {
 function buildGiantJungleTree(cx, cz) {
   const y0 = BASE_Y + 1;
   const LOG = 35, LEAF = 36, MOSS = 39;
-  // Massive trunk with root buttresses
   const trunkR = 2;
   for (let dx = -trunkR; dx <= trunkR; dx++) for (let dz = -trunkR; dz <= trunkR; dz++) {
     if (Math.abs(dx) + Math.abs(dz) > trunkR + 1) continue;
     for (let h = 0; h < 16; h++) setBlock(cx + dx, y0 + h, cz + dz, LOG);
   }
-  // Roots spreading out
   const rnd = mulberry32(7101);
   for (let angle = 0; angle < 8; angle++) {
     const rad = (angle / 8) * Math.PI * 2;
@@ -1063,7 +1065,6 @@ function buildGiantJungleTree(cx, cz) {
       if (i > 1) setBlock(rx, y0, rz, MOSS);
     }
   }
-  // Branches spreading
   const branchAngles = [0.3, 1.6, 2.7, 4.0, 5.3];
   for (const ba of branchAngles) {
     const blen = 5 + ((rnd() * 3) | 0);
@@ -1074,7 +1075,6 @@ function buildGiantJungleTree(cx, cz) {
       bz = cz + Math.round(Math.sin(ba) * i);
       by = y0 + bh - Math.round(i * 0.3);
       setBlock(bx, by, bz, LOG);
-      // Leaves around branch
       for (let lx = -1; lx <= 1; lx++) for (let ly = -1; ly <= 1; ly++) for (let lz = -1; lz <= 1; lz++) {
         if (lx === 0 && ly === 0 && lz === 0) continue;
         if (Math.abs(lx) + Math.abs(ly) + Math.abs(lz) > 2) continue;
@@ -1082,7 +1082,6 @@ function buildGiantJungleTree(cx, cz) {
       }
     }
   }
-  // Big canopy
   for (let dx = -6; dx <= 6; dx++) for (let dz = -6; dz <= 6; dz++) {
     const d = Math.hypot(dx, dz);
     if (d > 6.2) continue;
@@ -1091,7 +1090,6 @@ function buildGiantJungleTree(cx, cz) {
       if (!getBlock(cx + dx, y0 + 14 + h + hVariation, cz + dz)) setBlock(cx + dx, y0 + 14 + h + hVariation, cz + dz, LEAF);
     }
   }
-  // Decorative vines hanging (using moss? just leaves)
   for (let i = 0; i < 12; i++) {
     const a = rnd() * Math.PI * 2, r = 4 + rnd() * 3;
     const vx = Math.round(cx + Math.cos(a) * r);
@@ -1103,9 +1101,8 @@ function buildGiantJungleTree(cx, cz) {
 /* ==================== MAP: DESERT ==================== */
 function generateDesert() {
   for (const team of TEAMS) {
-    makeIsland(team.x, team.z, 8, 5, 30); // sand surface, sandstone below
+    makeIsland(team.x, team.z, 8, 5, 30);
     placeTeamBase(team, { floorId: 5 });
-    // Cactus decorations away from base
     const cactusSpots = [
       [team.x - 6, team.z - 6], [team.x + 6, team.z - 6], [team.x - 6, team.z + 6], [team.x + 6, team.z + 6]
     ];
@@ -1114,7 +1111,6 @@ function generateDesert() {
       setBlock(cx, BASE_Y + 1, cz, 31);
       setBlock(cx, BASE_Y + 2, cz, 31);
     }
-    // Small pyramid decoration beside base
     for (let i = 0; i < 2; i++) {
       const py = BASE_Y + 1 + i;
       const w = 2 - i;
@@ -1123,60 +1119,50 @@ function generateDesert() {
       }
     }
   }
-  // Diamond gens
   const dSpots = [[20, 0], [-20, 0], [0, 20], [0, -20]];
   for (const [mx, mz] of dSpots) {
     makeIsland(mx, mz, 5, 5, 30);
     setBlock(mx, BASE_Y, mz, 22);
     generators.push(makeGen(new THREE.Vector3(mx + 0.5, BASE_Y + 1, mz + 0.5), 'diamond', 30.0));
-    // Occasional cactus decoration
     setBlock(mx + 3, BASE_Y + 1, mz - 3, 31);
   }
-  // Central pyramid
   makeIsland(0, 0, 12, 5, 30);
   buildDesertPyramid(0, 0);
 }
 function buildDesertPyramid(cx, cz) {
   const y0 = BASE_Y + 1;
   const SANDSTONE = 30, SAND = 5, GLOW = 20, GOLD = 20;
-  const size = 9; // half base size
+  const size = 9;
   const height = 9;
   for (let layer = 0; layer < height; layer++) {
     const half = size - layer;
     if (half < 0) break;
     for (let dx = -half; dx <= half; dx++) for (let dz = -half; dz <= half; dz++) {
-      // Skip hollow interior (only outer shell + floor)
       const isShell = Math.abs(dx) === half || Math.abs(dz) === half || layer === height - 1;
-      if (layer === 0) setBlock(cx + dx, y0 + layer - 1, cz + dz, SANDSTONE); // floor
+      if (layer === 0) setBlock(cx + dx, y0 + layer - 1, cz + dz, SANDSTONE);
       if (isShell) setBlock(cx + dx, y0 + layer, cz + dz, SANDSTONE);
     }
   }
-  // Cap with gold glow
   setBlock(cx, y0 + height, cz, GOLD);
   setBlock(cx, y0 + height + 1, cz, GLOW);
-  // Entrance corridor (south side)
   for (let d = 0; d < size; d++) {
     setBlock(cx, y0 + 0, cz + size - d, 0);
     setBlock(cx, y0 + 1, cz + size - d, 0);
     setBlock(cx + 1, y0 + 0, cz + size - d, 0);
     setBlock(cx + 1, y0 + 1, cz + size - d, 0);
   }
-  // Decorations: glowstone on interior walls
   for (let i = 0; i < 4; i++) {
     const a = (i / 4) * Math.PI * 2;
     const gx = Math.round(cx + Math.cos(a) * (size - 2));
     const gz = Math.round(cz + Math.sin(a) * (size - 2));
     setBlock(gx, y0 + 2, gz, GLOW);
   }
-  // Emerald gens inside the hollow center
   setBlock(cx + 1, y0, cz + 1, 23); setBlock(cx - 2, y0, cz - 2, 23);
   generators.push(makeGen(new THREE.Vector3(cx + 1.5, y0 + 1, cz + 1.5), 'emerald', 15.0));
   generators.push(makeGen(new THREE.Vector3(cx - 1.5, y0 + 1, cz - 1.5), 'emerald', 15.0));
-  // Interior floor (sandstone)
   for (let dx = -size + 1; dx <= size - 1; dx++) for (let dz = -size + 1; dz <= size - 1; dz++) {
     if (!getBlock(cx + dx, y0 - 1, cz + dz)) setBlock(cx + dx, y0 - 1, cz + dz, SANDSTONE);
   }
-  // Scattered cacti around the pyramid exterior
   const rnd = mulberry32(7200);
   for (let i = 0; i < 18; i++) {
     const a = rnd() * Math.PI * 2, r = size + 2 + rnd() * 3;
@@ -1192,34 +1178,27 @@ function buildDesertPyramid(cx, cz) {
 /* ==================== MAP: WINTER ==================== */
 function generateWinter() {
   for (const team of TEAMS) {
-    makeIsland(team.x, team.z, 9, 33, 3); // snow surface, stone below
-    // Build igloo base
+    makeIsland(team.x, team.z, 9, 33, 3);
     buildIglooBase(team);
-    // Ice patches around base
     for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) {
       if (dx === 0 && dz === 0) continue;
       if (Math.abs(dx) + Math.abs(dz) > 3) continue;
       if (!getBlock(team.x + 7 + dx, BASE_Y, team.z + 7 + dz)) setBlock(team.x + 7 + dx, BASE_Y, team.z + 7 + dz, 32);
     }
-    // Snow trees
     makeTree(team.x - 6, BASE_Y + 1, team.z - 6, { logId: 42, leafId: 33, height: 4 });
     makeTree(team.x + 6, BASE_Y + 1, team.z - 6, { logId: 42, leafId: 33, height: 4 });
   }
-  // Diamond gens
   const dSpots = [[20, 0], [-20, 0], [0, 20], [0, -20]];
   for (const [mx, mz] of dSpots) {
-    makeIsland(mx, mz, 5, 33, 34); // snow surface, packed ice below
+    makeIsland(mx, mz, 5, 33, 34);
     setBlock(mx, BASE_Y, mz, 22);
     generators.push(makeGen(new THREE.Vector3(mx + 0.5, BASE_Y + 1, mz + 0.5), 'diamond', 30.0));
   }
-  // Central snow mountain with plateau
   makeIsland(0, 0, 12, 33, 3);
   buildSnowMountain(0, 0);
-  // Emerald gens on the plateau
   setBlock(3, BASE_Y + 4, 3, 23); setBlock(-3, BASE_Y + 4, -3, 23);
   generators.push(makeGen(new THREE.Vector3(3.5, BASE_Y + 5, 3.5), 'emerald', 15.0));
   generators.push(makeGen(new THREE.Vector3(-2.5, BASE_Y + 5, -2.5), 'emerald', 15.0));
-  // Ice slide paths connecting mountain to inner ring
   const rnd = mulberry32(7300);
   for (let i = 0; i < 3; i++) {
     const a = rnd() * Math.PI * 2;
@@ -1233,24 +1212,20 @@ function generateWinter() {
 function buildIglooBase(team) {
   const y0 = BASE_Y + 1;
   const SNOW = 33, ICE = 32, PACKED = 34;
-  // Clear a space and put down floor (snow)
   for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) {
     if (dx * dx + dz * dz > 20) continue;
     if (getBlock(team.x + dx, y0 - 1, team.z + dz) === 0) setBlock(team.x + dx, y0 - 1, team.z + dz, SNOW);
   }
-  // Igloo walls (circular ring, 5 tall)
   for (let a = 0; a < 360; a += 6) {
     const rad = a * Math.PI / 180;
     const wx = Math.round(team.x + Math.cos(rad) * 4);
     const wz = Math.round(team.z + Math.sin(rad) * 4);
-    // Skip doorway
     if ((a > 80 && a < 100) || (a > 260 && a < 280)) {
       for (let h = 0; h < 3; h++) setBlock(wx, y0 + h, wz, 0);
       continue;
     }
     for (let h = 0; h < 4; h++) setBlock(wx, y0 + h, wz, SNOW);
   }
-  // Dome roof (stepped rows inward)
   const domeLevels = [
     { r: 3, y: y0 + 4 },
     { r: 2, y: y0 + 5 },
@@ -1265,28 +1240,21 @@ function buildIglooBase(team) {
     }
   }
   setBlock(team.x, y0 + 7, team.z, SNOW);
-  // Place bed inside
   setBlock(team.x + 2, y0, team.z, team.bed);
   setBlock(team.x + 2, y0, team.z + 1, team.bed);
-  // Shop inside igloo
   setBlock(team.x - 2, y0, team.z + 2, 21);
   team.shopPos = { x: team.x - 1.5, z: team.z + 2.5 };
-  // Upgrade inside igloo
   setBlock(team.x - 2, y0, team.z - 2, 29);
   team.upgradePos = { x: team.x - 1.5, z: team.z - 1.5 };
-  // Iron gen inside igloo
   setBlock(team.x + 2, y0 - 1, team.z - 2, 18);
   generators.push(makeGen(new THREE.Vector3(team.x + 2.5, y0, team.z - 1.5), 'iron', 1.5));
-  // Gold gen inside igloo
   setBlock(team.x - 3, y0 - 1, team.z, 20);
   generators.push(makeGen(new THREE.Vector3(team.x - 2.5, y0, team.z + 0.5), 'gold', 4.0));
-  // Flag pole outside
   makeFlagPole(team.x - 6, y0, team.z - 6, team);
 }
 function buildSnowMountain(cx, cz) {
   const y0 = BASE_Y + 1;
   const SNOW = 33, PACKED = 34, ICE = 32;
-  // Base mountain (cone shape, layered)
   const levels = [
     { r: 7, h: 2 }, { r: 6, h: 2 }, { r: 5, h: 1 }, { r: 4, h: 1 }, { r: 3, h: 1 }, { r: 2, h: 1 }
   ];
@@ -1301,21 +1269,17 @@ function buildSnowMountain(cx, cz) {
     }
     curY += level.h;
   }
-  // Plateau top (flat walking area)
   for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) {
     if (dx * dx + dz * dz > 16) continue;
     if (!getBlock(cx + dx, curY, cz + dz)) setBlock(cx + dx, curY, cz + dz, SNOW);
   }
-  // Packed ice accents
   setBlock(cx + 5, y0 + 2, cz, PACKED);
   setBlock(cx - 5, y0 + 2, cz, PACKED);
   setBlock(cx, y0 + 2, cz + 5, PACKED);
   setBlock(cx, y0 + 2, cz - 5, PACKED);
-  // Glowing peak decoration
   setBlock(cx, curY + 1, cz, 20);
 }
 
-/* ----- GENERATE WORKSHEET ----- */
 function generateWorld() {
   if (currentMapKey === 'arena') generateArena();
   else if (currentMapKey === 'jungle') generateJungle();
@@ -1334,13 +1298,13 @@ function clearWorld() {
   dirty.clear();
   for (const t of TEAMS) teamBedBroken[t.name] = false;
   for (const t of TEAMS) teamUpgrades[t.name] = { sharpness: 0, protection: 0, haste: 0 };
-  // Reset team positions (jungle moves them)
   TEAMS[0].x = -30; TEAMS[0].z = -30;
   TEAMS[1].x = 30; TEAMS[1].z = -30;
   TEAMS[2].x = -30; TEAMS[2].z = 30;
   TEAMS[3].x = 30; TEAMS[3].z = 30;
   if (typeof droppedItems !== 'undefined') { for (const d of droppedItems) d.remove(); droppedItems.length = 0; }
   if (typeof throwables !== 'undefined') { for (const t of throwables) t.remove(); throwables.length = 0; }
+  if (typeof primedTNTs !== 'undefined') { for (const t of primedTNTs) { scene.remove(t.mesh); t.mesh.geometry.dispose(); } primedTNTs.length = 0; }
 }
 function buildInitialWorld() {
   resetWorldRng();
@@ -1420,7 +1384,7 @@ function blockedAt(x, y, z, h) {
 const TERMINAL_VELOCITY = 78.4;
 
 /* ============================================================================
-   9. NETWORKING (PeerJS P2P star topology)
+   9. NETWORKING (PeerJS P2P star topology) — v6 with host arbitration
    ========================================================================== */
 const NET = {
   mode: 'idle', peer: null, myId: null, roomCode: null, hostConn: null,
@@ -1429,7 +1393,8 @@ const NET = {
   started: false, localTeamName: null,
   teamsTaken: { Red: null, Blue: null, Green: null, Yellow: null },
   helloSent: new Set(),
-  mapName: 'standard'
+  mapName: 'standard',
+  lastPingMs: 0
 };
 function netSend(msg) {
   if (NET.mode === 'host') { for (const [, c] of NET.connections) { try { c.send(msg); } catch (e) { } } }
@@ -1562,7 +1527,7 @@ function startGameAsHost() {
   player.eliminated = false; player.spectator = false; player.respawnCooldown = 0;
   player.health = player.maxHealth;
   player.pos.set(PLAYER_TEAM.x + 0.5, BASE_Y + 2, PLAYER_TEAM.z + 0.5);
-  player.vel.set(0, 0, 0); maxFallY = player.pos.y;
+  player.vel.set(0, 0, 0); player.knockbackTime = 0; maxFallY = player.pos.y;
   rebuildRemotePlayersFromRoster();
   appendChat('[System]', 'Game started on ' + (MAP_OPTIONS.find(m => m.key === currentMapKey)?.name || currentMapKey) + '!', '#ffd966');
   if (!player.spectator) try { renderer.domElement.requestPointerLock(); } catch (e) { }
@@ -1749,8 +1714,20 @@ function handleNetData(data, fromId) {
       break;
     }
     case 'blk': {
-      applyRemoteBlock(data.x, data.y, data.z, data.id);
-      if (NET.mode === 'host') netRelay(data._from || null, data);
+      /* v6: host is authoritative for block changes. Clients apply the host's
+         echo, so simultaneous placements converge instead of contradicting. */
+      if (NET.mode === 'host') {
+        applyRemoteBlock(data.x, data.y, data.z, data.id);
+        netSend(data);
+      } else {
+        applyRemoteBlock(data.x, data.y, data.z, data.id);
+      }
+      break;
+    }
+    case 'tnt': {
+      /* v6: TNT is networked with a synchronized fuse. Only the host explodes. */
+      primeTNT(data.x, data.y, data.z, data.fuse, false);
+      if (NET.mode === 'host') netRelay(fromId, data);
       break;
     }
     case 'dmg': {
@@ -1758,15 +1735,15 @@ function handleNetData(data, fromId) {
       if (target === NET.myId) {
         damagePlayer(data.amount, data.source || 'Player');
         if (data.kb && data.kb.length === 3) {
-          player.knockbackTime = 0.30;
-          player.vel.x = data.kb[0];
-          player.vel.y = Math.max(player.vel.y, data.kb[1]);
-          player.vel.z = data.kb[2];
-          player.onGround = false;
+          applyKnockbackImpulse(data.kb[0], data.kb[1], data.kb[2], 0.40);
         }
       } else {
         const rp = remotePlayers.find(r => r.id === target);
-        if (rp) rp.flashHurt();
+        if (rp) {
+          /* Prediction only: the target's own state message is authoritative. */
+          rp.health = Math.max(0, rp.health - (data.amount || 0));
+          rp.flashHurt();
+        }
       }
       if (NET.mode === 'host') netRelay(data._from || null, data);
       break;
@@ -1822,7 +1799,7 @@ function beginPlayingAfterStart() {
   player.eliminated = false; player.spectator = false; player.respawnCooldown = 0;
   player.health = player.maxHealth;
   player.pos.set(PLAYER_TEAM.x + 0.5, BASE_Y + 2, PLAYER_TEAM.z + 0.5);
-  player.vel.set(0, 0, 0); maxFallY = player.pos.y;
+  player.vel.set(0, 0, 0); player.knockbackTime = 0; maxFallY = player.pos.y;
   updateStatusBar();
   try { renderer.domElement.requestPointerLock(); } catch (e) { }
 }
@@ -1838,7 +1815,7 @@ function applyRemoteBlock(x, y, z, id) {
    ========================================================================== */
 const remotePlayers = [];
 const SKIN_CACHE = new Map();
-const REMOTE_INTERP_DELAY = 0.10;
+const REMOTE_INTERP_DELAY_BASE = 0.10;
 const REMOTE_MAX_EXTRAP = 0.25;
 function getSkinEntry(skinUrl, slimHint) {
   if (!skinUrl || !skinUrl.startsWith('data:image')) return { tex: null, slim: false };
@@ -1870,6 +1847,12 @@ class RemotePlayer {
     this._skinTex = null; this._skinSlim = !!slim; this._lastSkinUrl = null;
     this.model = null; this.nameTag = null; this._lastTagHp = -1; this._lastReasonText = '';
     this.stateBuffer = [];
+    this._interpDelay = REMOTE_INTERP_DELAY_BASE;
+    this._jitterEMA = 0;
+    this._lastRecvTime = 0;
+    this._seq = 0;
+    /* local-only target invuln window (prevents attacker spam before target responds) */
+    this.localHurtCooldown = 0;
     this.buildModel(skinUrl); this.buildNametag();
   }
   buildModel(skinUrl) {
@@ -1909,20 +1892,39 @@ class RemotePlayer {
     if (this.health <= 0) { this.model.visible = false; this.nameTag.style.display = 'none'; }
   }
   flashHurt() { this.hurtTime = 0.4; }
+  applyLocalDamage(amount) {
+    if (this.localHurtCooldown > 0) return false;
+    this.localHurtCooldown = 0.5;
+    this.health = Math.max(0, this.health - amount);
+    this.flashHurt();
+    return true;
+  }
   applyState(data) {
     const now = performance.now() / 1000;
+    /* Track jitter for adaptive interpolation delay */
+    if (this._lastRecvTime > 0) {
+      const dt = now - this._lastRecvTime;
+      const expected = 0.045;
+      this._jitterEMA = this._jitterEMA * 0.9 + Math.abs(dt - expected) * 0.1;
+      this._interpDelay = clamp(REMOTE_INTERP_DELAY_BASE + this._jitterEMA * 0.9, REMOTE_INTERP_DELAY_BASE, 0.30);
+    }
+    this._lastRecvTime = now;
+    if (typeof data.seq === 'number') {
+      if (data.seq <= this._seq) return;
+      this._seq = data.seq;
+    }
     if (data.p && data.p.length === 3) {
       const last = this.stateBuffer[this.stateBuffer.length - 1];
       if (last) { const dx = data.p[0] - last.p[0], dz = data.p[2] - last.p[2]; if (Math.hypot(dx, dz) > 12) { this.pos.set(data.p[0], data.p[1], data.p[2]); this.targetPos.copy(this.pos); this.stateBuffer.length = 0; } }
       else { this.pos.set(data.p[0], data.p[1], data.p[2]); this.targetPos.copy(this.pos); }
       this.stateBuffer.push({ t: now, p: [data.p[0], data.p[1], data.p[2]], ry: (data.r && data.r.length === 2) ? data.r[0] : this.targetYaw, rp: (data.r && data.r.length === 2) ? data.r[1] : this.targetPitch });
-      while (this.stateBuffer.length > 40) this.stateBuffer.shift();
+      while (this.stateBuffer.length > 60) this.stateBuffer.shift();
     }
     if (typeof data.h === 'number') {
       const wasAlive = this.alive;
       this.health = data.h; this.alive = this.health > 0;
       if (wasAlive && !this.alive) { this.model.visible = false; this.nameTag.style.display = 'none'; addEventMessage('<b>' + this.name + '</b> was slain', '#ffaaaa'); }
-      else if (!wasAlive && this.alive) { this.model.visible = true; this.nameTag.style.display = 'block'; }
+      else if (!wasAlive && this.alive) { this.model.visible = true; this.nameTag.style.display = 'block'; this.localHurtCooldown = 0.5; }
       this._lastTagHp = -1;
     }
     if (data.i !== undefined && data.i !== this.heldItemId) { this.heldItemId = data.i; }
@@ -1935,7 +1937,7 @@ class RemotePlayer {
     const buf = this.stateBuffer;
     if (buf.length === 0) return;
     const now = performance.now() / 1000;
-    const tt = now - REMOTE_INTERP_DELAY;
+    const tt = now - this._interpDelay;
     if (buf.length === 1) { const b = buf[0]; this.targetPos.set(b.p[0], b.p[1], b.p[2]); this.targetYaw = b.ry; this.targetPitch = b.rp; return; }
     let i = 0; while (i < buf.length - 2 && buf[i + 1].t < tt) i++;
     const a = buf[i], b = buf[i + 1];
@@ -1975,6 +1977,7 @@ class RemotePlayer {
   }
   dispose() { if (this.model) scene.remove(this.model); if (this.nameTag) this.nameTag.remove(); }
   update(dt) {
+    if (this.localHurtCooldown > 0) this.localHurtCooldown = Math.max(0, this.localHurtCooldown - dt);
     this.updateInterpolation();
     const lerpK = Math.min(1, dt * 22);
     this.pos.lerp(this.targetPos, lerpK);
@@ -2025,7 +2028,7 @@ function updateRemoteNametags() {
     if (_tagHead.z > 1 || _tagHead.z < -1) { rp.nameTag.style.display = 'none'; continue; }
     rp.nameTag.style.display = 'block';
     rp.nameTag.style.left = ((_tagHead.x * 0.5 + 0.5) * innerWidth) + 'px';
-    rp.nameTag.style.top = ((-_tagHead.y * 0.5 + 0.5) * innerHeight) + 'px';
+    rp.nameTag.style.top = ((_tagHead.y * 0.5 + 0.5) * innerHeight) + 'px';
     rp.nameTag.style.opacity = clamp(1.1 - dist / 50, 0.25, 1);
     const hp = Math.max(0, Math.ceil(rp.health));
     if (rp._lastTagHp !== hp) { rp._lastTagHp = hp; rp.nameTagHpEl.textContent = hp; }
@@ -2042,12 +2045,16 @@ const player = {
   armor: { helmet: null, chest: null, legs: null, boots: null },
   absorption: 0, absorptionTimer: 0, regenTimer: 0, regenTick: 0,
   eating: false, eatProgress: 0, eliminated: false,
-  attackCooldownMax: 1.0, attackStrengthTicker: 999, invulnerableTime: 0, lastHurt: 0,
+  attackStrengthTicker: 999, attackCooldownMax: 1.0,
+  invulnerableTime: 0, lastHurt: 0,
   fallDistance: 0, respawnCooldown: 0, lastDamageSource: null, lastDamageTime: 0, hurtTime: 0,
   bowCharging: false, bowCharge: 0, effects: { speed: 0, jump: 0, invis: 0 },
   spectator: false,
   spectatorPos: new THREE.Vector3(), spectatorYaw: 0, spectatorPitch: 0,
-  spawnProtection: 0, knockbackTime: 0
+  spawnProtection: 0,
+  knockbackTime: 0,
+  noFallDamageUntil: 0,
+  lastAttackGameTime: 0
 };
 let maxFallY = player.pos.y;
 let playerTimeSinceDamage = 0;
@@ -2056,6 +2063,27 @@ const _eyePos = new THREE.Vector3();
 const _lookDir = new THREE.Vector3();
 function getEyePos() { return _eyePos.set(player.pos.x, player.pos.y + player.height - 0.18, player.pos.z); }
 function getLookDir() { const e = new THREE.Euler(player.pitch, player.yaw, 0, 'YXZ'); return _lookDir.set(0, 0, -1).applyEuler(e); }
+
+/* v6 knockback helper: sets the velocity and starts a no-input-control window */
+function applyKnockbackImpulse(vx, vy, vz, duration) {
+  player.vel.x = vx;
+  player.vel.z = vz;
+  player.vel.y = Math.max(player.vel.y, vy);
+  player.knockbackTime = duration || 0.40;
+  player.onGround = false;
+  player.noFallDamageUntil = performance.now() + 3500;
+  maxFallY = player.pos.y;
+  player.fallDistance = 0;
+}
+
+/* v6 attack cooldown helper: returns the cooldown completion fraction 0..1 */
+function getAttackCooldownFraction() {
+  const def = heldDef();
+  const speed = (def && def.kind === 'tool') ? getAttackSpeed(def.tool, def.material) : 4.0;
+  const cooldownTime = 1 / speed;
+  player.attackCooldownMax = cooldownTime;
+  return clamp(player.attackStrengthTicker / cooldownTime, 0, 1);
+}
 
 const keys = {};
 let lastW = 0;
@@ -2082,6 +2110,7 @@ function updateInputDisplay(dt) {
 }
 
 const fpsEl = document.getElementById('fpsCounter');
+const pingEl = document.getElementById('pingDisplay');
 let fpsFrameTimes = []; let fpsAccum = 0;
 let fpsLowStreak = 0, fpsHighStreak = 0, lastAdaptTime = 0;
 let effectsDisabledForPerf = false;
@@ -2111,6 +2140,17 @@ function updateFPS(dt) {
       }
     }
   }
+  /* v6: rough ping estimation from peer heartbeat cadence (if connected) */
+  if (NET.mode === 'client' && NET.hostConn && NET.hostConn.open) {
+    const jitter = remotePlayers.length > 0 ? remotePlayers[0]._jitterEMA : 0;
+    pingEl.textContent = 'PING: ~' + Math.round(jitter * 1000) + 'ms';
+  } else if (NET.mode === 'host' && NET.connections.size > 0) {
+    let worst = 0;
+    for (const rp of remotePlayers) worst = Math.max(worst, rp._jitterEMA);
+    pingEl.textContent = 'PING: ~' + Math.round(worst * 1000) + 'ms';
+  } else {
+    pingEl.textContent = 'PING: --';
+  }
 }
 
 function isTypingInField(e) { const t = e.target; if (!t) return false; const tag = t.tagName; return tag === 'INPUT' || tag === 'TEXTAREA' || t.isContentEditable; }
@@ -2126,7 +2166,18 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyQ') { dropHeldItem(); e.preventDefault(); }
   if (e.code === 'KeyT') { openChat(); e.preventDefault(); return; }
   if (e.code === 'KeyP') { openSkinPicker(); e.preventDefault(); }
-  if (e.code.startsWith('Digit')) { const n = parseInt(e.code.slice(5)); if (n >= 1 && n <= 9) { if (selectedSlot !== n - 1) player.eating = false; selectedSlot = n - 1; updateUI(); } }
+  if (e.code.startsWith('Digit')) {
+    const n = parseInt(e.code.slice(5));
+    if (n >= 1 && n <= 9) {
+      if (selectedSlot !== n - 1) {
+        player.eating = false;
+        selectedSlot = n - 1;
+        /* v6: switching main-hand item resets the attack cooldown (Java behaviour) */
+        player.attackStrengthTicker = 0;
+      }
+      updateUI();
+    }
+  }
   if (e.code === 'Escape') { if (shopOpen) closeShop(); else if (upgradeOpen) closeUpgradeShop(); else if (invOpen) toggleInventory(); }
   if (e.code === 'Space') e.preventDefault();
 });
@@ -2543,7 +2594,7 @@ const pearlGeo = new THREE.SphereGeometry(0.18, 10, 8);
 
 class Throwable {
   constructor(type, x, y, z, vx, vy, vz, ownerIsPlayer) {
-    this.type = type; // 'fireball' | 'ender_pearl'
+    this.type = type;
     this.pos = new THREE.Vector3(x, y, z);
     this.vel = new THREE.Vector3(vx, vy, vz);
     this.ownerIsPlayer = ownerIsPlayer;
@@ -2575,7 +2626,6 @@ class Throwable {
         return;
       }
       this.pos.set(nx, ny, nz);
-      // Fireball hits remote players
       if (this.type === 'fireball' && this.ownerIsPlayer) {
         for (const rp of remotePlayers) {
           if (!rp.alive) continue;
@@ -2599,12 +2649,12 @@ class Throwable {
     if (this.type === 'fireball') {
       fireballExplode(this.pos.x, this.pos.y, this.pos.z);
     } else if (this.type === 'ender_pearl' && this.ownerIsPlayer) {
-      // Teleport local player
       spawnGlintParticles(this.pos.x, this.pos.y, this.pos.z);
       player.pos.set(this.pos.x, this.pos.y + 0.05, this.pos.z);
       player.vel.set(0, -1.5, 0);
       player.onGround = false;
       maxFallY = player.pos.y; player.fallDistance = 0;
+      player.noFallDamageUntil = performance.now() + 1500;
       damagePlayer(5, 'Ender Pearl', true);
       const msg = { t: 'tp', id: NET.myId, x: player.pos.x, y: player.pos.y, z: player.pos.z };
       if (NET.mode === 'host') netRelay(NET.myId, msg);
@@ -2628,11 +2678,47 @@ function throwHeldItem() {
 }
 function updateThrowables(dt) { for (let i = throwables.length - 1; i >= 0; i--) { throwables[i].update(dt); if (throwables[i].removed) throwables.splice(i, 1); } }
 
+/* v6: shared radial explosion knockback used by fireballs and TNT */
+function applyExplosionKnockback(ex, ey, ez, radius, strengthScale, verticalBase, verticalScale, maxDist) {
+  const KB = 16;
+  /* Local player */
+  if (!player.eliminated && player.respawnCooldown <= 0 && !player.spectator && player.spawnProtection <= 0) {
+    const dx = player.pos.x - ex, dy = (player.pos.y + 0.9) - ey, dz = player.pos.z - ez;
+    const d = Math.hypot(dx, dy, dz);
+    if (d < maxDist) {
+      if (!isBlockShielded(ex, ey, ez, Math.floor(player.pos.x), Math.floor(player.pos.y), Math.floor(player.pos.z))) {
+        const strength = strengthScale * (1 - d / maxDist);
+        const horiz = Math.hypot(dx, dz);
+        if (horiz > 0.15) {
+          applyKnockbackImpulse((dx / horiz) * KB * strength, verticalBase + verticalScale * strength, (dz / horiz) * KB * strength, 0.55);
+        } else {
+          /* Explosion directly below/above: push in a random horizontal direction */
+          const ang = Math.random() * Math.PI * 2;
+          applyKnockbackImpulse(Math.cos(ang) * KB * strength * 0.6, verticalBase + verticalScale * strength, Math.sin(ang) * KB * strength * 0.6, 0.55);
+        }
+      }
+    }
+  }
+  /* Remote players */
+  for (const rp of remotePlayers) {
+    if (!rp.alive) continue;
+    const dx = rp.pos.x - ex, dy = (rp.pos.y + 0.9) - ey, dz = rp.pos.z - ez;
+    const d = Math.hypot(dx, dy, dz);
+    if (d < maxDist) {
+      if (isBlockShielded(ex, ey, ez, Math.floor(rp.pos.x), Math.floor(rp.pos.y), Math.floor(rp.pos.z))) continue;
+      const strength = strengthScale * (1 - d / maxDist);
+      const horiz = Math.hypot(dx, dz) || 1;
+      const kb = [(dx / horiz) * KB * strength, verticalBase + verticalScale * strength, (dz / horiz) * KB * strength];
+      const msg = { t: 'dmg', target: rp.id, amount: 0, source: NET.myName, kb, _from: NET.myId };
+      if (NET.mode === 'host') netRelay(NET.myId, msg); else if (NET.mode === 'client') netSend(msg);
+    }
+  }
+}
+
 function fireballExplode(ex, ey, ez) {
   const radius = 2.5;
   const r = Math.ceil(radius);
   const cx = Math.floor(ex), cy = Math.floor(ey), cz = Math.floor(ez);
-  // Break weak blocks only
   for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) for (let dz = -r; dz <= r; dz++) {
     const d = Math.hypot(dx, dy, dz); if (d > radius) continue;
     const bx = cx + dx, by = cy + dy, bz = cz + dz;
@@ -2648,59 +2734,50 @@ function fireballExplode(ex, ey, ez) {
     if (NET.mode === 'host') netRelay(NET.myId, { t: 'blk', x: bx, y: by, z: bz, id: 0, _from: NET.myId });
     else if (NET.mode === 'client') netSend({ t: 'blk', x: bx, y: by, z: bz, id: 0 });
   }
-  const KB = 14;
   const DMG = 4;
-  // Local player damage + knockback
+  /* Damage */
   if (!player.eliminated && player.respawnCooldown <= 0 && !player.spectator && player.spawnProtection <= 0) {
     const dx = player.pos.x - ex, dy = player.pos.y + 0.9 - ey, dz = player.pos.z - ez;
     const d = Math.hypot(dx, dy, dz);
-    if (d < radius + 1.0) {
-      if (!isBlockShielded(ex, ey, ez, Math.floor(player.pos.x), Math.floor(player.pos.y), Math.floor(player.pos.z))) {
-        const dmg = Math.max(1, Math.round(DMG * (1 - d / (radius + 1.0))));
-        damagePlayer(dmg, 'Fireball');
-        const horiz = Math.hypot(dx, dz) || 1;
-        const strength = 1 - d / (radius + 1.0);
-        player.vel.x += (dx / horiz) * KB * strength;
-        player.vel.z += (dz / horiz) * KB * strength;
-        player.vel.y = Math.max(player.vel.y, 5 + 4 * strength);
-        player.onGround = false; player.knockbackTime = 0.30;
-      }
+    if (d < radius + 1.0 && !isBlockShielded(ex, ey, ez, Math.floor(player.pos.x), Math.floor(player.pos.y), Math.floor(player.pos.z))) {
+      const dmg = Math.max(1, Math.round(DMG * (1 - d / (radius + 1.0))));
+      damagePlayer(dmg, 'Fireball');
     }
   }
-  // Remote player damage + knockback
   for (const rp of remotePlayers) {
     if (!rp.alive) continue;
     const dx = rp.pos.x - ex, dy = rp.pos.y + 0.9 - ey, dz = rp.pos.z - ez;
     const d = Math.hypot(dx, dy, dz);
-    if (d < radius + 1.0) {
-      if (isBlockShielded(ex, ey, ez, Math.floor(rp.pos.x), Math.floor(rp.pos.y), Math.floor(rp.pos.z))) continue;
+    if (d < radius + 1.0 && !isBlockShielded(ex, ey, ez, Math.floor(rp.pos.x), Math.floor(rp.pos.y), Math.floor(rp.pos.z))) {
       const dmg = Math.max(1, Math.round(DMG * (1 - d / (radius + 1.0))));
-      const strength = 1 - d / (radius + 1.0);
-      const horiz = Math.hypot(dx, dz) || 1;
-      const kb = [(dx / horiz) * KB * strength, 5 + 4 * strength, (dz / horiz) * KB * strength];
-      const msg = { t: 'dmg', target: rp.id, amount: dmg, source: NET.myName, kb, _from: NET.myId };
+      const msg = { t: 'dmg', target: rp.id, amount: dmg, source: NET.myName, _from: NET.myId };
       if (NET.mode === 'host') netRelay(NET.myId, msg); else if (NET.mode === 'client') netSend(msg);
-      rp.health = Math.max(0, rp.health - dmg); rp.flashHurt();
-      if (rp.health <= 0) { rp.alive = false; rp.model.visible = false; rp.nameTag.style.display = 'none'; }
     }
   }
+  /* v6: knockback works even when the blast lands right at the player's feet */
+  applyExplosionKnockback(ex, ey, ez, radius, 1.35, 7.5, 4.5, radius + 1.6);
   spawnCritParticles(ex, ey, ez);
   const pd = Math.hypot(player.pos.x - ex, player.pos.z - ez);
   if (pd < 20) showMessage('BOOM!', '#ff8844');
 }
 
 /* ============================================================================
-   15. TNT
+   15. TNT  (v6: networked fuse, host-authoritative explosion)
    ========================================================================== */
 const primedTNTs = [];
 const TNT_FUSE = 2.5;
 const tntSharedMat = new THREE.MeshStandardMaterial({ map: atlasTex, alphaTest: 0.5, roughness: 0.95, metalness: 0.0, envMapIntensity: 0.35 });
 function makeTNTMesh() { const geo = new THREE.BoxGeometry(0.98, 0.98, 0.98); const def = BLOCKS[24]; applyBlockFaceUVs(geo, def); const mesh = new THREE.Mesh(geo, tntSharedMat); mesh.castShadow = true; mesh.receiveShadow = true; return mesh; }
-function primeTNT(x, y, z) {
+function primeTNT(x, y, z, fuse, broadcast) {
   if (getBlock(x, y, z) === 24) { setBlock(x, y, z, 0); markDirty(x, y, z); }
   const mesh = makeTNTMesh(); mesh.position.set(x + 0.5, y + 0.5, z + 0.5); scene.add(mesh);
-  primedTNTs.push({ x, y, z, mesh, fuse: TNT_FUSE });
+  primedTNTs.push({ x, y, z, mesh, fuse: fuse !== undefined ? fuse : TNT_FUSE, authority: NET.mode !== 'client' });
   showMessage('TNT primed!', '#ff8844');
+  if (broadcast) {
+    const msg = { t: 'tnt', x, y, z, fuse: fuse !== undefined ? fuse : TNT_FUSE, _from: NET.myId };
+    if (NET.mode === 'host') netSend(msg);
+    else if (NET.mode === 'client') netSend(msg);
+  }
 }
 const BLAST_SHIELD_THRESHOLD = 6;
 function isBlockShielded(ex, ey, ez, tx, ty, tz) {
@@ -2726,7 +2803,10 @@ function updateTNT(dt) {
   for (let i = primedTNTs.length - 1; i >= 0; i--) {
     const t = primedTNTs[i]; t.fuse -= dt;
     t.mesh.position.y = t.y + 0.5 + Math.sin(performance.now() * 0.012) * 0.025;
-    if (t.fuse <= 0) { explodeAt(t.x + 0.5, t.y + 0.5, t.z + 0.5, 3.5); scene.remove(t.mesh); t.mesh.geometry.dispose(); primedTNTs.splice(i, 1); }
+    if (t.fuse <= 0) {
+      if (t.authority) explodeAt(t.x + 0.5, t.y + 0.5, t.z + 0.5, 3.5);
+      scene.remove(t.mesh); t.mesh.geometry.dispose(); primedTNTs.splice(i, 1);
+    }
   }
 }
 function explodeAt(ex, ey, ez, radius) {
@@ -2746,15 +2826,25 @@ function explodeAt(ex, ey, ez, radius) {
     if (NET.mode === 'host') netRelay(NET.myId, { t: 'blk', x: bx, y: by, z: bz, id: 0, _from: NET.myId });
     else if (NET.mode === 'client') netSend({ t: 'blk', x: bx, y: by, z: bz, id: 0 });
   }
+  /* Damage */
   if (!player.eliminated && player.respawnCooldown <= 0 && !player.spectator && player.spawnProtection <= 0) {
     const d = Math.hypot(player.pos.x - ex, player.pos.y + 0.9 - ey, player.pos.z - ez);
-    if (d < radius + 1.5) {
-      if (!isBlockShielded(ex, ey, ez, Math.floor(player.pos.x), Math.floor(player.pos.y), Math.floor(player.pos.z))) {
-        const dmg = Math.max(1, Math.floor(20 * (1 - d / (radius + 1.5))));
-        damagePlayer(dmg, 'TNT');
-      }
+    if (d < radius + 1.5 && !isBlockShielded(ex, ey, ez, Math.floor(player.pos.x), Math.floor(player.pos.y), Math.floor(player.pos.z))) {
+      const dmg = Math.max(1, Math.floor(20 * (1 - d / (radius + 1.5))));
+      damagePlayer(dmg, 'TNT');
     }
   }
+  for (const rp of remotePlayers) {
+    if (!rp.alive) continue;
+    const d = Math.hypot(rp.pos.x - ex, rp.pos.y + 0.9 - ey, rp.pos.z - ez);
+    if (d < radius + 1.5 && !isBlockShielded(ex, ey, ez, Math.floor(rp.pos.x), Math.floor(rp.pos.y), Math.floor(rp.pos.z))) {
+      const dmg = Math.max(1, Math.floor(20 * (1 - d / (radius + 1.5))));
+      const msg = { t: 'dmg', target: rp.id, amount: dmg, source: NET.myName, _from: NET.myId };
+      if (NET.mode === 'host') netRelay(NET.myId, msg); else if (NET.mode === 'client') netSend(msg);
+    }
+  }
+  /* v6: TNT knockback */
+  applyExplosionKnockback(ex, ey, ez, radius, 1.55, 8.0, 5.5, radius + 1.8);
   const playerDist = Math.hypot(player.pos.x - ex, player.pos.z - ez);
   if (playerDist < 20) showMessage('BOOM!', '#ff8844');
 }
@@ -2838,7 +2928,7 @@ function applyKnockbackTo(target, fromX, fromZ, strength, vertical) {
   v.x = v.x * 0.5 + dx * strength;
   v.z = v.z * 0.5 + dz * strength;
   v.y = Math.max(v.y, vertical);
-  if (isPlayer) { player.onGround = false; player.knockbackTime = 0.30; }
+  if (isPlayer) { player.onGround = false; player.knockbackTime = 0.40; }
 }
 function breakTime(blockId, item, teamName) {
   const def = BLOCKS[blockId]; if (!def) return 1;
@@ -2873,7 +2963,7 @@ function addEventMessage(html, color) {
   setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 10000);
 }
 function getKillerName(entity) { if (!entity || !entity.lastDamageSource) return null; if (performance.now() - (entity.lastDamageTime || 0) > 5000) return null; return entity.lastDamageSource; }
-function broadcastBlock(x, y, z, id) { const msg = { t: 'blk', x, y, z, id, _from: NET.myId }; if (NET.mode === 'host') netRelay(NET.myId, msg); else if (NET.mode === 'client') netSend(msg); }
+function broadcastBlock(x, y, z, id) { const msg = { t: 'blk', x, y, z, id, _from: NET.myId }; if (NET.mode === 'host') netSend(msg); else if (NET.mode === 'client') netSend(msg); }
 function broadcastBedDestroyed(teamName, byName) { const msg = { t: 'bed', team: teamName, by: byName, _from: NET.myId }; if (NET.mode === 'host') netRelay(NET.myId, msg); else if (NET.mode === 'client') netSend(msg); }
 function breakBlock(hit) {
   const id = getBlock(hit.x, hit.y, hit.z);
@@ -2890,11 +2980,11 @@ function breakBlock(hit) {
     addEventMessage(`<b style="color:#ff8888">${def.bed}'s bed</b> was destroyed by <b>${NET.myName}</b>`, '#ff6666');
     broadcastBedDestroyed(def.bed, NET.myName);
     updateStatusBar();
+    /* v6: breaking a block resets the attack cooldown */
+    player.attackStrengthTicker = 0;
     return;
   }
-  // Cactus: break entire column above + below
   if (def && def.cactus) {
-    // Find the bottom-most cactus
     let by0 = hit.y;
     while (getBlock(hit.x, by0 - 1, hit.z) === id) by0--;
     let y = by0;
@@ -2904,11 +2994,14 @@ function breakBlock(hit) {
       dropItemLocal('b' + id, 1, hit.x + 0.5, y + 0.4, hit.z + 0.5, null, 0.6);
       y++;
     }
+    player.attackStrengthTicker = 0;
     return;
   }
   setBlock(hit.x, hit.y, hit.z, 0); markDirty(hit.x, hit.y, hit.z);
   broadcastBlock(hit.x, hit.y, hit.z, 0);
   if (def) dropItemLocal('b' + id, 1, hit.x + 0.5, hit.y + 0.4, hit.z + 0.5, null, 0.6);
+  /* v6: breaking a block resets the attack cooldown (Java behaviour) */
+  player.attackStrengthTicker = 0;
 }
 function tryStartEating() {
   if (invOpen || shopOpen || upgradeOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return false;
@@ -2958,7 +3051,6 @@ function placeBlock(hit) {
     const hasWall = (getBlock(nx + 1, ny, nz) && !isLadderBlock(getBlock(nx + 1, ny, nz))) || (getBlock(nx - 1, ny, nz) && !isLadderBlock(getBlock(nx - 1, ny, nz))) || (getBlock(nx, ny, nz + 1) && !isLadderBlock(getBlock(nx, ny, nz + 1))) || (getBlock(nx, ny, nz - 1) && !isLadderBlock(getBlock(nx, ny, nz - 1)));
     if (!hasWall) { showMessage('Ladder needs a wall!', '#ffcc44'); return; }
   }
-  // Cactus: must have support below and no solid neighbors
   if (blockDef && blockDef.cactus) {
     const below = getBlock(nx, ny - 1, nz);
     if (!below || (BLOCKS[below] && BLOCKS[below].trans)) { showMessage('Cactus needs solid ground', '#ffcc44'); return; }
@@ -2973,7 +3065,7 @@ function placeBlock(hit) {
     broadcastBlock(nx, ny, nz, blockId); broadcastBlock(nx, ny, nz + 1, blockId);
   } else {
     if (nx + 1 > p.x - r && nx < p.x + r && ny + 1 > p.y && ny < p.y + h && nz + 1 > p.z - r && nz < p.z + r) return;
-    if (blockDef && blockDef.tnt) { primeTNT(nx, ny, nz); broadcastBlock(nx, ny, nz, blockId); }
+    if (blockDef && blockDef.tnt) { primeTNT(nx, ny, nz, TNT_FUSE, true); }
     else { setBlock(nx, ny, nz, blockId); markDirty(nx, ny, nz); broadcastBlock(nx, ny, nz, blockId); }
   }
   stack.count--; if (stack.count <= 0) inv[selectedSlot] = null;
@@ -3136,9 +3228,8 @@ function updateEnchantedGlint(dt) {
 }
 
 /* ============================================================================
-   19. COMBAT
+   19. COMBAT  (v6: Java-accurate attack cooldown)
    ========================================================================== */
-let attackCooldown = 0;
 function getHeldAttackStats() {
   const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
   if (def && def.kind === 'tool') {
@@ -3153,44 +3244,80 @@ function getHeldAttackStats() {
   return { damage: 1, speed: 4.0, kind: null, material: null };
 }
 function getAttackStrength(cooldownMax) { return clamp(player.attackStrengthTicker / cooldownMax, 0, 1); }
+
+/* v6: full Java-style attack.  `p` = cooldown completion 0..1.
+   Base melee damage is scaled by (0.2 + 0.8*p^2).
+   Sharpness bonus is scaled by p.
+   Critical hits and sprint-knockback require p >= 0.848. */
 function attackEntityTarget(hit) {
   if (player.eliminated || player.eating || player.respawnCooldown > 0 || player.spectator) return false;
   if (!hit || !hit.entity) return false;
   const rp = hit.entity; if (!rp.alive) return false;
-  const s = getHeldAttackStats();
-  const cooldownMax = 1 / s.speed;
-  player.attackCooldownMax = cooldownMax;
-  const strength = getAttackStrength(cooldownMax);
-  const chargeMult = 0.2 + strength * strength * 0.8;
-  const stack = heldStack(); const isKbStick = stack && stack.id === 'knockback_stick';
-  let damage = s.damage * chargeMult;
-  if (isKbStick) damage = 1;
-  const sprintHit = player.sprint && Math.hypot(player.vel.x, player.vel.z) > 1.2;
-  const isCrit = !player.onGround && player.vel.y < 0 && player.fallDistance > 0 && !sprintHit && strength > 0.9;
-  if (isCrit && !isKbStick) damage *= 1.5;
-  player.attackStrengthTicker = 0; attackCooldown = cooldownMax; startSwing();
-  const horiz = Math.hypot(player.vel.x, player.vel.z) || 1;
-  const kbStr = isKbStick ? 22 : (sprintHit ? 13.5 : 8.0);
-  const kbVert = isKbStick ? 8.5 : (sprintHit ? 7.0 : 5.2);
+
+  const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
+  const isKbStick = stack && stack.id === 'knockback_stick';
+
+  /* --- Java attack cooldown --- */
+  const attackSpeed = (def && def.kind === 'tool') ? getAttackSpeed(def.tool, def.material) : 4.0;
+  const cooldownTime = 1 / attackSpeed;
+  player.attackCooldownMax = cooldownTime;
+  const p = clamp(player.attackStrengthTicker / cooldownTime, 0, 1);
+
+  /* --- Damage --- */
+  let baseDmg = 1;
+  if (def && def.kind === 'tool') { const stats = TOOL_STATS[def.tool]?.[def.material]; if (stats) baseDmg = stats.dmg; }
+  if (isKbStick) baseDmg = 1;
+  const sharp = (teamUpgrades[PLAYER_TEAM.name] && teamUpgrades[PLAYER_TEAM.name].sharpness) || 0;
+  const sharpBonus = (sharp > 0 && def && (def.tool === 'sword' || def.tool === 'axe' || def.tool === 'pickaxe')) ? 1.25 * sharp : 0;
+  let damage = baseDmg * (0.2 + 0.8 * p * p) + sharpBonus * p;
+
+  /* --- Crit / sprint-knockback gating (p >= 0.848) --- */
+  const fullCharge = p >= 0.848;
+  const sprintHit = player.sprint && Math.hypot(player.vel.x, player.vel.z) > 1.2 && fullCharge;
+  const isCrit = !player.onGround && player.vel.y < 0 && player.fallDistance > 0 && !sprintHit && fullCharge && !isKbStick;
+  if (isCrit) damage *= 1.5;
+
+  player.attackStrengthTicker = 0;
+  startSwing();
+
+  /* --- Knockback impulse --- */
   let dxv = rp.pos.x - player.pos.x, dzv = rp.pos.z - player.pos.z;
   const dd = Math.hypot(dxv, dzv) || 1; dxv /= dd; dzv /= dd;
+  let kbStr, kbVert;
+  if (isKbStick) { kbStr = 22; kbVert = 8.5; }
+  else if (sprintHit) { kbStr = 13.5; kbVert = 7.0; }
+  else { kbStr = 8.0; kbVert = 5.2; }
   const kb = [dxv * kbStr, kbVert, dzv * kbStr];
-  const msg = { t: 'dmg', target: rp.id, amount: damage, source: NET.myName, kb, _from: NET.myId };
+
+  const msg = { t: 'dmg', target: rp.id, amount: damage, source: NET.myName, kb, p, _from: NET.myId };
   if (NET.mode === 'host') netRelay(NET.myId, msg); else if (NET.mode === 'client') netSend(msg);
-  rp.health = Math.max(0, rp.health - damage); rp.flashHurt();
-  if (rp.health <= 0) { rp.alive = false; rp.model.visible = false; rp.nameTag.style.display = 'none'; }
-  if (isCrit && !isKbStick) { spawnCritParticles(rp.pos.x, rp.pos.y + 1.2, rp.pos.z); showMessage('CRITICAL HIT!', '#ffd966'); }
+
+  /* Local prediction: use the remote's local invuln window to prevent spam hits */
+  if (rp.localHurtCooldown <= 0) {
+    rp.localHurtCooldown = 0.5;
+    rp.health = Math.max(0, rp.health - damage);
+    rp.flashHurt();
+  }
+
+  if (isCrit) { spawnCritParticles(rp.pos.x, rp.pos.y + 1.2, rp.pos.z); showMessage('CRITICAL HIT!', '#ffd966'); }
   return true;
 }
-function tryManualAttack() { if (player.eliminated || player.eating || player.respawnCooldown > 0 || player.spectator) return; const { entity } = getCrosshairTarget(); if (entity) attackEntityTarget(entity); else startSwing(); }
+/* v6: auto-attack (holding LMB) fires only when the cooldown is fully charged */
 function updateAutoAttack(dt) {
   if (!mining) return;
   if (invOpen || shopOpen || upgradeOpen || camMode === 2) return;
   if (player.eliminated || player.eating || player.bowCharging || player.respawnCooldown > 0 || player.spectator) return;
   if (document.pointerLockElement !== renderer.domElement) return;
-  if (attackCooldown > 0) return;
+  const p = getAttackCooldownFraction();
+  if (p < 0.999) return;
   const { entity } = getCrosshairTarget();
   if (entity) attackEntityTarget(entity);
+}
+function tryManualAttack() {
+  if (player.eliminated || player.eating || player.respawnCooldown > 0 || player.spectator) return;
+  const { entity } = getCrosshairTarget();
+  if (entity) attackEntityTarget(entity);
+  else startSwing();
 }
 
 /* ============================================================================
@@ -3198,6 +3325,7 @@ function updateAutoAttack(dt) {
    ========================================================================== */
 let netSendAccum = 0;
 const NET_SEND_INTERVAL = 0.045;
+let netSeqCounter = 0;
 const _lastSentState = { px: 99999, py: 99999, pz: 99999, yaw: 999, pitch: 999, hp: -1, item: null, sneak: null, mining: null, sw: null, ar: '', lastTime: 0 };
 function sendLocalState() {
   if (!NET.started) return;
@@ -3218,7 +3346,8 @@ function sendLocalState() {
   _lastSentState.hp = hp; _lastSentState.item = item; _lastSentState.sneak = player.sneak;
   _lastSentState.mining = mining && !!mineTarget; _lastSentState.sw = sw; _lastSentState.ar = arKey;
   _lastSentState.lastTime = now;
-  const s = { t: 'st', id: NET.myId, p: [px, py, pz], r: [ry, rp], h: hp, i: item, sn: player.sneak, mg: mining && !!mineTarget, sw, ar: { helmet: player.armor.helmet, chest: player.armor.chest, legs: player.armor.legs, boots: player.armor.boots } };
+  netSeqCounter++;
+  const s = { t: 'st', id: NET.myId, seq: netSeqCounter, p: [px, py, pz], r: [ry, rp], h: hp, i: item, sn: player.sneak, mg: mining && !!mineTarget, sw, ar: { helmet: player.armor.helmet, chest: player.armor.chest, legs: player.armor.legs, boots: player.armor.boots } };
   if (NET.mode === 'host') netRelay(NET.myId, s); else netSend(s);
 }
 function updateSpectator(dt) {
@@ -3257,7 +3386,8 @@ function updatePlayer(dt) {
   if (player.spawnProtection > 0) player.spawnProtection = Math.max(0, player.spawnProtection - dt);
   if (player.hurtTime > 0) player.hurtTime = Math.max(0, player.hurtTime - dt);
   if (player.knockbackTime > 0) player.knockbackTime = Math.max(0, player.knockbackTime - dt);
-  player.attackStrengthTicker += dt;
+  /* v6: attack cooldown ticker (clamped to 2s max) */
+  player.attackStrengthTicker = Math.min(player.attackStrengthTicker + dt, 2.0);
   if (player.invulnerableTime > 0) player.invulnerableTime = Math.max(0, player.invulnerableTime - dt);
   for (const k of ['speed', 'jump', 'invis']) { if (player.effects[k] > 0) player.effects[k] = Math.max(0, player.effects[k] - dt); }
   const wantSneak = !!(keys['ShiftLeft'] || keys['ShiftRight']);
@@ -3284,12 +3414,19 @@ function updatePlayer(dt) {
   if (player.effects.speed > 0) speed *= 1.4;
   const tvx = wx * speed, tvz = wz * speed;
   const hasInput = len > 0;
-  // Ice physics — reduced friction / acceleration on slippery blocks
   const onIce = player.onGround && isOnSlippery(player.pos);
   let accel; if (player.onGround) accel = hasInput ? 10 : 5; else accel = hasInput ? 2 : 0.8;
   if (onIce) accel *= 0.15;
   let k = Math.min(1, accel * dt);
-  if (player.knockbackTime > 0) k *= 0.12;
+  if (player.knockbackTime > 0) {
+    /* v6: during knockback, input control is greatly reduced and horizontal
+       velocity decays with a gentle half-life so the player is visibly
+       launched instead of sinking into the crater. */
+    k *= 0.08;
+    const drag = Math.pow(0.5, dt / 0.50);
+    player.vel.x *= drag;
+    player.vel.z *= drag;
+  }
   player.vel.x += (tvx - player.vel.x) * k;
   player.vel.z += (tvz - player.vel.z) * k;
   const inLadder = isInLadderBlock(player.pos);
@@ -3319,7 +3456,8 @@ function updatePlayer(dt) {
   player.fallDistance = Math.max(0, maxFallY - player.pos.y);
   if (player.onGround) {
     const fallDist = maxFallY - player.pos.y;
-    if (fallDist > 3) { const dmg = Math.floor(fallDist - 3); damagePlayer(dmg, null, true); }
+    /* v6: knockback grants temporary fall-damage immunity */
+    if (fallDist > 3 && performance.now() > player.noFallDamageUntil) { const dmg = Math.floor(fallDist - 3); damagePlayer(dmg, null, true); }
     maxFallY = player.pos.y; player.fallDistance = 0;
   } else maxFallY = Math.max(maxFallY, player.pos.y);
   if (player.pos.y < -12) {
@@ -3330,8 +3468,9 @@ function updatePlayer(dt) {
     else startRespawnCooldown();
     return;
   }
-  if (attackCooldown > 0) attackCooldown -= dt;
-  if (attackCooldown > 0) { const progress = clamp(1 - attackCooldown / (player.attackCooldownMax || 1), 0, 1); cooldownFillEl.style.width = (progress * 100).toFixed(1) + '%'; cooldownBarEl.classList.add('show'); }
+  /* v6: attack cooldown bar shows Java-style completion */
+  const p = getAttackCooldownFraction();
+  if (p < 1) { cooldownFillEl.style.width = (p * 100).toFixed(1) + '%'; cooldownBarEl.classList.add('show'); }
   else cooldownBarEl.classList.remove('show');
   if (player.bowCharging) {
     const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
@@ -3448,6 +3587,7 @@ function respawnPlayer() {
   player.invulnerableTime = 0; player.lastHurt = 0;
   player.spawnProtection = 5.0;
   player.knockbackTime = 0;
+  player.noFallDamageUntil = 0;
   maxFallY = player.pos.y; playerTimeSinceDamage = 0; playerRegenAccum = 0;
   player.effects.speed = 0; player.effects.jump = 0; player.effects.invis = 0;
   taaReset = true;
@@ -3460,7 +3600,7 @@ function startRespawnCooldown() {
   player.spectatorYaw = player.yaw; player.spectatorPitch = -0.7;
   player.health = 0; player.absorption = 0; player.absorptionTimer = 0; player.regenTimer = 0; player.hurtTime = 0;
   player.pos.set(PLAYER_TEAM.x + 0.5, BASE_Y + 2, PLAYER_TEAM.z + 0.5);
-  player.vel.set(0, 0, 0); player.knockbackTime = 0;
+  player.vel.set(0, 0, 0); player.knockbackTime = 0; player.noFallDamageUntil = 0;
   maxFallY = player.pos.y;
   updateHealthBar();
   mining = false; player.eating = false; player.bowCharging = false;
@@ -3491,11 +3631,12 @@ function damagePlayer(amount, source, bypassArmor) {
   if (player.spawnProtection > 0) return false;
   let applyAmount = amount;
   let freshHit = false;
-  if (player.invulnerableTime > 0.5) {
+  /* v6: Java-style 10-tick invulnerability window (0.5s) */
+  if (player.invulnerableTime > 0) {
     if (amount <= player.lastHurt) return false;
     applyAmount = amount - player.lastHurt; player.lastHurt = amount;
   } else {
-    player.lastHurt = amount; player.invulnerableTime = 1.0; player.hurtTime = 0.5; freshHit = true;
+    player.lastHurt = amount; player.invulnerableTime = 0.5; player.hurtTime = 0.5; freshHit = true;
   }
   if (source) { player.lastDamageSource = source; player.lastDamageTime = performance.now(); }
   let afterArmor = applyAmount;
