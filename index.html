@@ -431,7 +431,7 @@ const ARMOR_TILE_BASE = 74;
 const ARMOR_PIECES = [{ key: 'helmet', name: 'Helmet' }, { key: 'chest', name: 'Chestplate' }, { key: 'legs', name: 'Leggings' }, { key: 'boots', name: 'Boots' }];
 const ARMOR_TIERS = [
   { key: 'leather', name: 'Leather', tier: 1, pts: { helmet: 1, chest: 3, legs: 2, boots: 1 }, tough: 0, col: ['#8a5a3a', '#4a2e1a', '#b08060'] },
-  { key: 'chainmail', name: 'Chainmail', tier: 2, pts: { helmet: 2, chest: 5, legs: 3, boots: 2 }, tough: 0, col: ['#a8a8b0', '#606068', '#d8d8e0'] },
+  { key: 'chainmail', name: 'Chainmail', tier: 2, pts: { helmet: 2, chest: 5, legs: 3, boots: 2 }, tough: 0, col: ['#929cae', '#39404c', '#eef4ff'] },
   { key: 'gold', name: 'Gold', tier: 3, pts: { helmet: 2, chest: 5, legs: 3, boots: 1 }, tough: 0, col: ['#e0c840', '#8a7020', '#fff088'] },
   { key: 'iron', name: 'Iron', tier: 4, pts: { helmet: 2, chest: 6, legs: 5, boots: 2 }, tough: 0, col: ['#d8d8d8', '#888888', '#f4f4f4'] },
   { key: 'diamond', name: 'Diamond', tier: 5, pts: { helmet: 3, chest: 8, legs: 6, boots: 3 }, tough: 2, col: ['#4ae0d0', '#1a8a7c', '#c8fff8'] }
@@ -439,7 +439,37 @@ const ARMOR_TIERS = [
 const ARMOR_SLOT_ORDER = ['helmet', 'chest', 'legs', 'boots'];
 const ARMOR_PATTERNS = { helmet: ["................", "....########....", "...##########...", "..############..", "..############..", "..####....####..", "..###......###..", "..###......###..", "..###......###..", "..###......###..", "..###......###..", "..###......###..", "..###......###..", "..############..", "..############..", "................"], chest: ["................", "..###......###..", ".#####....#####.", ".##############.", ".##############.", ".##############.", ".##############.", ".##############.", "..############..", "..############..", "..############..", "..############..", "...##########...", "....########....", ".....######.....", "......####......"], legs: ["................", "................", "..############..", "..############..", "..############..", "..####....####..", "..###......###..", "..###......###..", "..###......###..", "..###......###..", "..###......###..", "..###......###..", "..###......###..", "..###......###..", "..###......###..", "................"], boots: ["................", "................", "................", "................", "..####....####..", "..####....####..", "..####....####..", "..####....####..", "..####....####..", "..#####...#####.", ".######..######.", ".##############.", ".##############.", "................", "................", "................"] };
 function drawArmorPiece(tileIdx, pattern, base, dark, light) { paintTile(tileIdx, () => { const inP = (x, y) => x >= 0 && x < 16 && y >= 0 && y < 16 && pattern[y][x] === '#'; let topX = 15, topY = 15; for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { if (pattern[y][x] !== '#') continue; let edge = false; for (const [ddx, ddy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) { if (!inP(x + ddx, y + ddy)) { edge = true; break; } } actx.fillStyle = edge ? dark : base; actx.fillRect(x, y, 1, 1); if (y < topY || (y === topY && x < topX)) { topY = y; topX = x; } } actx.fillStyle = light; actx.fillRect(topX + 1, topY + 1, 2, 1); actx.fillRect(topX + 1, topY + 1, 1, 2); }); }
-ARMOR_TIERS.forEach((tier, ti) => { ARMOR_PIECES.forEach((piece, pi) => { drawArmorPiece(ARMOR_TILE_BASE + ti * 4 + pi, ARMOR_PATTERNS[piece.key], tier.col[0], tier.col[1], tier.col[2]); }); });
+
+/* Chainmail keeps its own woven-link texture so it never reads as flat iron at a glance.
+   The icon is a 2px mesh: raised plates with a punched hole in every other cell, edged in
+   near-black and capped with a hard white glint like the reference sprites. */
+const CHAIN_COL = { outline: '#232830', hole: '#39404c', deep: '#5b6270', mid: '#828b9b', base: '#929cae', light: '#bcc6d6', hi: '#eef4ff' };
+function chainIconPixel(x, y) {
+  const px = x & 1, py = y & 1;
+  const plate = (((x >> 1) + (y >> 1)) & 1) === 0;
+  if (px === 1 && py === 1) return CHAIN_COL.hole;         // punched opening between links
+  if (px === 0 && py === 0) return plate ? CHAIN_COL.hi : CHAIN_COL.light;
+  if (px === 0 || py === 0) return CHAIN_COL.light;         // lit rim of the link
+  return CHAIN_COL.base;                                    // shaded rim
+}
+function drawChainmailPiece(tileIdx, pattern) {
+  paintTile(tileIdx, () => {
+    const inP = (x, y) => x >= 0 && x < 16 && y >= 0 && y < 16 && pattern[y][x] === '#';
+    let topX = 15, topY = 15;
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+      if (pattern[y][x] !== '#') continue;
+      let edge = false;
+      for (const [ddx, ddy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) { if (!inP(x + ddx, y + ddy)) { edge = true; break; } }
+      actx.fillStyle = edge ? CHAIN_COL.outline : chainIconPixel(x, y);
+      actx.fillRect(x, y, 1, 1);
+      if (y < topY || (y === topY && x < topX)) { topY = y; topX = x; }
+    }
+    actx.fillStyle = '#ffffff';
+    actx.fillRect(topX + 1, topY + 1, 2, 1);
+    actx.fillRect(topX + 1, topY + 1, 1, 2);
+  });
+}
+ARMOR_TIERS.forEach((tier, ti) => { ARMOR_PIECES.forEach((piece, pi) => { const tile = ARMOR_TILE_BASE + ti * 4 + pi; if (tier.key === 'chainmail') drawChainmailPiece(tile, ARMOR_PATTERNS[piece.key]); else drawArmorPiece(tile, ARMOR_PATTERNS[piece.key], tier.col[0], tier.col[1], tier.col[2]); }); });
 
 const atlasTex = new THREE.CanvasTexture(acv); atlasTex.magFilter = THREE.NearestFilter; atlasTex.minFilter = THREE.NearestFilter; atlasTex.generateMipmaps = false; atlasTex.colorSpace = THREE.SRGBColorSpace;
 const atlasURL = acv.toDataURL();
@@ -3398,6 +3428,7 @@ function updateUI() {
   } else cursorEl.style.display = 'none';
   applyPlayerArmorToModel(playerModel);
   applyPlayerArmorToModel(invPreviewModel);
+  setFPArm(currentSkinTex, currentSkinSlim);
 }
 function syncArmorDisplay() { for (let i = 0; i < 4; i++) { const id = player.armor[ARMOR_SLOT_ORDER[i]]; armorInv[i] = id ? { id, count: 1 } : null; paintSlot(armorSlots[i], armorInv[i]); } }
 function updateArmorTier() { let t = 0; for (const k of ARMOR_SLOT_ORDER) { const id = player.armor[k]; if (id && ITEMS[id]) t = Math.max(t, ITEMS[id].tier); } player.armorTier = t; }
@@ -4805,24 +4836,163 @@ const SKIN_CORNERS = { px: [[0, 0], [1, 0], [0, 1], [1, 1]], nx: [[0, 0], [1, 0]
 function applyFaceUV(geo, faceIdx, region, corners, texW, texH) { const rx = region[0], ry = region[1], rw = region[2], rh = region[3]; const uv = geo.attributes.uv; for (let i = 0; i < 4; i++) { const c = corners[i]; uv.setXY(faceIdx * 4 + i, (rx + c[0] * rw) / texW, 1 - (ry + c[1] * rh) / texH); } uv.needsUpdate = true; }
 function applySkinUVsToBox(geo, layout, texW, texH) { applyFaceUV(geo, 0, layout.right, SKIN_CORNERS.px, texW, texH); applyFaceUV(geo, 1, layout.left, SKIN_CORNERS.nx, texW, texH); applyFaceUV(geo, 2, layout.top, SKIN_CORNERS.py, texW, texH); applyFaceUV(geo, 3, layout.bottom, SKIN_CORNERS.ny, texW, texH); applyFaceUV(geo, 4, layout.back, SKIN_CORNERS.pz, texW, texH); applyFaceUV(geo, 5, layout.front, SKIN_CORNERS.nz, texW, texH); }
 function makeSkinnedBox(w, h, d, layout, mat, inflate) { const e = inflate || 0; const geo = new THREE.BoxGeometry(w + e * 2, h + e * 2, d + e * 2); applySkinUVsToBox(geo, layout, SKIN_TEX_W, SKIN_TEX_H); return new THREE.Mesh(geo, mat); }
-const ARMOR_MAT_PROPS = { leather: { roughness: 0.90, metalness: 0.02, envInt: 0.40, opacity: 1.00 }, chainmail: { roughness: 0.55, metalness: 0.72, envInt: 0.75, opacity: 1.00 }, gold: { roughness: 0.20, metalness: 1.00, envInt: 1.30, opacity: 1.00 }, iron: { roughness: 0.40, metalness: 0.94, envInt: 1.10, opacity: 1.00 }, diamond: { roughness: 0.06, metalness: 0.14, envInt: 2.30, opacity: 0.78, emissive: 0x0e5f56, emissiveIntensity: 0.32 } };
+const ARMOR_MAT_PROPS = { leather: { roughness: 0.90, metalness: 0.02, envInt: 0.40, opacity: 1.00 }, chainmail: { roughness: 0.72, metalness: 0.55, envInt: 1.05, opacity: 1.00 }, gold: { roughness: 0.20, metalness: 1.00, envInt: 1.30, opacity: 1.00 }, iron: { roughness: 0.40, metalness: 0.94, envInt: 1.10, opacity: 1.00 }, diamond: { roughness: 0.06, metalness: 0.14, envInt: 2.30, opacity: 0.78, emissive: 0x0e5f56, emissiveIntensity: 0.32 } };
 const armorMatCache = []; const armorMatGlintCache = [];
 const ARMOR_PLACEHOLDER_MAT = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7, metalness: 0.1 });
-function makeArmorAlbedo(tier) { const S = 32; const cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'); const [base, dark, light] = tier.col; g.fillStyle = base; g.fillRect(0, 0, S, S); const rnd = mulberry32(9000 + tier.tier * 131); g.globalAlpha = 0.30; for (let i = 0; i < 520; i++) { const px = (rnd() * S) | 0, py = (rnd() * S) | 0; const r = rnd(); g.fillStyle = r < 0.34 ? dark : (r < 0.68 ? light : base); g.fillRect(px, py, 1, 1); } g.globalAlpha = 1; g.fillStyle = light; g.globalAlpha = 0.22; g.fillRect(0, 0, S, 1); g.fillRect(0, 0, 1, S); g.globalAlpha = 1; const tex = new THREE.CanvasTexture(cv); tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4; return tex; }
-function makeArmorRoughness(tier) { const S = 32; const cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'); g.fillStyle = '#e6e6e6'; g.fillRect(0, 0, S, S); const rnd = mulberry32(17000 + tier.tier * 77); for (let i = 0; i < 260; i++) { const px = (rnd() * S) | 0, py = (rnd() * S) | 0; const v = 150 + ((rnd() * 105) | 0); g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(px, py, 1, 1); } g.strokeStyle = '#9a9a9a'; g.lineWidth = 1; g.globalAlpha = 0.5; for (let i = 0; i < 10; i++) { const y = (rnd() * S) | 0; g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(S, y + 0.5); g.stroke(); } g.globalAlpha = 1; const tex = new THREE.CanvasTexture(cv); tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex; }
+function makeArmorAlbedo(tier) { const S = 32; const cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'); const [base, dark, light] = tier.col; g.fillStyle = base; g.fillRect(0, 0, S, S); const rnd = mulberry32(9000 + tier.tier * 131); g.globalAlpha = 0.30; for (let i = 0; i < 520; i++) { const px = (rnd() * S) | 0, py = (rnd() * S) | 0; const r = rnd(); g.fillStyle = r < 0.34 ? dark : (r < 0.68 ? light : base); g.fillRect(px, py, 1, 1); } g.globalAlpha = 1; const tex = new THREE.CanvasTexture(cv); tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4; return tex; }
+function makeArmorRoughness(tier) { const S = 32; const cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d'); g.fillStyle = '#e6e6e6'; g.fillRect(0, 0, S, S); const rnd = mulberry32(17000 + tier.tier * 77); for (let i = 0; i < 260; i++) { const px = (rnd() * S) | 0, py = (rnd() * S) | 0; const v = 150 + ((rnd() * 105) | 0); g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(px, py, 1, 1); } const tex = new THREE.CanvasTexture(cv); tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex; }
+
+/* Chainmail weave: a tileable grid of interlocking rings, drawn as chunky pixels so it
+   reads as mail next to the smooth plates of the other tiers. Shared geometry is used to
+   build the albedo, roughness and normal maps so all three line up exactly. */
+const CHAIN_TEX_SIZE = 64, CHAIN_LINK_STEP = 8;
+function forEachChainLinkPixel(cb) {
+  const S = CHAIN_TEX_SIZE, step = CHAIN_LINK_STEP;
+  for (let j = 0; j < S / step; j++) {
+    for (let i = 0; i < S / step; i++) {
+      const cx = step / 2 + i * step + ((j & 1) ? step / 2 : 0);
+      const cy = step / 2 + j * step;
+      for (let oy = -4; oy <= 4; oy++) for (let ox = -4; ox <= 4; ox++) {
+        const d = Math.sqrt(ox * ox + oy * oy);
+        if (d > 3.7 || d < 1.3) continue;
+        cb((((cx + ox) % S) + S) % S, (((cy + oy) % S) + S) % S, d, ox, oy);
+      }
+    }
+  }
+}
+function chainTexMake(cv) {
+  const tex = new THREE.CanvasTexture(cv);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 4;
+  return tex;
+}
+function makeChainmailAlbedo() {
+  const S = CHAIN_TEX_SIZE;
+  const cv = document.createElement('canvas'); cv.width = cv.height = S;
+  const g = cv.getContext('2d');
+  // Gaps between and inside the rings are left transparent, so the layer beneath shows through.
+  g.clearRect(0, 0, S, S);
+  forEachChainLinkPixel((x, y, d, ox, oy) => {
+    const lit = -ox - oy; // each ring is lit from the top-left
+    let col;
+    if (d < 1.9) col = CHAIN_COL.deep;
+    else if (lit > 2.4) col = CHAIN_COL.hi;
+    else if (lit > 0.2) col = CHAIN_COL.light;
+    else if (lit > -2.4) col = CHAIN_COL.base;
+    else col = CHAIN_COL.mid;
+    g.fillStyle = col; g.fillRect(x, y, 1, 1);
+  });
+  // pin-head rivets where links overlap
+  const step = CHAIN_LINK_STEP;
+  for (let j = 0; j < S / step; j++) for (let i = 0; i < S / step; i++) {
+    const cx = step / 2 + i * step + ((j & 1) ? step / 2 : 0);
+    const cy = step / 2 + j * step;
+    g.fillStyle = '#ffffff';
+    g.fillRect(((cx - 2) % S + S) % S, ((cy - 2) % S + S) % S, 1, 1);
+  }
+  const tex = chainTexMake(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+function makeChainmailRoughness() {
+  const S = CHAIN_TEX_SIZE;
+  const cv = document.createElement('canvas'); cv.width = cv.height = S;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#cfcfcf'; g.fillRect(0, 0, S, S); // the gaps catch no light
+  forEachChainLinkPixel((x, y, d, ox, oy) => {
+    const lit = -ox - oy;
+    const v = d < 1.9 ? 168 : (lit > 0 ? 92 : 132);
+    g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(x, y, 1, 1);
+  });
+  return chainTexMake(cv);
+}
+function makeChainmailNormal() {
+  const S = CHAIN_TEX_SIZE;
+  const height = new Float32Array(S * S);
+  forEachChainLinkPixel((x, y, d) => {
+    const t = 1 - Math.abs(d - 2.5) / 1.25; // rounded tube cross-section
+    if (t <= 0) return;
+    const h = Math.sqrt(t);
+    if (h > height[y * S + x]) height[y * S + x] = h;
+  });
+  const at = (x, y) => height[(((y % S) + S) % S) * S + (((x % S) + S) % S)];
+  const cv = document.createElement('canvas'); cv.width = cv.height = S;
+  const g = cv.getContext('2d');
+  const img = g.createImageData(S, S);
+  const strength = 2.2;
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    const dx = at(x + 1, y) - at(x - 1, y);
+    const dy = at(x, y + 1) - at(x, y - 1);
+    let nx = -dx * strength, ny = dy * strength, nz = 1;
+    const inv = 1 / Math.sqrt(nx * nx + ny * ny + nz * nz);
+    const o = (y * S + x) * 4;
+    img.data[o] = (nx * inv * 0.5 + 0.5) * 255;
+    img.data[o + 1] = (ny * inv * 0.5 + 0.5) * 255;
+    img.data[o + 2] = (nz * inv * 0.5 + 0.5) * 255;
+    img.data[o + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  return chainTexMake(cv); // normal maps stay in linear colour space
+}
 function getArmorMaterial(tierIdx) {
   if (armorMatCache[tierIdx]) return armorMatCache[tierIdx];
   const tier = ARMOR_TIERS[tierIdx]; if (!tier) return ARMOR_PLACEHOLDER_MAT;
   const props = ARMOR_MAT_PROPS[tier.key] || ARMOR_MAT_PROPS.iron;
-  const mat = new THREE.MeshStandardMaterial({ map: makeArmorAlbedo(tier), roughnessMap: makeArmorRoughness(tier), color: 0xffffff, roughness: props.roughness, metalness: props.metalness, envMapIntensity: props.envInt, transparent: props.opacity < 1, opacity: props.opacity, depthWrite: true, side: THREE.FrontSide });
+  const isChain = tier.key === 'chainmail';
+  const params = { map: isChain ? makeChainmailAlbedo() : makeArmorAlbedo(tier), roughnessMap: isChain ? makeChainmailRoughness() : makeArmorRoughness(tier), color: 0xffffff, roughness: props.roughness, metalness: props.metalness, envMapIntensity: props.envInt, transparent: props.opacity < 1, opacity: props.opacity, depthWrite: true, side: THREE.FrontSide };
+  if (isChain) { params.alphaTest = 0.5; params.normalMap = makeChainmailNormal(); params.normalScale = new THREE.Vector2(1.15, 1.15); }
+  const mat = new THREE.MeshStandardMaterial(params);
   if (props.emissive) { mat.emissive = new THREE.Color(props.emissive); mat.emissiveIntensity = props.emissiveIntensity || 0.25; }
   armorMatCache[tierIdx] = mat; return mat;
 }
 function getArmorMaterialGlint(tierIdx) { if (armorMatGlintCache[tierIdx]) return armorMatGlintCache[tierIdx]; const base = getArmorMaterial(tierIdx); const m = base.clone(); m.emissive = new THREE.Color(0x6a2ea0); m.emissiveIntensity = 0.35; markGlint(m); armorMatGlintCache[tierIdx] = m; return m; }
 const SKIN = 0xe8b48c, SHIRT = 0x3ea34a, PANTS = 0x35509e;
-function makeArmorBox(w, h, d, x, y, z, mat) { const geo = new THREE.BoxGeometry(w, h, d); const mesh = new THREE.Mesh(geo, mat); mesh.position.set(x, y, z); mesh.userData.isArmor = true; return mesh; }
+/* Armour textures are mapped in world space instead of restarting at 0..1 on every box:
+   that keeps one continuous weave across the chest, belly and shoulder plates, with no
+   shrunken duplicate of the pattern on the overlay panels and no stretched links. */
+const ARMOR_UV_SCALE = 2.5;
+function applyArmorBoxUVs(geo, w, h, d, cx, cy, cz) {
+  const uv = geo.attributes.uv, pos = geo.attributes.position;
+  const O = 64;
+  for (let f = 0; f < 6; f++) {
+    let ua, va, us = 1, vs = 1;
+    if (f === 0) { ua = 2; va = 1; us = -1; }        // +X: u = -z, v = y
+    else if (f === 1) { ua = 2; va = 1; }            // -X: u = +z, v = y
+    else if (f === 2) { ua = 0; va = 2; vs = -1; }   // +Y: u = x, v = -z
+    else if (f === 3) { ua = 0; va = 2; }            // -Y: u = x, v = z
+    else if (f === 4) { ua = 0; va = 1; }            // +Z: u = x, v = y
+    else { ua = 0; va = 1; us = -1; }                // -Z: u = -x, v = y
+    for (let i = 0; i < 4; i++) {
+      const vi = f * 4 + i;
+      const c = [pos.getX(vi), pos.getY(vi), pos.getZ(vi)];
+      const o = [cx, cy, cz];
+      uv.setXY(vi, (c[ua] * us + o[ua] + O) * ARMOR_UV_SCALE, (c[va] * vs + o[va] + O) * ARMOR_UV_SCALE);
+    }
+  }
+  uv.needsUpdate = true;
+}
+function makeArmorBox(w, h, d, x, y, z, mat) { const geo = new THREE.BoxGeometry(w, h, d); applyArmorBoxUVs(geo, w, h, d, x, y, z); const mesh = new THREE.Mesh(geo, mat); mesh.position.set(x, y, z); mesh.userData.isArmor = true; return mesh; }
 function makeHelmetPiece() { const mat = ARMOR_PLACEHOLDER_MAT; const g = new THREE.Group(); g.userData.isArmor = true; g.visible = false; g.add(makeArmorBox(0.58, 0.20, 0.58, 0, 0.43, 0, mat)); g.add(makeArmorBox(0.58, 0.34, 0.07, 0, 0.19, 0.255, mat)); g.add(makeArmorBox(0.07, 0.40, 0.46, -0.295, 0.2, 0.04, mat)); g.add(makeArmorBox(0.07, 0.40, 0.46, 0.295, 0.2, 0.04, mat)); g.add(makeArmorBox(0.58, 0.08, 0.07, 0, 0.36, -0.26, mat)); g.add(makeArmorBox(0.07, 0.14, 0.16, -0.255, 0.04, -0.16, mat)); g.add(makeArmorBox(0.07, 0.14, 0.16, 0.255, 0.04, -0.16, mat)); return g; }
-function makeChestplatePiece() { const mat = ARMOR_PLACEHOLDER_MAT; const g = new THREE.Group(); g.userData.isArmor = true; g.visible = false; g.add(makeArmorBox(0.60, 0.70, 0.35, 0, 0.34, 0, mat)); g.add(makeArmorBox(0.42, 0.30, 0.05, 0, 0.38, -0.165, mat)); g.add(makeArmorBox(0.38, 0.20, 0.05, 0, 0.11, -0.165, mat)); g.add(makeArmorBox(0.42, 0.36, 0.05, 0, 0.34, 0.165, mat)); g.add(makeArmorBox(0.32, 0.06, 0.28, 0, 0.555, 0, mat)); g.add(makeArmorBox(0.26, 0.16, 0.32, -0.31, 0.54, 0, mat)); g.add(makeArmorBox(0.26, 0.16, 0.32, 0.31, 0.54, 0, mat)); g.add(makeArmorBox(0.24, 0.05, 0.28, -0.32, 0.635, 0, mat)); g.add(makeArmorBox(0.24, 0.05, 0.28, 0.32, 0.635, 0, mat)); return g; }
+function makeChestplatePiece(slim) {
+  const mat = ARMOR_PLACEHOLDER_MAT;
+  const g = new THREE.Group(); g.userData.isArmor = true; g.visible = false;
+  /* The shoulder pads are sized from the arm they sit on (4 px classic / 3 px slim), so
+     equipping a chestplate adds a thin cap around the shoulder without widening the arm. */
+  const armW = slim ? 0.1875 : 0.25, armX = 0.25 + armW / 2;
+  const padW = armW + 0.01, padD = 0.26;
+  g.add(makeArmorBox(0.505, 0.70, 0.35, 0, 0.34, 0, mat));
+  g.add(makeArmorBox(0.42, 0.30, 0.05, 0, 0.38, -0.165, mat));
+  g.add(makeArmorBox(0.38, 0.20, 0.05, 0, 0.11, -0.165, mat));
+  g.add(makeArmorBox(0.42, 0.36, 0.05, 0, 0.34, 0.165, mat));
+  g.add(makeArmorBox(0.32, 0.06, 0.28, 0, 0.555, 0, mat));
+  g.add(makeArmorBox(padW, 0.18, padD, -armX, 0.53, 0, mat));
+  g.add(makeArmorBox(padW, 0.18, padD, armX, 0.53, 0, mat));
+  g.add(makeArmorBox(padW - 0.02, 0.05, 0.28, -armX, 0.635, 0, mat));
+  g.add(makeArmorBox(padW - 0.02, 0.05, 0.28, armX, 0.635, 0, mat));
+  return g;
+}
 function makeLeggingsWaistPiece() { const mat = ARMOR_PLACEHOLDER_MAT; const g = new THREE.Group(); g.userData.isArmor = true; g.visible = false; g.add(makeArmorBox(0.56, 0.20, 0.31, 0, 0.10, 0, mat)); g.add(makeArmorBox(0.58, 0.05, 0.33, 0, 0.20, 0, mat)); return g; }
 function makeLeggingPiece() { const mat = ARMOR_PLACEHOLDER_MAT; const g = new THREE.Group(); g.userData.isArmor = true; g.visible = false; g.add(makeArmorBox(0.31, 0.46, 0.31, 0, -0.22, 0, mat)); g.add(makeArmorBox(0.33, 0.06, 0.33, 0, -0.46, 0, mat)); return g; }
 function makeBootPiece() { const mat = ARMOR_PLACEHOLDER_MAT; const g = new THREE.Group(); g.userData.isArmor = true; g.visible = false; g.add(makeArmorBox(0.31, 0.26, 0.31, 0, -0.57, 0, mat)); g.add(makeArmorBox(0.31, 0.12, 0.14, 0, -0.64, -0.16, mat)); g.add(makeArmorBox(0.33, 0.05, 0.33, 0, -0.435, 0, mat)); return g; }
@@ -4872,7 +5042,7 @@ function buildHumanoidModel(opts = {}) {
   }
   torso.add(armL, armR);
   g.add(legL, legR, torso);
-  const armorParts = { helmet: makeHelmetPiece(), chest: makeChestplatePiece(), waist: makeLeggingsWaistPiece(), legsL: makeLeggingPiece(), legsR: makeLeggingPiece(), bootsL: makeBootPiece(), bootsR: makeBootPiece() };
+  const armorParts = { helmet: makeHelmetPiece(), chest: makeChestplatePiece(slim), waist: makeLeggingsWaistPiece(), legsL: makeLeggingPiece(), legsR: makeLeggingPiece(), bootsL: makeBootPiece(), bootsR: makeBootPiece() };
   headGrp.add(armorParts.helmet); torso.add(armorParts.chest); torso.add(armorParts.waist);
   legL.add(armorParts.legsL); legL.add(armorParts.bootsL);
   legR.add(armorParts.legsR); legR.add(armorParts.bootsR);
@@ -5013,21 +5183,47 @@ previewContainer.addEventListener('mouseleave', () => { if (invPreviewHead) { in
 
 const armGroup = new THREE.Group(); camera.add(armGroup);
 const fpArmMat = new THREE.MeshStandardMaterial({ color: SKIN, roughness: 0.88, metalness: 0.0, envMapIntensity: 0.5 });
-let fpArm = null;
+let fpArm = null, fpArmSleeve = null, fpArmKey = '', fpArmOwnMat = false;
+/* First-person arm mirrors the third-person right arm: the same 12-pixel arm strip and the
+   same sleeve overlay from the skin, wrapped over a 4x4 (classic) or 3x4 (slim) box.
+   Armour never paints the arm - only the chestplate's shoulder pads overlap the upper arm,
+   exactly as in third person, and they are not visible from the first-person view. */
+const FP_ARM_LEN = 0.44, FP_ARM_W_CLASSIC = 0.13, FP_ARM_D = 0.13;
 function setFPArm(skinTex, slim) {
-  if (fpArm) { armGroup.remove(fpArm); if (fpArm.geometry) fpArm.geometry.dispose(); if (fpArm.material && fpArm.material.map) fpArm.material.dispose(); fpArm = null; }
-  if (skinTex) {
-    const w = slim ? 0.10 : 0.13;
-    const geo = new THREE.BoxGeometry(w, 0.44, w);
-    const layout = slim ? SKIN_LAYOUTS_SLIM.rightArm : SKIN_LAYOUTS.rightArm;
-    applySkinUVsToBox(geo, layout, SKIN_TEX_W, SKIN_TEX_H);
-    fpArm = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: skinTex, alphaTest: 0.5, roughness: 0.88, metalness: 0.0, envMapIntensity: 0.5 }));
-    fpArm.rotation.x = Math.PI / 2; fpArm.position.set(0, 0, 0.18);
-  } else {
-    fpArm = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.11, 0.44), fpArmMat);
-    fpArm.position.set(0, 0, 0.18);
+  slim = !!slim;
+  const key = (skinTex ? 'skin' : 'plain') + '|' + (slim ? 1 : 0);
+  if (fpArm && key === fpArmKey) return;
+  fpArmKey = key;
+  if (fpArm) {
+    armGroup.remove(fpArm);
+    if (fpArm.geometry) fpArm.geometry.dispose();
+    if (fpArmOwnMat && fpArm.material) fpArm.material.dispose();
+    fpArm = null; fpArmOwnMat = false;
   }
+  if (fpArmSleeve) { armGroup.remove(fpArmSleeve); fpArmSleeve.geometry.dispose(); fpArmSleeve = null; }
+  // Classic arms are 4 px wide, slim arms are 3 px wide; both are 4 px deep in the skin.
+  const w = slim ? FP_ARM_W_CLASSIC * 0.75 : FP_ARM_W_CLASSIC;
+  const geo = new THREE.BoxGeometry(w, FP_ARM_LEN, FP_ARM_D);
+  let mat;
+  if (skinTex) {
+    applySkinUVsToBox(geo, slim ? SKIN_LAYOUTS_SLIM.rightArm : SKIN_LAYOUTS.rightArm, SKIN_TEX_W, SKIN_TEX_H);
+    mat = new THREE.MeshStandardMaterial({ map: skinTex, alphaTest: 0.5, side: THREE.FrontSide, roughness: 0.88, metalness: 0.0, envMapIntensity: 0.5 });
+    fpArmOwnMat = true;
+  } else {
+    mat = fpArmMat;
+  }
+  fpArm = new THREE.Mesh(geo, mat);
+  fpArm.rotation.x = Math.PI / 2; fpArm.position.set(0, 0, 0.18);
   armGroup.add(fpArm);
+  if (skinTex) {
+    // Second skin layer (sleeve), wrapped over the base arm so transparent pixels show the base.
+    const e = 0.008;
+    const sgeo = new THREE.BoxGeometry(w + e * 2, FP_ARM_LEN + e * 2, FP_ARM_D + e * 2);
+    applySkinUVsToBox(sgeo, slim ? SKIN_LAYOUTS_SLIM.rightSleeve : SKIN_LAYOUTS.rightSleeve, SKIN_TEX_W, SKIN_TEX_H);
+    fpArmSleeve = new THREE.Mesh(sgeo, mat);
+    fpArmSleeve.rotation.x = Math.PI / 2; fpArmSleeve.position.set(0, 0, 0.18);
+    armGroup.add(fpArmSleeve);
+  }
 }
 setFPArm(null, false);
 const itemHolder = new THREE.Group(); armGroup.add(itemHolder);
@@ -5619,6 +5815,7 @@ function buyUpgrade(up) {
   addEventMessage(`<b style="color:#c060ff">${PLAYER_TEAM.name}</b> bought <b>${up.name} ${tu[up.key]}</b>`, '#c060ff');
   updateUpgradeUI();
   applyPlayerArmorToModel(playerModel); applyPlayerArmorToModel(invPreviewModel);
+  setFPArm(currentSkinTex, currentSkinSlim);
   currentItemKey = null; updateItemMesh();
   effectDisplayKey = '';
 }
