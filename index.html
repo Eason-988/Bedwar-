@@ -7,7 +7,14 @@
 #healthBar{position:absolute;bottom:74px;left:calc(50% - 225px);pointer-events:none}
 #armorCanvas{display:block;margin-bottom:1px}
 #healthCanvas{display:block}
-#effectDisplay{position:absolute;left:16px;bottom:150px;font-size:12px;color:#fff;background:rgba(0,0,0,.42);padding:5px 10px;border-radius:5px;display:none;pointer-events:none;letter-spacing:.5px;border:1px solid rgba(255,255,255,.15);text-shadow:1px 1px 0 #000}#effectDisplay.show{display:block}#effectDisplay span{margin-right:8px;font-weight:bold}#inventory{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(24,24,28,.95);border:3px solid #555;border-radius:6px;padding:14px;display:none;pointer-events:auto;box-shadow:0 0 40px rgba(0,0,0,.7)}#inventory.open{display:block}#inventory h3{margin:0 0 10px;font-size:14px;letter-spacing:2px;color:#ddd;text-align:center}.grid{display:grid;grid-template-columns:repeat(9,46px);gap:3px}#invHotbar{margin-top:10px;padding-top:10px;border-top:2px solid #444}#invTop{display:flex;gap:14px;margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid #444}#invLeft{display:flex;gap:12px}#armorSlots{display:grid;grid-template-columns:46px;gap:6px;align-self:flex-start}#invPreview{width:130px;height:170px;background:rgba(0,0,0,.35);border:2px solid #444;border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative}#invPreview canvas{width:130px;height:170px;image-rendering:pixelated}#cursorItem{position:absolute;width:32px;height:32px;pointer-events:none;background-repeat:no-repeat;image-rendering:pixelated;z-index:50;transform:translate(-50%,-50%);display:none}
+#effectDisplay{position:absolute;left:16px;bottom:150px;font-size:12px;color:#fff;background:rgba(0,0,0,.42);padding:5px 10px;border-radius:5px;display:none;pointer-events:none;letter-spacing:.5px;border:1px solid rgba(255,255,255,.15);text-shadow:1px 1px 0 #000}#effectDisplay.show{display:block}#effectDisplay span{margin-right:8px;font-weight:bold}#inventory{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(24,24,28,.95);border:3px solid #555;border-radius:6px;padding:14px;display:none;pointer-events:auto;box-shadow:0 0 40px rgba(0,0,0,.7)}#inventory.open{display:block}#inventory h3{margin:0 0 10px;font-size:14px;letter-spacing:2px;color:#ddd;text-align:center}
+#chestPanel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(24,24,28,.96);border:3px solid #555;border-radius:6px;padding:14px;display:none;pointer-events:auto;box-shadow:0 0 40px rgba(0,0,0,.7);z-index:20}
+#chestPanel.open{display:block}
+#chestPanel h3{margin:0 0 10px;font-size:14px;letter-spacing:2px;color:#ddd;text-align:center;text-shadow:1px 1px 0 #000}
+#chestPanel .chest-sub{margin:10px 0 6px;padding-top:8px;border-top:2px solid #444;font-size:11px;letter-spacing:2px;color:#9a9a9a;text-align:center}
+#chestGrid,#chestInvGrid,#chestHotGrid{display:grid;grid-template-columns:repeat(9,46px);gap:3px}
+#chestHotGrid{margin-top:6px}
+#chestPanel .chest-hint{margin-top:8px;font-size:10px;color:#777;text-align:center;letter-spacing:1px}.grid{display:grid;grid-template-columns:repeat(9,46px);gap:3px}#invHotbar{margin-top:10px;padding-top:10px;border-top:2px solid #444}#invTop{display:flex;gap:14px;margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid #444}#invLeft{display:flex;gap:12px}#armorSlots{display:grid;grid-template-columns:46px;gap:6px;align-self:flex-start}#invPreview{width:160px;height:220px;background:#0b0b0e;border:2px solid #444;border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}#invPreview canvas{width:160px;height:220px;image-rendering:pixelated}#cursorItem{position:absolute;width:32px;height:32px;pointer-events:none;background-repeat:no-repeat;image-rendering:pixelated;z-index:50;transform:translate(-50%,-50%);display:none}
 /* ---- Hypixel-style Bed Wars GUI ---- */
 #shop,#upgradeShop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;flex-direction:column;pointer-events:auto;background:#c6c6c6;padding:10px 12px 11px;border:2px solid #000;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #555,0 18px 60px rgba(0,0,0,.78);z-index:30;font-family:'Courier New',monospace;image-rendering:pixelated;max-height:94vh}
 #shop.open,#upgradeShop.open{display:flex}
@@ -50,6 +57,10 @@
 #shopTip .cur-iron{color:#e8e8e8}#shopTip .cur-gold{color:#ffd54a}#shopTip .cur-emerald{color:#6bff8f}#shopTip .cur-diamond{color:#7ff5e8}
 @media (max-height:780px){#shop,#upgradeShop{transform:translate(-50%,-50%) scale(.88)}}
 @media (max-width:560px){#shop,#upgradeShop{transform:translate(-50%,-50%) scale(.72)}}
+@media (max-height:660px){#inventory{transform:translate(-50%,-50%) scale(.85)}}
+@media (max-width:520px){#inventory{transform:translate(-50%,-50%) scale(.8)}}
+@media (max-height:760px){#chestPanel{transform:translate(-50%,-50%) scale(.9)}}
+@media (max-height:660px){#chestPanel{transform:translate(-50%,-50%) scale(.8)}}
 #tooltip{position:fixed;display:none;background:rgba(10,10,16,.96);border:2px solid #6a6a7a;border-radius:4px;padding:8px 12px;font-size:13px;pointer-events:none;z-index:200;color:#eee;box-shadow:0 4px 16px rgba(0,0,0,.6);max-width:220px;line-height:1.5}#tooltip .tt-name{font-weight:bold;color:#ffd966;margin-bottom:6px;font-size:14px}#tooltip .tt-stat{color:#b8b8c8;margin:2px 0}#tooltip .tt-stat span{color:#7fe0a0;font-weight:bold}#tooltip .tt-tier{margin-top:6px;color:#f0a040;font-size:12px;border-top:1px solid #444;padding-top:4px}#tooltip .tt-ench{color:#c060ff;font-style:italic;font-size:12px;margin-top:4px}
 #hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.78);padding:28px 40px;border-radius:10px;text-align:center;font-size:15px;line-height:1.9;pointer-events:auto;cursor:pointer}#hint b{color:#7fff7f;font-size:22px;letter-spacing:3px}#hint.hidden{display:none}#msg{position:absolute;left:50%;top:16%;transform:translateX(-50%);font-size:20px;font-weight:bold;text-shadow:2px 2px 0 #000;opacity:0;transition:opacity .4s;letter-spacing:1px;text-align:center}#msg.show{opacity:1}.gen-label{position:absolute;transform:translate(-50%,-100%);background:rgba(0,0,0,.72);color:#fff;font-size:12px;font-weight:bold;padding:3px 8px;border-radius:4px;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,.25);text-shadow:1px 1px 0 #000;z-index:15}.gen-label.diamond{color:#7ff5e8;border-color:#7ff5e8}.gen-label.emerald{color:#5eff8a;border-color:#5eff8a}.gen-label.iron{color:#ddd;border-color:#ddd}.gen-label.gold{color:#ffd966;border-color:#ffd966}
 #deadOverlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(60,0,0,.85);border:3px solid #ff4444;border-radius:8px;padding:30px 60px;text-align:center;color:#fff;display:none;pointer-events:auto}#deadOverlay.show{display:block}#deadOverlay h2{color:#ff4444;margin:0 0 12px;font-size:26px;letter-spacing:3px}#deadOverlay p{margin:6px 0;font-size:14px}#deadOverlay button{margin-top:16px;padding:10px 24px;background:#ff4444;border:2px solid #fff;color:#fff;font-family:inherit;font-size:14px;font-weight:bold;cursor:pointer;border-radius:5px;letter-spacing:2px}#deadOverlay button:hover{background:#ff6666}#respawnOverlay{position:absolute;left:50%;top:12%;transform:translate(-50%,-50%);background:rgba(0,0,0,.82);border:3px solid #888;border-radius:8px;padding:22px 48px;text-align:center;color:#fff;display:none;pointer-events:none}#respawnOverlay.show{display:block}#respawnOverlay h2{color:#ccc;margin:0 0 8px;font-size:20px;letter-spacing:3px}#respawnOverlay p{margin:6px 0;font-size:26px;font-weight:bold;color:#ffd966}
@@ -111,6 +122,8 @@
 #netBadge.net-on{color:#7fe0a0;border-color:rgba(127,224,160,.4)}
 #netBadge.net-warn{color:#ffd966;border-color:rgba(255,217,102,.4)}
 #netBadge.net-off{color:#8a93a8}
+#devBadge{display:none;font-size:11px;font-weight:bold;letter-spacing:1.5px;padding:5px 10px;border-radius:4px;background:rgba(255,217,102,.14);color:#ffd966;border:1px solid rgba(255,217,102,.5);text-shadow:1px 1px 0 #000;white-space:nowrap}
+#devBadge.show{display:block}
 #pingMeter{display:inline-flex;align-items:center;gap:6px;font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;font-weight:bold;padding:5px 10px;border-radius:4px;background:rgba(0,0,0,.42);text-shadow:1px 1px 0 #000;border:1px solid rgba(255,255,255,.12);white-space:nowrap}
 #pingMeter .ping-bars{display:inline-flex;align-items:flex-end;gap:2px;height:11px}
 #pingMeter .ping-bars i{display:block;width:3px;background:currentColor;opacity:.28;border-radius:1px}
@@ -131,16 +144,18 @@
   <div id="cooldownBar"><div id="cooldownFill"></div></div>
   <div id="bowChargeWrap"><div id="bowChargeFill"></div></div>
   <div id="leftPanel">
-    <div id="pingMeter" class="ping-idle"><span class="ping-bars"><i></i><i></i><i></i><i></i></span><span id="pingText">PING — ms</span></div>
+    <div id="pingMeter" class="ping-idle"><span class="ping-bars"><i></i><i></i><i></i><i></i></span><span id="pingText">PING -- ms</span></div>
     <div id="info">
       <div><span class="k">WASD</span> move &nbsp; <span class="k">Space</span> jump</div>
-      <div><span class="k">Shift</span> sneak &nbsp; <span class="k">Ctrl</span>/2×W sprint</div>
+      <div><span class="k">Shift</span> sneak &nbsp; <span class="k">Ctrl</span>/2x W sprint</div>
       <div><span class="k">LMB</span> mine/attack &nbsp; <span class="k">RMB</span> place/use/eat/shoot/throw</div>
       <div><span class="k">E</span> inventory/shop &nbsp; <span class="k">F5</span> camera &nbsp; <span class="k">1-9</span> hotbar</div>
       <div><span class="k">T</span> chat &nbsp; <span class="k">P</span> skin (outside chat)</div>
+      <div><span class="k">/developer</span> unlock testing commands in chat</div>
     </div>
     <div id="statusBar"></div>
-    <div id="netBadge" class="net-off">● not connected</div>
+    <div id="netBadge" class="net-off">not connected</div>
+    <div id="devBadge">DEVELOPER MODE</div>
   </div>
   <div id="eventLog"></div>
   <div id="msg"></div>
@@ -148,15 +163,16 @@
   <div id="effectDisplay"></div>
   <div id="hotbar"></div>
   <div id="inventory"><h3>INVENTORY</h3><div id="invTop"><div id="invLeft"><div id="armorSlots"></div><div id="invPreview"></div></div></div><div class="grid" id="invGrid"></div><div class="grid" id="invHotbar"></div></div>
+  <div id="chestPanel"><h3 id="chestTitle">CHEST</h3><div id="chestGrid"></div><div class="chest-sub">YOUR INVENTORY</div><div id="chestInvGrid"></div><div id="chestHotGrid"></div><div class="chest-hint">Click to move stacks &middot; Shift-click to transfer &middot; E to close</div></div>
   <div id="shop">
-    <div class="gui-head"><span class="gui-title">ITEM SHOP</span><div id="shopClose">✕</div></div>
+    <div class="gui-head"><span class="gui-title">ITEM SHOP</span><div id="shopClose">&times;</div></div>
     <div class="gui-grid" id="shopGrid"></div>
     <div class="cat-bar" id="shopCats"></div>
     <div class="gui-res" id="shopRes"></div>
     <div class="gui-foot">Hover an item for details &middot; Click to purchase</div>
   </div>
   <div id="upgradeShop">
-    <div class="gui-head"><span class="gui-title">TEAM UPGRADES</span><div id="upgradeClose">✕</div></div>
+    <div class="gui-head"><span class="gui-title">TEAM UPGRADES</span><div id="upgradeClose">&times;</div></div>
     <div class="gui-grid" id="upgradeGrid"></div>
     <div class="gui-res" id="upgradeRes"></div>
     <div class="gui-foot">Purchases upgrade your whole team &middot; Paid with diamonds</div>
@@ -165,8 +181,8 @@
   <div id="deadOverlay"><h2>DEFEATED</h2><p>Your bed has been destroyed.</p><p id="deadTeamInfo"></p><button id="respawnBtn">RETURN TO LOBBY</button></div>
   <div id="respawnOverlay"><h2>SPECTATING</h2><p id="respawnTimer">5.0</p><p style="font-size:11px;opacity:.7;margin-top:8px;letter-spacing:1px;color:#aaa;font-weight:normal">WASD · SPACE / SHIFT · MOUSE</p></div>
   <div id="hint"><b>VOXEL BED WARS</b><br><br>Click to play<br><span style="opacity:.7;font-size:12px">Destroy the enemy beds · protect your own</span></div>
-  <div id="skinPanel"><button id="skinBtn" type="button">🎨 SKIN</button><button id="skinResetBtn" type="button" title="Reset to default skin">⟲</button></div>
-  <div id="skinToast">Drop a 64×64 PNG skin · press P</div>
+  <div id="skinPanel"><button id="skinBtn" type="button">SKIN</button><button id="skinResetBtn" type="button" title="Reset to default skin">Reset</button></div>
+  <div id="skinToast">Drop a 64x64 PNG skin · press P</div>
 </div>
 <div id="hurtOverlay"></div>
 <div id="tooltip"></div>
@@ -174,12 +190,12 @@
 <input id="skinInput" type="file" accept="image/png,image/*">
 
 <div id="chatPanel"></div>
-<div id="chatInputWrap"><input id="chatInput" type="text" maxlength="180" autocomplete="off" spellcheck="false" placeholder="Type a message… (Enter to send)"></div>
-<div id="chatHint">Press T to chat</div>
+<div id="chatInputWrap"><input id="chatInput" type="text" maxlength="180" autocomplete="off" spellcheck="false" placeholder="Type a message (Enter to send)"></div>
+<div id="chatHint">Press T to chat · /developer for testing commands</div>
 
 <div id="lobby">
   <h1>VOXEL BED WARS</h1>
-  <h2>◆ MULTIPLAYER v7.3 · RELAY + PING ◆</h2>
+  <h2>MULTIPLAYER v7.3 · RELAY + PING</h2>
   <div class="lobby-box">
     <div id="lobbyTabs">
       <div class="tab active" data-tab="host">CREATE ROOM</div>
@@ -193,11 +209,11 @@
           <option value="hivemq">HiveMQ · broker.hivemq.com</option>
           <option value="mosquitto">Mosquitto · test.mosquitto.org</option>
           <option value="emqx">EMQX · broker.emqx.io</option>
-          <option value="custom">Custom server…</option>
+          <option value="custom">Custom server</option>
         </select>
       </div>
       <div class="lobby-row" id="relayCustomRow"><label>Server</label><input type="text" id="relayCustom" placeholder="wss://your-relay:8084/mqtt"></div>
-      <div class="lobby-row"><label>Room code</label><div id="roomCodeBox" style="flex:1;background:#0e1524;border:2px solid #33406b;border-radius:4px;padding:9px 12px;font-size:16px;letter-spacing:4px;color:#7ff5e8;text-align:center">——————</div></div>
+      <div class="lobby-row"><label>Room code</label><div id="roomCodeBox" style="flex:1;background:#0e1524;border:2px solid #33406b;border-radius:4px;padding:9px 12px;font-size:16px;letter-spacing:4px;color:#7ff5e8;text-align:center">------</div></div>
       <div class="lobby-row" style="justify-content:space-between">
         <button class="lobby-btn" id="btnCreateRoom">CREATE ROOM</button>
         <button class="lobby-btn secondary" id="btnStartGame" disabled>START GAME</button>
@@ -223,7 +239,7 @@
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
 /* ============================================================================
-   VOXEL BED WARS — MULTIPLAYER EDITION v7.3
+   VOXEL BED WARS - MULTIPLAYER EDITION v7.3
    v7.3 BACKGROUND-TAB PASS (no more "hide the tab to stop taking damage"):
    - The simulation no longer depends on requestAnimationFrame. A watchdog on
      the frame clock notices when the browser stops delivering frames (hidden
@@ -309,7 +325,9 @@ const actx = acv.getContext('2d'); actx.imageSmoothingEnabled = false;
 function paintTile(i, fn) { const x = (i % TPR) * TS, y = Math.floor(i / TPR) * TS; actx.save(); actx.translate(x, y); fn(); actx.restore(); }
 function noiseTile(colors, seed) { const rnd = mulberry32(seed); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { actx.fillStyle = colors[(rnd() * colors.length) | 0]; actx.fillRect(x, y, 1, 1); } }
 const T = { grass_top: 0, dirt: 1, grass_side: 2, stone: 3, cobble: 4, sand: 5, log_side: 6, log_top: 7, planks: 8, leaves: 9, wool_red: 10, wool_blue: 11, wool_green: 12, wool_yellow: 13, bed_top_red: 14, bed_top_blue: 15, bed_top_green: 16, bed_top_yellow: 17, bed_side_red: 18, bed_side_blue: 19, bed_side_green: 20, bed_side_yellow: 21, obsidian: 22, iron_block: 23, endstone: 24, gold_block: 25, vending: 26, diamond_block: 27, emerald_block: 28, wool_white: 29, iron_ingot: 30, gold_ingot: 31, stained_clay: 98, glass: 99, ladder: 100, upgrade_machine: 102,
-  sandstone_side: 103, sandstone_top: 104, cactus_side: 105, cactus_top: 106, ice: 107, snow: 108, packed_ice: 109, jungle_log_side: 110, jungle_log_top: 111, jungle_leaves: 112, stone_bricks: 113, mossy_cobble: 114, marble: 115, dark_planks: 116, spruce_planks: 117, fireball: 121, ender_pearl: 122 };
+  sandstone_side: 103, sandstone_top: 104, cactus_side: 105, cactus_top: 106, ice: 107, snow: 108, packed_ice: 109, jungle_log_side: 110, jungle_log_top: 111, jungle_leaves: 112, stone_bricks: 113, mossy_cobble: 114, marble: 115, dark_planks: 116, spruce_planks: 117, fireball: 121, ender_pearl: 122,
+  chest_top: 123, chest_side: 124, chest_front: 125, ender_chest_top: 126, ender_chest_side: 127, ender_chest_front: 128,
+  dark_oak_log_top: 129, dark_oak_log_side: 130 };
 const ITEM_START = 32;
 const PAL = { grass: ['#5d9c3f', '#579437', '#66a847', '#4f8c30'], dirt: ['#866043', '#7d5a3e', '#8f6a4b', '#78553a'], stone: ['#7f7f7f', '#787878', '#888888', '#727272'], sand: ['#dbd3a0', '#d5cc96', '#e2daa8', '#cfc78e'], end: ['#dbde9e', '#d0d394', '#e5e8a8', '#c8cb8c'], leaf: ['#3d6b28', '#345c22', '#457a2e', '#2c4f1c'], obsid: ['#1a1024', '#221535', '#150c1e', '#2a1a40'], ironb: ['#d8d8d8', '#c8c8c8', '#e8e8e8', '#bcbcbc'], log: ['#7a5a34', '#6b4f2c', '#856540', '#5e4527'], plank: ['#b08a52', '#a67f4a', '#bb945b', '#9c7743'] };
 paintTile(T.grass_top, () => noiseTile(PAL.grass, 1)); paintTile(T.dirt, () => noiseTile(PAL.dirt, 2));
@@ -365,6 +383,18 @@ paintTile(T.mossy_cobble, () => { actx.fillStyle = '#6b6b6b'; actx.fillRect(0, 0
 paintTile(T.marble, () => { noiseTile(['#e8e8e8', '#e0e0e0', '#f0f0f0', '#d8d8d8'], 513); const rnd = mulberry32(514); for (let i = 0; i < 12; i++) { const x = (rnd() * 16) | 0, y = (rnd() * 16) | 0, len = 3 + ((rnd() * 5) | 0), ang = rnd() * Math.PI * 2; let cx = x, cy = y; for (let j = 0; j < len; j++) { actx.fillStyle = '#a8a8a8'; actx.fillRect(Math.round(cx), Math.round(cy), 1, 1); cx += Math.cos(ang); cy += Math.sin(ang); } } });
 paintTile(T.dark_planks, () => { noiseTile(['#4a3828', '#3a2a1a', '#5a4838', '#2a1a10'], 515); actx.fillStyle = '#1a1008'; for (let y = 3; y < 16; y += 4) actx.fillRect(0, y, 16, 1); actx.fillRect(5, 0, 1, 4); actx.fillRect(11, 4, 1, 4); actx.fillRect(3, 8, 1, 4); actx.fillRect(12, 12, 1, 4); });
 paintTile(T.spruce_planks, () => { noiseTile(['#8a6848', '#7a5838', '#9a7858', '#6a4828'], 516); actx.fillStyle = '#5a3820'; for (let y = 3; y < 16; y += 4) actx.fillRect(0, y, 16, 1); actx.fillRect(5, 0, 1, 4); actx.fillRect(11, 4, 1, 4); actx.fillRect(3, 8, 1, 4); actx.fillRect(12, 12, 1, 4); });
+
+/* --- CHEST / ENDER CHEST TEXTURES --- */
+paintTile(T.chest_top, () => { noiseTile(['#a8783c', '#9a6c34', '#b98844', '#8a5e2a'], 520); actx.fillStyle = '#6b461c'; actx.fillRect(0, 0, 16, 1); actx.fillRect(0, 15, 16, 1); actx.fillRect(0, 0, 1, 16); actx.fillRect(15, 0, 1, 16); actx.fillStyle = '#c89a56'; actx.fillRect(2, 2, 12, 1); actx.fillRect(2, 2, 1, 12); });
+paintTile(T.chest_side, () => { noiseTile(['#a8783c', '#9a6c34', '#b98844', '#8a5e2a'], 521); actx.fillStyle = '#6b461c'; actx.fillRect(0, 0, 16, 1); actx.fillRect(0, 15, 16, 1); actx.fillRect(0, 0, 1, 16); actx.fillRect(15, 0, 1, 16); actx.fillStyle = '#7d7d7d'; actx.fillRect(0, 6, 16, 2); actx.fillStyle = '#b8b8b8'; actx.fillRect(0, 6, 16, 1); actx.fillStyle = '#4a4a4a'; actx.fillRect(0, 8, 16, 1); });
+paintTile(T.chest_front, () => { noiseTile(['#a8783c', '#9a6c34', '#b98844', '#8a5e2a'], 522); actx.fillStyle = '#6b461c'; actx.fillRect(0, 0, 16, 1); actx.fillRect(0, 15, 16, 1); actx.fillRect(0, 0, 1, 16); actx.fillRect(15, 0, 1, 16); actx.fillStyle = '#7d7d7d'; actx.fillRect(0, 6, 16, 2); actx.fillStyle = '#b8b8b8'; actx.fillRect(0, 6, 16, 1); actx.fillStyle = '#d8d8d8'; actx.fillRect(6, 4, 4, 5); actx.fillStyle = '#555'; actx.fillRect(7, 6, 2, 2); actx.fillStyle = '#2a1a08'; actx.fillRect(7, 8, 2, 1); });
+paintTile(T.ender_chest_top, () => { noiseTile(['#1e1a2e', '#2a2240', '#161222', '#352a52'], 523); actx.fillStyle = '#0c0a14'; actx.fillRect(0, 0, 16, 1); actx.fillRect(0, 15, 16, 1); actx.fillRect(0, 0, 1, 16); actx.fillRect(15, 0, 1, 16); actx.fillStyle = '#4ac7b8'; actx.fillRect(5, 5, 2, 2); actx.fillRect(9, 9, 2, 2); actx.fillStyle = '#7ff5e8'; actx.fillRect(5, 5, 1, 1); actx.fillRect(9, 9, 1, 1); });
+paintTile(T.ender_chest_side, () => { noiseTile(['#1e1a2e', '#2a2240', '#161222', '#352a52'], 524); actx.fillStyle = '#0c0a14'; actx.fillRect(0, 0, 16, 1); actx.fillRect(0, 15, 16, 1); actx.fillRect(0, 0, 1, 16); actx.fillRect(15, 0, 1, 16); actx.fillStyle = '#5a4a8a'; actx.fillRect(0, 6, 16, 2); actx.fillStyle = '#7ff5e8'; actx.fillRect(4, 3, 1, 1); actx.fillRect(11, 11, 1, 1); actx.fillStyle = '#2ba99a'; actx.fillRect(10, 4, 1, 1); actx.fillRect(5, 12, 1, 1); });
+paintTile(T.ender_chest_front, () => { noiseTile(['#1e1a2e', '#2a2240', '#161222', '#352a52'], 525); actx.fillStyle = '#0c0a14'; actx.fillRect(0, 0, 16, 1); actx.fillRect(0, 15, 16, 1); actx.fillRect(0, 0, 1, 16); actx.fillRect(15, 0, 1, 16); actx.fillStyle = '#5a4a8a'; actx.fillRect(0, 6, 16, 2); actx.fillStyle = '#7ff5e8'; actx.fillRect(5, 4, 6, 5); actx.fillStyle = '#1a6a5e'; actx.fillRect(7, 4, 2, 5); actx.fillStyle = '#0a2a24'; actx.fillRect(7, 8, 2, 1); });
+
+/* --- DARK OAK LOG (winter trees) --- */
+paintTile(T.dark_oak_log_side, () => { noiseTile(['#3a2818', '#2e1e10', '#46301c', '#241608'], 526); const rnd = mulberry32(527); for (let x = 0; x < 16; x++) { if (rnd() < 0.35) { actx.fillStyle = '#1c120a'; actx.fillRect(x, 0, 1, 16); } } actx.fillStyle = '#1a1008'; actx.fillRect(0, 0, 16, 1); actx.fillRect(0, 15, 16, 1); });
+paintTile(T.dark_oak_log_top, () => { actx.fillStyle = '#4a3422'; actx.fillRect(0, 0, 16, 16); const shades = ['#3a2818', '#2e1e10', '#5a4228']; for (let r = 0; r < 7; r++) { actx.fillStyle = shades[r % 3]; const s = r * 1.1; actx.fillRect(Math.round(s), Math.round(s), Math.round(16 - 2 * s), 1); actx.fillRect(Math.round(s), Math.round(s), 1, Math.round(16 - 2 * s)); actx.fillRect(Math.round(16 - s - 1), Math.round(s), 1, Math.round(16 - 2 * s)); actx.fillRect(Math.round(s), Math.round(16 - s - 1), Math.round(16 - 2 * s), 1); } actx.fillStyle = '#1a1008'; actx.fillRect(0, 0, 16, 1); actx.fillRect(0, 15, 16, 1); actx.fillRect(0, 0, 1, 16); actx.fillRect(15, 0, 1, 16); });
 
 /* Fireball icon */
 paintTile(T.fireball, () => { const cx = 8, cy = 8, R = 6.5; for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const d = Math.hypot(x + 0.5 - cx, y + 0.5 - cy); if (d > R) continue; const t = d / R; let r, g, b; if (t < 0.35) { r = 255; g = 250; b = 180; } else if (t < 0.65) { r = 255; g = 180; b = 60; } else if (t < 0.9) { r = 240; g = 90; b = 20; } else { r = 160; g = 40; b = 10; } actx.fillStyle = `rgba(${r},${g},${b},1)`; actx.fillRect(x, y, 1, 1); } actx.fillStyle = '#fffff0'; actx.fillRect(5, 5, 2, 2); });
@@ -474,7 +504,7 @@ ARMOR_TIERS.forEach((tier, ti) => { ARMOR_PIECES.forEach((piece, pi) => { const 
 const atlasTex = new THREE.CanvasTexture(acv); atlasTex.magFilter = THREE.NearestFilter; atlasTex.minFilter = THREE.NearestFilter; atlasTex.generateMipmaps = false; atlasTex.colorSpace = THREE.SRGBColorSpace;
 const atlasURL = acv.toDataURL();
 function tileUV(t) { const col = t % TPR, row = Math.floor(t / TPR); const e = 0.5 / ATLAS; return [col / TPR + e, 1 - (row + 1) / TPR + e, (col + 1) / TPR - e, 1 - row / TPR - e]; }
-function applyBlockFaceUVs(geo, def) { const uvAttr = geo.attributes.uv; const t = def.tiles; const faceTiles = [t[2], t[2], t[0], t[1], t[2], t[2]]; for (let f = 0; f < 6; f++) { const tile = faceTiles[f]; const col = tile % TPR, row = Math.floor(tile / TPR); const u0 = col / TPR, u1 = (col + 1) / TPR; const v0 = 1 - (row + 1) / TPR, v1 = 1 - row / TPR; const corners = [[u0, v1], [u1, v1], [u0, v0], [u1, v0]]; for (let i = 0; i < 4; i++) uvAttr.setXY(f * 4 + i, corners[i][0], corners[i][1]); } uvAttr.needsUpdate = true; }
+function applyBlockFaceUVs(geo, def) { const uvAttr = geo.attributes.uv; const t = def.tiles; const faceTiles = [t[2], t[2], t[0], t[1], t[2], t[2]]; const e = 0.5 / ATLAS; for (let f = 0; f < 6; f++) { const tile = faceTiles[f]; const col = tile % TPR, row = Math.floor(tile / TPR); const u0 = col / TPR + e, u1 = (col + 1) / TPR - e; const v0 = 1 - (row + 1) / TPR + e, v1 = 1 - row / TPR - e; const corners = [[u0, v1], [u1, v1], [u0, v0], [u1, v0]]; for (let i = 0; i < 4; i++) uvAttr.setXY(f * 4 + i, corners[i][0], corners[i][1]); } uvAttr.needsUpdate = true; }
 
 /* ============================================================================
    3. BLOCKS & ITEMS
@@ -500,14 +530,14 @@ const BLOCKS = {
   18: { name: 'Iron Block', tiles: [T.iron_block, T.iron_block, T.iron_block], hard: 5, tool: 'pickaxe', need: true, blastRes: 6 },
   19: { name: 'End Stone', tiles: [T.endstone, T.endstone, T.endstone], hard: 3.0, tool: 'pickaxe', need: true, blastRes: 9 },
   20: { name: 'Gold Block', tiles: [T.gold_block, T.gold_block, T.gold_block], hard: 3.0, tool: 'pickaxe', need: true, blastRes: 6 },
-  21: { name: 'Vending Machine', tiles: [T.vending, T.vending, T.vending], hard: 2.0, tool: 'pickaxe', need: true, shop: true, blastRes: 6 },
+  21: { name: 'Vending Machine', tiles: [T.vending, T.vending, T.vending], hard: 2.0, tool: 'pickaxe', need: true, shop: true, blastRes: 1200, unbreakable: true },
   22: { name: 'Diamond Block', tiles: [T.diamond_block, T.diamond_block, T.diamond_block], hard: 5.0, tool: 'pickaxe', need: true, blastRes: 6 },
   23: { name: 'Emerald Block', tiles: [T.emerald_block, T.emerald_block, T.emerald_block], hard: 5.0, tool: 'pickaxe', need: true, blastRes: 6 },
   24: { name: 'TNT', tiles: [64, 66, 65], hard: 0.1, tnt: true, blastRes: 0 },
   25: { name: 'White Wool', tiles: [T.wool_white, T.wool_white, T.wool_white], hard: 0.8, tool: 'shears', blastRes: 0.8 },
   26: { name: 'Stained Clay', tiles: [T.stained_clay, T.stained_clay, T.stained_clay], hard: 1.5, tool: 'pickaxe', need: true, blastRes: 6 },
   28: { name: 'Ladder', tiles: [T.ladder, T.ladder, T.ladder], hard: 0.4, tool: 'axe', blastRes: 0.4, trans: true, ladder: true },
-  29: { name: 'Upgrade Machine', tiles: [T.upgrade_machine, T.upgrade_machine, T.upgrade_machine], hard: 2.0, tool: 'pickaxe', need: true, upgrade: true, blastRes: 6 },
+  29: { name: 'Upgrade Machine', tiles: [T.upgrade_machine, T.upgrade_machine, T.upgrade_machine], hard: 2.0, tool: 'pickaxe', need: true, upgrade: true, blastRes: 1200, unbreakable: true },
   30: { name: 'Sandstone', tiles: [T.sandstone_top, T.sandstone_top, T.sandstone_side], hard: 0.8, tool: 'pickaxe', need: true, blastRes: 4 },
   31: { name: 'Cactus', tiles: [T.cactus_top, T.cactus_top, T.cactus_side], hard: 0.4, tool: 'axe', blastRes: 0.5, cactus: true },
   32: { name: 'Ice', tiles: [T.ice, T.ice, T.ice], hard: 0.5, tool: 'pickaxe', blastRes: 0.5, slippery: true, trans: true, alpha: true },
@@ -521,7 +551,10 @@ const BLOCKS = {
   40: { name: 'Marble', tiles: [T.marble, T.marble, T.marble], hard: 1.5, tool: 'pickaxe', need: true, blastRes: 6 },
   41: { name: 'Dark Oak Planks', tiles: [T.dark_planks, T.dark_planks, T.dark_planks], hard: 2.0, tool: 'axe', blastRes: 3 },
   42: { name: 'Spruce Planks', tiles: [T.spruce_planks, T.spruce_planks, T.spruce_planks], hard: 2.0, tool: 'axe', blastRes: 3 },
-  43: { name: 'Reinforced Glass', tiles: [T.glass, T.glass, T.glass], hard: 0.3, tool: 'pickaxe', blastRes: 1200, trans: true }
+  43: { name: 'Reinforced Glass', tiles: [T.glass, T.glass, T.glass], hard: 0.3, tool: 'pickaxe', blastRes: 1200, trans: true },
+  44: { name: 'Chest', tiles: [T.chest_top, T.chest_top, T.chest_side], hard: 2.5, tool: 'axe', blastRes: 1200, chest: true, chestType: 'normal', unbreakable: true },
+  45: { name: 'Ender Chest', tiles: [T.ender_chest_top, T.ender_chest_top, T.ender_chest_side], hard: 2.5, tool: 'axe', blastRes: 1200, chest: true, chestType: 'ender', unbreakable: true },
+  46: { name: 'Dark Oak Log', tiles: [T.dark_oak_log_top, T.dark_oak_log_top, T.dark_oak_log_side], hard: 2.0, tool: 'axe', blastRes: 2 }
 };
 const SPEC_BY_BLOCK = { 17: 0.34, 18: 0.92, 20: 0.95, 22: 0.86, 23: 0.86, 21: 0.45, 29: 0.50, 28: 0.30, 43: 0.30, 40: 0.18, 38: 0.30, 34: 0.40 };
 const TOOL_SPEED = { wood: 2, copper: 3, stone: 4, iron: 6, diamond: 8, netherite: 9, gold: 12 };
@@ -570,7 +603,7 @@ ITEMS['ender_pearl'] = { id: 'ender_pearl', name: 'Ender Pearl', tile: T.ender_p
 ARMOR_TIERS.forEach((tier, ti) => { ARMOR_PIECES.forEach((piece, pi) => { const id = tier.key + '_' + piece.key; ITEMS[id] = { id, name: tier.name + ' ' + piece.name, tile: ARMOR_TILE_BASE + ti * 4 + pi, stack: 1, kind: 'armor', tier: tier.tier, tierName: tier.name, slot: piece.key, slotName: piece.name, armorPoints: tier.pts[piece.key], toughness: tier.tough }; }); });
 
 /* ============================================================================
-   4. RENDERER / SCENE  (direct render — no post-process chain)
+   4. RENDERER / SCENE  (direct render - no post-process chain)
    ========================================================================== */
 const scene = new THREE.Scene();
 const SKY_HORIZON = 0xc4dbf0;
@@ -671,15 +704,17 @@ scene.environment = buildEnvMap(renderer);
    6. CHUNK MESHING & WORLD STORAGE
    ========================================================================== */
 const previewContainer = document.getElementById('invPreview');
+const INV_PREVIEW_W = 160, INV_PREVIEW_H = 220;
 const invPreviewRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-invPreviewRenderer.setPixelRatio(1.5); invPreviewRenderer.setSize(130, 170);
+invPreviewRenderer.setPixelRatio(1.5); invPreviewRenderer.setSize(INV_PREVIEW_W, INV_PREVIEW_H);
 invPreviewRenderer.outputColorSpace = THREE.SRGBColorSpace;
 invPreviewRenderer.toneMapping = THREE.ACESFilmicToneMapping; invPreviewRenderer.toneMappingExposure = 1.05;
-invPreviewRenderer.domElement.style.width = '130px'; invPreviewRenderer.domElement.style.height = '170px';
+invPreviewRenderer.domElement.style.width = INV_PREVIEW_W + 'px'; invPreviewRenderer.domElement.style.height = INV_PREVIEW_H + 'px';
 previewContainer.appendChild(invPreviewRenderer.domElement);
 const invPreviewScene = new THREE.Scene();
-const invPreviewCamera = new THREE.PerspectiveCamera(38, 130 / 170, 0.1, 10);
-invPreviewCamera.position.set(0, 1.15, 2.1); invPreviewCamera.lookAt(0, 1.0, 0);
+/* Wide enough to fit the whole 1.8-block-tall model with a little headroom. */
+const invPreviewCamera = new THREE.PerspectiveCamera(36, INV_PREVIEW_W / INV_PREVIEW_H, 0.1, 10);
+invPreviewCamera.position.set(0, 0.95, 3.35); invPreviewCamera.lookAt(0, 0.95, 0);
 invPreviewScene.add(new THREE.AmbientLight(0xffffff, 0.85));
 const invPreviewLight = new THREE.DirectionalLight(0xffffff, 0.75); invPreviewLight.position.set(1.2, 2.2, 1.5); invPreviewScene.add(invPreviewLight);
 const invPreviewLight2 = new THREE.DirectionalLight(0xffffff, 0.35); invPreviewLight2.position.set(-1, 0.4, -1); invPreviewScene.add(invPreviewLight2);
@@ -725,6 +760,65 @@ blockMat.onBeforeCompile = (shader) => {
 };
 const chunkMeshes = new Map();
 const bedMeshes = new Map();
+const chestMeshes = new Map();
+const chestMat = new THREE.MeshStandardMaterial({ map: atlasTex, alphaTest: 0.5, roughness: 0.82, metalness: 0.10, envMapIntensity: 0.45 });
+function makeChestPlate(w, h, tile) {
+  const geo = new THREE.PlaneGeometry(w, h);
+  const uv = geo.attributes.uv; const col = tile % TPR, row = Math.floor(tile / TPR);
+  const e = 0.5 / ATLAS;
+  uv.setXY(0, col / TPR + e, 1 - (row + 1) / TPR + e); uv.setXY(1, (col + 1) / TPR - e, 1 - (row + 1) / TPR + e);
+  uv.setXY(2, col / TPR + e, 1 - row / TPR - e); uv.setXY(3, (col + 1) / TPR - e, 1 - row / TPR - e);
+  uv.needsUpdate = true;
+  return new THREE.Mesh(geo, chestMat);
+}
+function makeTexturedBox(w, h, d, def) {
+  const geo = new THREE.BoxGeometry(w, h, d);
+  applyBlockFaceUVs(geo, def);
+  const m = new THREE.Mesh(geo, chestMat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function chestFacingAngle(x, z) {
+  for (const t of TEAMS) {
+    if (Math.abs(x - t.x) <= 10 && Math.abs(z - t.z) <= 10) return -Math.sign(t.x) * Math.PI / 2;
+  }
+  return 0;
+}
+function makeChestMesh(blockId, x, z) {
+  const def = BLOCKS[blockId];
+  const g = new THREE.Group();
+  const body = makeTexturedBox(0.94, 0.58, 0.94, def);
+  body.position.set(0, 0.29, 0); g.add(body);
+  const lidPivot = new THREE.Group();
+  lidPivot.position.set(0, 0.58, -0.47);
+  const lid = makeTexturedBox(0.94, 0.36, 0.94, def);
+  lid.position.set(0, 0.18, 0.47);
+  lidPivot.add(lid);
+  g.add(lidPivot);
+  const frontTile = def.chestType === 'ender' ? T.ender_chest_front : T.chest_front;
+  const plate = makeChestPlate(0.72, 0.38, frontTile);
+  plate.position.set(0, 0.30, 0.472); g.add(plate);
+  const latch = makeBox(0.17, 0.15, 0.035, def.chestType === 'ender' ? 0x7ff5e8 : 0x9a9a9a);
+  latch.position.set(0, 0.45, 0.492); g.add(latch);
+  if (def.chestType === 'ender') {
+    const gem = makeBox(0.22, 0.06, 0.02, 0x2ba99a);
+    gem.position.set(0, 0.66, 0.49); g.add(gem);
+  }
+  g.rotation.y = chestFacingAngle(x, z);
+  g.userData.lid = lidPivot;
+  g.userData.openTarget = 0;
+  g.userData.chestType = def.chestType;
+  return g;
+}
+function updateChestAnimations(dt) {
+  const k = Math.min(1, dt * 14);
+  for (const mesh of chestMeshes.values()) {
+    const lid = mesh.userData.lid;
+    if (!lid) continue;
+    const target = (mesh.userData.openTarget || 0) * -1.25;
+    lid.rotation.x += (target - lid.rotation.x) * k;
+  }
+}
 function makeBedMesh(blockId) {
   const def = BLOCKS[blockId];
   const team = TEAMS.find(t => t.name === def.bed);
@@ -748,13 +842,21 @@ function buildChunk(cx, cz) {
     const [bx, , bz] = key.split(',').map(Number);
     if (Math.floor(bx / CH) === cx && Math.floor(bz / CH) === cz) { scene.remove(mesh); bedMeshes.delete(key); }
   }
+  for (const [key, mesh] of [...chestMeshes]) {
+    const [bx, , bz] = key.split(',').map(Number);
+    if (Math.floor(bx / CH) === cx && Math.floor(bz / CH) === cz) {
+      scene.remove(mesh);
+      mesh.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
+      chestMeshes.delete(key);
+    }
+  }
   const positions = []; const normals = []; const colors = []; const uvs = []; const indices = []; const specs = []; let vc = 0;
   const x0 = cx * CH; const z0 = cz * CH;
   for (let x = x0; x < x0 + CH; x++) {
     for (let z = z0; z < z0 + CH; z++) {
       for (let y = 0; y < WORLD_H; y++) {
         const id = getBlock(x, y, z); if (!id) continue;
-        const def = BLOCKS[id]; if (!def || def.bed) continue;
+        const def = BLOCKS[id]; if (!def || def.bed || def.chest) continue;
         const specVal = SPEC_BY_BLOCK[id] || 0;
         if (def.ladder) {
           const nN = getBlock(x, y, z - 1), nS = getBlock(x, y, z + 1), nW = getBlock(x - 1, y, z), nE = getBlock(x + 1, y, z);
@@ -778,6 +880,7 @@ function buildChunk(cx, cz) {
             const ndef = BLOCKS[nid];
             if (!ndef) continue;
             if (ndef.bed) { }
+            else if (ndef.chest) { }
             else if (ndef.trans && ndef === def) continue;
             else if (!ndef.trans) continue;
           }
@@ -839,6 +942,15 @@ function buildChunk(cx, cz) {
     scene.add(mesh);
     bedMeshes.set(x + ',' + y + ',' + z, mesh);
   }
+  for (let x = x0; x < x0 + CH; x++) for (let z = z0; z < z0 + CH; z++) for (let y = 0; y < WORLD_H; y++) {
+    const id = getBlock(x, y, z);
+    const cdef = id ? BLOCKS[id] : null;
+    if (!cdef || !cdef.chest) continue;
+    const mesh = makeChestMesh(id, x, z);
+    mesh.position.set(x + 0.5, y, z + 0.5);
+    scene.add(mesh);
+    chestMeshes.set(x + ',' + y + ',' + z, mesh);
+  }
 }
 function processDirty(maxN) { let n = 0; for (const key of dirty) { if (n >= maxN) break; const [cx, cz] = key.split(',').map(Number); buildChunk(cx, cz); dirty.delete(key); n++; } }
 
@@ -846,10 +958,10 @@ function processDirty(maxN) { let n = 0; for (const key of dirty) { if (n >= max
    7. TEAMS & WORLD GENERATION  (MULTI-MAP)
    ========================================================================== */
 const TEAMS = [
-  { name: 'Red', bed: 13, wool: 9, x: -30, z: -30, hex: 0xb02e26 },
-  { name: 'Blue', bed: 14, wool: 10, x: 30, z: -30, hex: 0x3c44aa },
-  { name: 'Green', bed: 15, wool: 11, x: -30, z: 30, hex: 0x5e7c16 },
-  { name: 'Yellow', bed: 16, wool: 12, x: 30, z: 30, hex: 0xfed83d }
+  { name: 'Red', bed: 13, wool: 9, x: -36, z: -36, hex: 0xb02e26 },
+  { name: 'Blue', bed: 14, wool: 10, x: 36, z: -36, hex: 0x3c44aa },
+  { name: 'Green', bed: 15, wool: 11, x: -36, z: 36, hex: 0x5e7c16 },
+  { name: 'Yellow', bed: 16, wool: 12, x: 36, z: 36, hex: 0xfed83d }
 ];
 let PLAYER_TEAM = TEAMS[0];
 const teamBedBroken = {}; for (const t of TEAMS) teamBedBroken[t.name] = false;
@@ -857,13 +969,41 @@ const teamUpgrades = {}; for (const t of TEAMS) teamUpgrades[t.name] = { sharpne
 let generators = [];
 
 const MAP_OPTIONS = [
-  { key: 'standard', name: 'Classic', desc: 'Balanced four-corner islands' },
-  { key: 'arena', name: 'Arena', desc: 'Coliseum with all gens in center' },
-  { key: 'jungle', name: 'Jungle', desc: 'Giant central tree · far islands' },
-  { key: 'desert', name: 'Desert', desc: 'Pyramid with emerald gens inside' },
-  { key: 'winter', name: 'Winter', desc: 'Igloo bases · slippery ice' }
+  { key: 'standard', name: 'Classic', desc: 'Marble acropolis · four corner keeps' },
+  { key: 'jungle', name: 'Jungle', desc: 'Giant central tree · overgrown keeps' },
+  { key: 'desert', name: 'Desert', desc: 'Step pyramid · open-air emerald summit' },
+  { key: 'winter', name: 'Winter', desc: 'Frozen keep · snowbound bases' }
 ];
 let currentMapKey = 'standard';
+
+/* Every map follows the same three-part layout:
+   one large main island, four diamond sub-islands, four team base islands.
+   The main island has twice the radius of a base island, so its area is 4x. */
+const MAIN_R = 19, BASE_R = 9, SUB_R = 6;
+const SUB_SPOTS = [[26, 0], [-26, 0], [0, 26], [0, -26]];
+
+const BASE_THEMES = {
+  standard: {
+    surf: 1, sub: 2, floor: 40, trim: 38, wall: 38, wallAccent: 4, post: 6,
+    roof: 41, roofAccent: 25, window: 43, lamp: 20, bedFloor: 40, bedTrim: 38, bedPost: 6,
+    ironBase: 18, goldBase: 20
+  },
+  jungle: {
+    surf: 1, sub: 2, floor: 39, trim: 35, wall: 37, wallAccent: 35, post: 35,
+    roof: 36, roofAccent: 11, window: 43, lamp: 23, bedFloor: 39, bedTrim: 35, bedPost: 35,
+    ironBase: 18, goldBase: 20
+  },
+  desert: {
+    surf: 5, sub: 30, floor: 30, trim: 26, wall: 30, wallAccent: 26, post: 30,
+    roof: 30, roofAccent: 12, window: 43, lamp: 20, bedFloor: 30, bedTrim: 26, bedPost: 30,
+    ironBase: 18, goldBase: 20
+  },
+  winter: {
+    surf: 33, sub: 34, floor: 33, trim: 42, wall: 33, wallAccent: 38, post: 42,
+    roof: 34, roofAccent: 25, window: 32, lamp: 20, bedFloor: 33, bedTrim: 34, bedPost: 42,
+    ironBase: 18, goldBase: 20
+  }
+};
 
 function makeIsland(cx, cz, R, surfId, subId) {
   for (let dx = -R; dx <= R; dx++) for (let dz = -R; dz <= R; dz++) {
@@ -894,161 +1034,367 @@ function makeFlagPole(cx, cy, cz, team) {
   setBlock(cx + 1, cy + 4, cz, woolId); setBlock(cx + 2, cy + 4, cz, woolId);
   setBlock(cx + 1, cy + 3, cz, woolId); setBlock(cx + 2, cy + 3, cz, woolId); setBlock(cx + 3, cy + 3, cz, woolId);
 }
-
-function placeTeamBase(team, opts) {
-  opts = opts || {};
-  const floorId = opts.floorId || 1;
-  setBlock(team.x + 3, BASE_Y + 1, team.z, team.bed);
-  setBlock(team.x + 3, BASE_Y + 1, team.z + 1, team.bed);
-  const vx = team.x - 3, vz = team.z + 3;
-  setBlock(vx, BASE_Y + 1, vz, 21);
-  team.shopPos = { x: vx + 0.5, z: vz + 0.5 };
-  const ux = team.x - 5, uz = team.z + 3;
-  setBlock(ux, BASE_Y + 1, uz, 29);
-  team.upgradePos = { x: ux + 0.5, z: uz + 0.5 };
-  setBlock(team.x + 5, BASE_Y, team.z - 2, 18);
-  generators.push(makeGen(new THREE.Vector3(team.x + 5.5, BASE_Y + 1, team.z - 1.5), 'iron', 1.5));
-  setBlock(team.x + 4, BASE_Y, team.z + 5, 20);
-  generators.push(makeGen(new THREE.Vector3(team.x + 4.5, BASE_Y + 1, team.z + 5.5), 'gold', 4.0));
-  makeFlagPole(team.x - 2, BASE_Y + 1, team.z - 2, team);
+function makePath(x1, z1, x2, z2, id, halfW) {
+  const steps = Math.max(Math.abs(x2 - x1), Math.abs(z2 - z1));
+  const w = halfW || 0;
+  for (let i = 0; i <= steps; i++) {
+    const t = steps ? i / steps : 0;
+    const x = Math.round(x1 + (x2 - x1) * t), z = Math.round(z1 + (z2 - z1) * t);
+    for (let ox = -w; ox <= w; ox++) for (let oz = -w; oz <= w; oz++) {
+      if (ox * ox + oz * oz > w * w + 0.1) continue;
+      if (getBlock(x + ox, BASE_Y, z + oz)) setBlock(x + ox, BASE_Y, z + oz, id);
+    }
+  }
+}
+function scatterSurface(cx, cz, R, fromId, toId, count, seed) {
+  const rnd = mulberry32(seed);
+  for (let i = 0; i < count; i++) {
+    const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * R;
+    const x = Math.round(cx + Math.cos(a) * r), z = Math.round(cz + Math.sin(a) * r);
+    if (getBlock(x, BASE_Y, z) === fromId) setBlock(x, BASE_Y, z, toId);
+  }
+}
+function makeLampPost(x, z, postId, lampId, h) {
+  if (!getBlock(x, BASE_Y, z)) setBlock(x, BASE_Y, z, 4);
+  for (let i = 1; i <= h; i++) setBlock(x, BASE_Y + i, z, postId);
+  setBlock(x, BASE_Y + h + 1, z, lampId);
+}
+function clearGenSpace(gen) {
+  const bx = Math.floor(gen.pos.x), bz = Math.floor(gen.pos.z), by = Math.floor(gen.pos.y);
+  for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (let dy = 0; dy <= 5; dy++) {
+    if (dx === 0 && dz === 0 && dy === 0) continue;
+    setBlock(bx + dx, by + dy, bz + dz, 0);
+  }
+  if (!getBlock(bx, by - 1, bz)) setBlock(bx, by - 1, bz, 3);
 }
 
-/* ==================== MAP: STANDARD ==================== */
+/* ------------------------------------------------------------------ */
+/*  THEMED BASE KEEP                                                   */
+/* ------------------------------------------------------------------ */
+function buildBaseTower(team, key) {
+  const cfg = BASE_THEMES[key];
+  const sx = Math.sign(team.x) || 1, sz = Math.sign(team.z) || 1;
+  const bx = team.x + sx * 2, bz = team.z + sz * 2;
+  const y0 = BASE_Y, y1 = BASE_Y + 1;
+
+  /* The base island itself, then the keep on top of it. */
+  makeIsland(team.x, team.z, BASE_R, cfg.surf, cfg.sub);
+
+  /* Clear the shell volume so trees/rocks never clip into the keep. */
+  for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) {
+    for (let y = y1; y <= BASE_Y + 10; y++) setBlock(bx + dx, y, bz + dz, 0);
+  }
+
+  /* Floor + theme border. */
+  for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) {
+    const edge = Math.abs(dx) === 4 || Math.abs(dz) === 4;
+    setBlock(bx + dx, y0, bz + dz, edge ? cfg.trim : cfg.floor);
+  }
+  /* Team-coloured runner from the door to the generator atrium. */
+  for (let d = -3; d <= 1; d++) {
+    setBlock(bx + d * sx, y0, bz, team.wool);
+    setBlock(bx + d * sx, y0, bz + 1, team.wool);
+  }
+
+  /* Walls, corner posts and lintel band. */
+  for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) {
+    if (!(Math.abs(dx) === 4 || Math.abs(dz) === 4)) continue;
+    const corner = Math.abs(dx) === 4 && Math.abs(dz) === 4;
+    for (let h = 1; h <= 4; h++) {
+      let id = cfg.wall;
+      if (h === 4) id = cfg.wallAccent;
+      if (corner) id = cfg.post;
+      setBlock(bx + dx, y0 + h, bz + dz, id);
+    }
+  }
+  for (const dx of [-4, 4]) for (const dz of [-4, 4]) {
+    for (let h = 1; h <= 5; h++) setBlock(bx + dx, y0 + h, bz + dz, cfg.post);
+  }
+
+  /* Main entrance faces the centre of the map. */
+  const doorX = bx - sx * 4;
+  for (let dz = -1; dz <= 1; dz++) for (let h = 1; h <= 3; h++) setBlock(doorX, y0 + h, bz + dz, 0);
+  setBlock(doorX, y0 + 1, bz - 2, cfg.trim);
+  setBlock(doorX, y0 + 2, bz - 2, cfg.trim);
+  setBlock(doorX, y0 + 1, bz + 2, cfg.trim);
+  setBlock(doorX, y0 + 2, bz + 2, cfg.trim);
+
+  /* Windows on the other three walls. */
+  const backX = bx + sx * 4;
+  for (let dz = -1; dz <= 1; dz++) for (let h = 2; h <= 3; h++) setBlock(backX, y0 + h, bz + dz, cfg.window);
+  for (let dx = -1; dx <= 1; dx++) for (let h = 2; h <= 3; h++) {
+    setBlock(bx + dx, y0 + h, bz + sz * 4, cfg.window);
+    setBlock(bx + dx, y0 + h, bz - sz * 4, cfg.window);
+  }
+
+  /* Walkable roof ring with a large open skylight above the generators. */
+  for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) {
+    if (Math.abs(dx) >= 3 || Math.abs(dz) >= 3) setBlock(bx + dx, BASE_Y + 5, bz + dz, cfg.roof);
+  }
+  for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) {
+    if (!(Math.abs(dx) === 4 || Math.abs(dz) === 4)) continue;
+    if (((dx + dz) & 1) === 0) setBlock(bx + dx, BASE_Y + 6, bz + dz, cfg.roofAccent);
+  }
+  for (const dx of [-4, 4]) for (const dz of [-4, 4]) {
+    setBlock(bx + dx, BASE_Y + 6, bz + dz, cfg.trim);
+    setBlock(bx + dx, BASE_Y + 7, bz + dz, cfg.lamp);
+  }
+
+  /* Interior wall lamps. */
+  setBlock(bx - sx * 4, y0 + 3, bz - 2, cfg.lamp);
+  setBlock(bx - sx * 4, y0 + 3, bz + 2, cfg.lamp);
+
+  /* Vending machine (left) and upgrade machine (right) of the main door. */
+  const leftZ = bz - sx * 3;
+  const rightZ = bz + sx * 3;
+  setBlock(bx, y1, leftZ, 21);
+  setBlock(bx, y1, rightZ, 29);
+  team.shopPos = { x: bx + 0.5, z: leftZ + 0.5 };
+  team.upgradePos = { x: bx + 0.5, z: rightZ + 0.5 };
+
+  /* Iron and gold generators, side by side in the open atrium. */
+  setBlock(bx - 1, y0, bz + 1, cfg.ironBase);
+  generators.push(makeGen(new THREE.Vector3(bx - 0.5, y1, bz + 1.5), 'iron', 1.5));
+  setBlock(bx + 1, y0, bz + 1, cfg.goldBase);
+  generators.push(makeGen(new THREE.Vector3(bx + 1.5, y1, bz + 1.5), 'gold', 4.0));
+
+  /* Normal chest + ender chest against the outer wall. */
+  setBlock(bx + sx * 3, y1, bz - 2, 44);
+  setBlock(bx + sx * 3, y1, bz + 2, 45);
+  /* Small shelf accents beside the storage. */
+  setBlock(bx + sx * 3, y1, bz - 3, cfg.trim);
+  setBlock(bx + sx * 3, y1, bz + 3, cfg.trim);
+
+  /* Theme flavour on the keep itself. */
+  if (key === 'standard') {
+    for (const dz of [-2, 2]) setBlock(doorX, y1 + 3, bz + dz, 25);
+    setBlock(backX, y1 + 2, bz, team.wool);
+    setBlock(backX, y1 + 3, bz, team.wool);
+  } else if (key === 'jungle') {
+    for (let dx = -4; dx <= 4; dx += 2) {
+      setBlock(bx + dx, BASE_Y + 6, bz - 4, 36);
+      setBlock(bx + dx, BASE_Y + 6, bz + 4, 36);
+    }
+    for (let dz = -4; dz <= 4; dz += 2) {
+      setBlock(bx - 4, BASE_Y + 6, bz + dz, 36);
+      setBlock(bx + 4, BASE_Y + 6, bz + dz, 36);
+    }
+    setBlock(doorX, y1, bz - 2, 35); setBlock(doorX, y1 + 2, bz - 2, 36);
+    setBlock(doorX, y1, bz + 2, 35); setBlock(doorX, y1 + 2, bz + 2, 36);
+  } else if (key === 'desert') {
+    for (let dx = -4; dx <= 4; dx++) {
+      if (Math.abs(dx) < 3) continue;
+      setBlock(bx + dx, BASE_Y + 5, bz - 4, 26);
+      setBlock(bx + dx, BASE_Y + 5, bz + 4, 26);
+    }
+    setBlock(backX, y1 + 3, bz, 12);
+  } else if (key === 'winter') {
+    for (const dx of [-3, 3]) for (const dz of [-3, 3]) setBlock(bx + dx, BASE_Y + 5, bz + dz, 32);
+    setBlock(backX, y1 + 2, bz, 32); setBlock(backX, y1 + 3, bz, 32);
+    setBlock(doorX, y1 + 3, bz, 25);
+  }
+
+  placeBedArea(team, cfg);
+  decorateBase(team, key, cfg);
+}
+
+function placeBedArea(team, cfg) {
+  const sx = Math.sign(team.x) || 1, sz = Math.sign(team.z) || 1;
+  const bedX = team.x - sx * 4, bedZ = team.z - sz * 4;
+  const y0 = BASE_Y;
+
+  for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) {
+    const x = bedX + dx, z = bedZ + dz;
+    if (!getBlock(x, y0, z)) continue;
+    const edge = Math.abs(dx) === 2 || Math.abs(dz) === 2;
+    setBlock(x, y0, z, edge ? cfg.bedTrim : cfg.bedFloor);
+  }
+  for (let dx = -1; dx <= 1; dx++) for (let dz = 0; dz <= 1; dz++) setBlock(bedX + dx, y0, bedZ + dz, team.wool);
+
+  /* The bed is outside the keep and open to the sky. */
+  setBlock(bedX, y0 + 1, bedZ, team.bed);
+  setBlock(bedX, y0 + 1, bedZ + 1, team.bed);
+  /* Wool headboard behind the pillow, never above the bed. */
+  setBlock(bedX, y0 + 1, bedZ + 2, team.wool);
+  setBlock(bedX, y0 + 2, bedZ + 2, team.wool);
+  setBlock(bedX, y0 + 3, bedZ + 2, cfg.lamp);
+
+  /* Four open posts with lamps frame the bed without roofing it. */
+  for (const dx of [-2, 2]) for (const dz of [-2, 2]) {
+    const x = bedX + dx, z = bedZ + dz;
+    if (!getBlock(x, y0, z)) continue;
+    if (getBlock(x, y0 + 1, z)) continue;
+    for (let h = 1; h <= 2; h++) setBlock(x, y0 + h, z, cfg.bedPost);
+    setBlock(x, y0 + 3, z, cfg.lamp);
+    setBlock(x, y0 + 2, z, team.wool);
+  }
+
+  team.bedPos = { x: bedX, z: bedZ };
+  team.spawnX = bedX + 0.5;
+  team.spawnZ = bedZ - 1.5;
+}
+
+function decorateBase(team, key, cfg) {
+  const sx = Math.sign(team.x) || 1, sz = Math.sign(team.z) || 1;
+  const spots = [
+    [team.x - sx * 5, team.z + sz * 6],
+    [team.x + sx * 6, team.z - sz * 5],
+    [team.x - sx * 7, team.z - sz * 1],
+    [team.x + sx * 7, team.z + sz * 2]
+  ];
+  /* Path from the bed terrace to the keep doorway. */
+  makePath(team.x - sx * 4, team.z - sz * 4, team.x - sx * 2, team.z + sz * 2, cfg.trim, 0);
+
+  if (key === 'standard') {
+    makeTree(spots[0][0], BASE_Y + 1, spots[0][1], { height: 4 });
+    makeTree(spots[1][0], BASE_Y + 1, spots[1][1], { height: 4 });
+    makeTree(spots[2][0], BASE_Y + 1, spots[2][1], { height: 3, spread: 1 });
+    makeFlagPole(team.x - sx * 3, BASE_Y + 1, team.z + sz * 7, team);
+    makeLampPost(spots[3][0], spots[3][1], 6, 20, 3);
+    scatterSurface(team.x, team.z, BASE_R - 1, 1, 25, 10, 1000 + team.x);
+    scatterSurface(team.x, team.z, BASE_R - 1, 1, team.wool, 10, 2000 + team.z);
+  } else if (key === 'jungle') {
+    makeTree(spots[0][0], BASE_Y + 1, spots[0][1], { logId: 35, leafId: 36, height: 5 });
+    makeTree(spots[1][0], BASE_Y + 1, spots[1][1], { logId: 35, leafId: 36, height: 4 });
+    makeTree(spots[2][0], BASE_Y + 1, spots[2][1], { logId: 35, leafId: 36, height: 3, spread: 1 });
+    makeTree(spots[3][0], BASE_Y + 1, spots[3][1], { logId: 35, leafId: 36, height: 4 });
+    for (let i = 0; i < 24; i++) {
+      const a = (i / 24) * Math.PI * 2, r = BASE_R - 1.2;
+      const x = Math.round(team.x + Math.cos(a) * r), z = Math.round(team.z + Math.sin(a) * r);
+      if (getBlock(x, BASE_Y, z) === 1) setBlock(x, BASE_Y, z, 39);
+    }
+    makeLampPost(team.x - sx * 7, team.z + sz * 4, 35, 23, 3);
+    scatterSurface(team.x, team.z, BASE_R - 1, 1, 39, 14, 2100 + team.x);
+  } else if (key === 'desert') {
+    for (const [x, z] of spots) {
+      if (getBlock(x, BASE_Y, z) !== 5) continue;
+      setBlock(x, BASE_Y + 1, z, 31);
+      if (Math.abs(x - team.x) + Math.abs(z - team.z) > 4) setBlock(x, BASE_Y + 2, z, 31);
+    }
+    /* Sandstone ruin pillars. */
+    for (const [x, z] of [spots[0], spots[1]]) {
+      for (let h = 1; h <= 3; h++) setBlock(x + 1, BASE_Y + h, z, h === 3 ? 12 : 30);
+    }
+    /* Dry fountain with team-coloured water. */
+    const fx = team.x - sx * 6, fz = team.z + sz * 3;
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+      if (Math.abs(dx) + Math.abs(dz) === 2) setBlock(fx + dx, BASE_Y, fz + dz, 30);
+      else setBlock(fx + dx, BASE_Y, fz + dz, team.wool);
+    }
+    setBlock(fx, BASE_Y + 1, fz, 30);
+    scatterSurface(team.x, team.z, BASE_R - 1, 5, 30, 16, 2200 + team.z);
+    scatterSurface(team.x, team.z, BASE_R - 1, 5, 26, 8, 2300 + team.x);
+  } else if (key === 'winter') {
+    makeTree(spots[0][0], BASE_Y + 1, spots[0][1], { logId: 46, leafId: 8, height: 5 });
+    makeTree(spots[1][0], BASE_Y + 1, spots[1][1], { logId: 46, leafId: 8, height: 4 });
+    makeTree(spots[2][0], BASE_Y + 1, spots[2][1], { logId: 46, leafId: 8, height: 4, spread: 1 });
+    /* Snowman. */
+    const mx = team.x + sx * 6, mz = team.z + sz * 5;
+    setBlock(mx, BASE_Y + 1, mz, 33); setBlock(mx, BASE_Y + 2, mz, 33);
+    setBlock(mx, BASE_Y + 3, mz, 25); setBlock(mx, BASE_Y + 3, mz + 1, 20);
+    /* Ice spikes — only the free spot, so they never overwrite a tree trunk. */
+    const spikeX = spots[3][0], spikeZ = spots[3][1];
+    for (let h = 1; h <= 3; h++) setBlock(spikeX, BASE_Y + h, spikeZ, h === 3 ? 32 : 34);
+    setBlock(spikeX, BASE_Y + 4, spikeZ, 33);
+    makeLampPost(team.x - sx * 5, team.z + sz * 7, 42, 20, 3);
+    scatterSurface(team.x, team.z, BASE_R - 1, 33, 34, 16, 2400 + team.x);
+    scatterSurface(team.x, team.z, BASE_R - 1, 33, 32, 10, 2500 + team.z);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  SUB ISLANDS (diamond generators)                                   */
+/* ------------------------------------------------------------------ */
+function buildSubIsland(key, mx, mz) {
+  const cfg = BASE_THEMES[key];
+  makeIsland(mx, mz, SUB_R, cfg.surf, cfg.sub);
+  setBlock(mx, BASE_Y, mz, 22);
+  generators.push(makeGen(new THREE.Vector3(mx + 0.5, BASE_Y + 1, mz + 0.5), 'diamond', 30.0));
+  /* Path to the main island. */
+  const dx = mx === 0 ? 0 : -Math.sign(mx), dz = mz === 0 ? 0 : -Math.sign(mz);
+  makePath(mx + dx * 4, mz + dz * 4, mx + dx * (SUB_R - 1), mz + dz * (SUB_R - 1), cfg.trim, 1);
+
+  if (key === 'standard') {
+    for (const px of [-3, 3]) for (const pz of [-3, 3]) {
+      for (let h = 1; h <= 3; h++) setBlock(mx + px, BASE_Y + h, mz + pz, 40);
+      setBlock(mx + px, BASE_Y + 4, mz + pz, 25);
+    }
+    for (let dx2 = -4; dx2 <= 4; dx2++) for (let dz2 = -4; dz2 <= 4; dz2++) {
+      if (Math.max(Math.abs(dx2), Math.abs(dz2)) === 4) setBlock(mx + dx2, BASE_Y, mz + dz2, 38);
+    }
+  } else if (key === 'jungle') {
+    for (const px of [-3, 3]) for (const pz of [-3, 3]) {
+      for (let h = 1; h <= 4; h++) setBlock(mx + px, BASE_Y + h, mz + pz, 35);
+      setBlock(mx + px, BASE_Y + 5, mz + pz, 36);
+    }
+    scatterSurface(mx, mz, SUB_R - 1, 1, 39, 10, 3100 + mx);
+  } else if (key === 'desert') {
+    for (const px of [-3, 3]) for (const pz of [-3, 3]) {
+      for (let h = 1; h <= 4; h++) setBlock(mx + px, BASE_Y + h, mz + pz, 30);
+      setBlock(mx + px, BASE_Y + 5, mz + pz, 12);
+    }
+    scatterSurface(mx, mz, SUB_R - 1, 5, 30, 10, 3200 + mz);
+  } else if (key === 'winter') {
+    for (const px of [-3, 3]) for (const pz of [-3, 3]) {
+      for (let h = 1; h <= 4; h++) setBlock(mx + px, BASE_Y + h, mz + pz, h === 4 ? 32 : 34);
+      setBlock(mx + px, BASE_Y + 5, mz + pz, 33);
+    }
+    scatterSurface(mx, mz, SUB_R - 1, 33, 32, 12, 3300 + mx);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  CLASSIC — marble acropolis                                         */
+/* ------------------------------------------------------------------ */
+function buildClassicTemple(cx, cz) {
+  const y0 = BASE_Y;
+  for (let dx = -6; dx <= 6; dx++) for (let dz = -6; dz <= 6; dz++) setBlock(cx + dx, y0, cz + dz, 40);
+  for (let dx = -5; dx <= 5; dx++) for (let dz = -5; dz <= 5; dz++) setBlock(cx + dx, y0 + 1, cz + dz, 38);
+  for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) setBlock(cx + dx, y0 + 2, cz + dz, 40);
+  for (const px of [-4, 4]) for (const pz of [-4, 4]) {
+    for (let h = 0; h < 5; h++) setBlock(cx + px, y0 + 3 + h, cz + pz, 38);
+    setBlock(cx + px, y0 + 2, cz + pz, 38);
+    setBlock(cx + px, y0 + 8, cz + pz, 40);
+  }
+  for (let dx = -5; dx <= 5; dx++) for (let dz = -5; dz <= 5; dz++) {
+    setBlock(cx + dx, y0 + 8, cz + dz, (Math.abs(dx) === 5 || Math.abs(dz) === 5) ? 38 : 40);
+  }
+  for (let dx = -3; dx <= 3; dx++) for (let dz = -3; dz <= 3; dz++) {
+    setBlock(cx + dx, y0 + 9, cz + dz, (Math.abs(dx) === 3 || Math.abs(dz) === 3) ? 38 : 25);
+  }
+  setBlock(cx, y0 + 10, cz, 20);
+  setBlock(cx, y0 + 11, cz, 20);
+  /* White banners on the outside of the temple. */
+  for (const pz of [-6, 6]) {
+    for (let h = 3; h <= 6; h += 3) setBlock(cx - 5, y0 + h, cz + pz, 25);
+    for (let h = 3; h <= 6; h += 3) setBlock(cx + 5, y0 + h, cz + pz, 25);
+  }
+}
+
 function generateStandard() {
-  for (const team of TEAMS) {
-    makeIsland(team.x, team.z, 9);
-    placeTeamBase(team);
-    makeTree(team.x - 6, BASE_Y + 1, team.z - 6);
-    makeTree(team.x + 6, BASE_Y + 1, team.z - 6);
-    makeTree(team.x - 6, BASE_Y + 1, team.z + 6);
+  const cfg = BASE_THEMES.standard;
+  makeIsland(0, 0, MAIN_R, cfg.surf, cfg.sub);
+  buildClassicTemple(0, 0);
+
+  makePath(7, 0, 17, 0, 38, 1); makePath(-7, 0, -17, 0, 38, 1);
+  makePath(0, 7, 0, 17, 38, 1); makePath(0, -7, 0, -17, 38, 1);
+  for (const [gx, gz] of [[9, 0], [-9, 0]]) {
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) setBlock(gx + dx, BASE_Y, gz + dz, 40);
+    setBlock(gx, BASE_Y, gz, 23);
+    generators.push(makeGen(new THREE.Vector3(gx + 0.5, BASE_Y + 1, gz + 0.5), 'emerald', 15.0));
   }
-  const diamondSpots = [[20, 0], [-20, 0], [0, 20], [0, -20]];
-  for (const [mx, mz] of diamondSpots) {
-    makeIsland(mx, mz, 5);
-    setBlock(mx, BASE_Y, mz, 22);
-    generators.push(makeGen(new THREE.Vector3(mx + 0.5, BASE_Y + 1, mz + 0.5), 'diamond', 30.0));
-  }
-  makeIsland(0, 0, 9);
-  buildLighthouse(0, 0);
-  setBlock(5, BASE_Y, 5, 23); setBlock(-5, BASE_Y, -5, 23);
-  generators.push(makeGen(new THREE.Vector3(5.5, BASE_Y + 1, 5.5), 'emerald', 15.0));
-  generators.push(makeGen(new THREE.Vector3(-4.5, BASE_Y + 1, -4.5), 'emerald', 15.0));
-}
-function buildLighthouse(cx, cz) {
-  const y0 = BASE_Y + 1; const WHITE = 25, RED = 9, COBBLE = 4, GOLD = 20, GLOW = 20;
-  for (let dx = -3; dx <= 3; dx++) for (let dz = -3; dz <= 3; dz++) { if (dx * dx + dz * dz > 10) continue; setBlock(cx + dx, y0 - 1, cz + dz, COBBLE); }
-  for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) { if (dx === 0 && dz === 0) continue; setBlock(cx + dx, y0, cz + dz, COBBLE); }
-  for (let ly = 1; ly < 12; ly++) { const col = (Math.floor(ly / 3) % 2 === 0) ? WHITE : RED; for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) { if (Math.abs(dx) !== 2 && Math.abs(dz) !== 2) continue; setBlock(cx + dx, y0 + ly, cz + dz, col); } }
-  for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) { if (Math.abs(dx) !== 2 && Math.abs(dz) !== 2) continue; setBlock(cx + dx, y0 + 12, cz + dz, WHITE); }
-  for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) setBlock(cx + dx, y0 + 12, cz + dz, WHITE);
-  for (let ly = 13; ly < 21; ly++) { const col = (Math.floor((ly - 13) / 3) % 2 === 0) ? WHITE : RED; for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) { if (dx === 0 && dz === 0) continue; setBlock(cx + dx, y0 + ly, cz + dz, col); } }
-  for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) { if (dx === 0 && dz === 0) continue; setBlock(cx + dx, y0 + 21, cz + dz, WHITE); }
-  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) setBlock(cx + dx, y0 + 22, cz + dz, WHITE);
-  setBlock(cx, y0 + 21, cz, GOLD); setBlock(cx, y0 + 22, cz, GOLD);
-  setBlock(cx, y0 + 21, cz - 2, GLOW); setBlock(cx, y0 + 21, cz + 2, GLOW);
-  setBlock(cx + 2, y0 + 21, cz, GLOW); setBlock(cx - 2, y0 + 21, cz, GLOW);
-  for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) { if (Math.abs(dx) === 2 && Math.abs(dz) === 2) continue; setBlock(cx + dx, y0 + 23, cz + dz, RED); }
-  for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) setBlock(cx + dx, y0 + 24, cz + dz, WHITE);
-  setBlock(cx, y0 + 25, cz, RED);
+  for (const [tx, tz] of [[13, 11], [-13, 11], [13, -11], [-13, -11]]) makeTree(tx, BASE_Y + 1, tz, { height: 4 });
+  for (const [lx, lz] of [[14, 0], [-14, 0], [0, 14], [0, -14]]) makeLampPost(lx, lz, 6, 20, 3);
+  scatterSurface(0, 0, MAIN_R - 1, 1, 25, 24, 4100);
+  scatterSurface(0, 0, MAIN_R - 1, 1, 40, 20, 4200);
+
+  for (const [mx, mz] of SUB_SPOTS) buildSubIsland('standard', mx, mz);
+  for (const team of TEAMS) buildBaseTower(team, 'standard');
 }
 
-/* ==================== MAP: ARENA ==================== */
-function generateArena() {
-  for (const team of TEAMS) {
-    makeIsland(team.x, team.z, 7, 3, 3);
-    placeTeamBase(team, { floorId: 3 });
-    makeTree(team.x - 5, BASE_Y + 1, team.z - 5);
-    makeTree(team.x + 5, BASE_Y + 1, team.z - 5);
-  }
-  buildArenaColiseum(0, 0);
-  const diaAngles = [0.25, 0.75, 1.25, 1.75];
-  for (let i = 0; i < diaAngles.length; i++) {
-    const a = diaAngles[i] * Math.PI;
-    const r = 6.5;
-    const gx = Math.round(Math.cos(a) * r), gz = Math.round(Math.sin(a) * r);
-    setBlock(gx, BASE_Y, gz, 22);
-    generators.push(makeGen(new THREE.Vector3(gx + 0.5, BASE_Y + 1, gz + 0.5), 'diamond', 30.0));
-  }
-  setBlock(1, BASE_Y, 1, 23); setBlock(-1, BASE_Y, -1, 23);
-  generators.push(makeGen(new THREE.Vector3(1.5, BASE_Y + 1, 1.5), 'emerald', 15.0));
-  generators.push(makeGen(new THREE.Vector3(-0.5, BASE_Y + 1, -0.5), 'emerald', 15.0));
-}
-function buildArenaColiseum(cx, cz) {
-  const y0 = BASE_Y + 1;
-  const BRICK = 38, MARBLE = 40, DARK = 41, STONE = 3, PLANKS = 7, LOG = 6, GLOW = 20;
-  for (let dx = -10; dx <= 10; dx++) for (let dz = -10; dz <= 10; dz++) {
-    const d = Math.hypot(dx, dz);
-    if (d > 10) continue;
-    setBlock(cx + dx, y0 - 1, cz + dz, d < 6 ? MARBLE : BRICK);
-    if (d > 9.5) setBlock(cx + dx, y0 - 2, cz + dz, STONE);
-  }
-  const wallR = 9.5;
-  for (let a = 0; a < 360; a += 3) {
-    const rad = a * Math.PI / 180;
-    const wx = Math.round(cx + Math.cos(rad) * wallR);
-    const wz = Math.round(cz + Math.sin(rad) * wallR);
-    for (let h = 0; h < 4; h++) setBlock(wx, y0 + h, wz, (h % 2 === 0) ? BRICK : MARBLE);
-    setBlock(wx, y0 + 4, wz, DARK);
-    if (a % 30 === 0) {
-      for (let h = 0; h < 7; h++) setBlock(wx, y0 + h, wz, h < 5 ? MARBLE : GLOW);
-    }
-    if (a >= 88 && a <= 92 || a >= 178 && a <= 182 || a >= 268 && a <= 272 || a >= 358) {
-      for (let h = 0; h < 4; h++) setBlock(wx, y0 + h, wz, 0);
-    }
-  }
-  for (let a = 20; a < 340; a += 8) {
-    const rad = a * Math.PI / 180;
-    const tier = 7;
-    for (let step = 0; step < 3; step++) {
-      const tr = tier + step * 0.7;
-      const wx = Math.round(cx + Math.cos(rad) * tr);
-      const wz = Math.round(cz + Math.sin(rad) * tr);
-      setBlock(wx, y0 + step, wz, PLANKS);
-      setBlock(wx, y0 + step + 1, wz, 0);
-    }
-  }
-  for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) setBlock(cx + dx, y0 - 1, cz + dz, MARBLE);
-  setBlock(cx, y0, cz, 23);
-  for (const [px, pz] of [[-7, -7], [7, -7], [-7, 7], [7, 7]]) {
-    for (let h = 0; h < 3; h++) setBlock(cx + px, y0 + h, cz + pz, LOG);
-    setBlock(cx + px, y0 + 3, cz + pz, GLOW);
-  }
-}
-
-/* ==================== MAP: JUNGLE ==================== */
-function generateJungle() {
-  for (const team of TEAMS) {
-    const tx = team.x * 1.15;
-    const tz = team.z * 1.15;
-    team.x = Math.round(tx); team.z = Math.round(tz);
-    makeIsland(team.x, team.z, 8, 1, 2);
-    placeTeamBase(team);
-    makeTree(team.x - 5, BASE_Y + 1, team.z - 6, { logId: 35, leafId: 36, height: 5 });
-    makeTree(team.x + 6, BASE_Y + 1, team.z - 6, { logId: 35, leafId: 36, height: 5 });
-    makeTree(team.x - 6, BASE_Y + 1, team.z + 6, { logId: 35, leafId: 36, height: 6 });
-    makeTree(team.x + 6, BASE_Y + 1, team.z + 6, { logId: 35, leafId: 36, height: 5 });
-    makeTree(team.x - 3, BASE_Y + 1, team.z - 8, { logId: 35, leafId: 36, height: 3, spread: 1, heightVar: 1 });
-    makeTree(team.x + 7, BASE_Y + 1, team.z + 1, { logId: 35, leafId: 36, height: 3, spread: 1, heightVar: 1 });
-  }
-  const dSpots = [[22, 0], [-22, 0], [0, 22], [0, -22]];
-  for (const [mx, mz] of dSpots) {
-    makeIsland(mx, mz, 4, 1, 2);
-    setBlock(mx, BASE_Y, mz, 22);
-    generators.push(makeGen(new THREE.Vector3(mx + 0.5, BASE_Y + 1, mz + 0.5), 'diamond', 30.0));
-    makeTree(mx + 3, BASE_Y + 1, mz + 1, { logId: 35, leafId: 36, height: 4 });
-  }
-  makeIsland(0, 0, 11, 1, 2);
-  buildGiantJungleTree(0, 0);
-  setBlock(4, BASE_Y, 4, 23); setBlock(-4, BASE_Y, -4, 23);
-  generators.push(makeGen(new THREE.Vector3(4.5, BASE_Y + 1, 4.5), 'emerald', 15.0));
-  generators.push(makeGen(new THREE.Vector3(-4.5, BASE_Y + 1, -4.5), 'emerald', 15.0));
-  const rnd = mulberry32(7100);
-  for (let i = 0; i < 60; i++) {
-    const a = rnd() * Math.PI * 2, r = 6 + rnd() * 5;
-    const mx = Math.round(Math.cos(a) * r), mz = Math.round(Math.sin(a) * r);
-    if (getBlock(mx, BASE_Y, mz) === 1) setBlock(mx, BASE_Y, mz, 39);
-  }
-}
+/* ------------------------------------------------------------------ */
+/*  JUNGLE — giant central tree                                        */
+/* ------------------------------------------------------------------ */
 function buildGiantJungleTree(cx, cz) {
   const y0 = BASE_Y + 1;
   const LOG = 35, LEAF = 36, MOSS = 39;
@@ -1102,191 +1448,148 @@ function buildGiantJungleTree(cx, cz) {
   }
 }
 
-/* ==================== MAP: DESERT ==================== */
-function generateDesert() {
-  for (const team of TEAMS) {
-    makeIsland(team.x, team.z, 8, 5, 30);
-    placeTeamBase(team, { floorId: 5 });
-    const cactusSpots = [
-      [team.x - 6, team.z - 6], [team.x + 6, team.z - 6], [team.x - 6, team.z + 6], [team.x + 6, team.z + 6]
-    ];
-    for (const [cx, cz] of cactusSpots) {
-      if (getBlock(cx, BASE_Y + 1, cz)) continue;
-      setBlock(cx, BASE_Y + 1, cz, 31);
-      setBlock(cx, BASE_Y + 2, cz, 31);
+function generateJungle() {
+  const cfg = BASE_THEMES.jungle;
+  makeIsland(0, 0, MAIN_R, cfg.surf, cfg.sub);
+  buildGiantJungleTree(0, 0);
+
+  makePath(7, 0, 17, 0, 37, 1); makePath(-7, 0, -17, 0, 37, 1);
+  makePath(0, 7, 0, 17, 37, 1); makePath(0, -7, 0, -17, 37, 1);
+  for (const [gx, gz] of [[10, 0], [-10, 0]]) {
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) setBlock(gx + dx, BASE_Y, gz + dz, 39);
+    setBlock(gx, BASE_Y, gz, 23);
+    generators.push(makeGen(new THREE.Vector3(gx + 0.5, BASE_Y + 1, gz + 0.5), 'emerald', 15.0));
+  }
+  for (const [tx, tz] of [[14, 9], [-14, 9], [14, -9], [-14, -9], [9, 14], [-9, 14], [9, -14], [-9, -14]]) {
+    makeTree(tx, BASE_Y + 1, tz, { logId: 35, leafId: 36, height: 4 });
+  }
+  for (const [lx, lz] of [[15, 0], [-15, 0], [0, 15], [0, -15]]) makeLampPost(lx, lz, 35, 23, 3);
+  scatterSurface(0, 0, MAIN_R - 1, 1, 39, 40, 5100);
+  scatterSurface(0, 0, MAIN_R - 1, 1, 37, 18, 5200);
+
+  for (const [mx, mz] of SUB_SPOTS) buildSubIsland('jungle', mx, mz);
+  for (const team of TEAMS) buildBaseTower(team, 'jungle');
+}
+
+/* ------------------------------------------------------------------ */
+/*  DESERT — step pyramid with emerald summit                          */
+/* ------------------------------------------------------------------ */
+function buildDesertPyramid(cx, cz) {
+  const y0 = BASE_Y;
+  for (let layer = 0; layer <= 6; layer++) {
+    const half = 9 - layer;
+    for (let dx = -half; dx <= half; dx++) for (let dz = -half; dz <= half; dz++) {
+      setBlock(cx + dx, y0 + layer, cz + dz, 30);
     }
-    for (let i = 0; i < 2; i++) {
-      const py = BASE_Y + 1 + i;
-      const w = 2 - i;
-      for (let dx = -w; dx <= w; dx++) for (let dz = -w; dz <= w; dz++) {
-        if (!getBlock(team.x + 7 + dx, py, team.z + 4 + dz)) setBlock(team.x + 7 + dx, py, team.z + 4 + dz, 30);
+    if (layer === 2 || layer === 5) {
+      for (let dx = -half; dx <= half; dx++) {
+        setBlock(cx + dx, y0 + layer, cz - half, 26);
+        setBlock(cx + dx, y0 + layer, cz + half, 26);
       }
     }
   }
-  const dSpots = [[20, 0], [-20, 0], [0, 20], [0, -20]];
-  for (const [mx, mz] of dSpots) {
-    makeIsland(mx, mz, 5, 5, 30);
-    setBlock(mx, BASE_Y, mz, 22);
-    generators.push(makeGen(new THREE.Vector3(mx + 0.5, BASE_Y + 1, mz + 0.5), 'diamond', 30.0));
-    setBlock(mx + 3, BASE_Y + 1, mz - 3, 31);
-  }
-  makeIsland(0, 0, 12, 5, 30);
-  buildDesertPyramid(0, 0);
-}
-function buildDesertPyramid(cx, cz) {
-  const y0 = BASE_Y + 1;
-  const SANDSTONE = 30, SAND = 5, GLOW = 20, GOLD = 20;
-  const size = 9;
-  const height = 9;
-  for (let layer = 0; layer < height; layer++) {
-    const half = size - layer;
-    if (half < 0) break;
-    for (let dx = -half; dx <= half; dx++) for (let dz = -half; dz <= half; dz++) {
-      const isShell = Math.abs(dx) === half || Math.abs(dz) === half || layer === height - 1;
-      if (layer === 0) setBlock(cx + dx, y0 + layer - 1, cz + dz, SANDSTONE);
-      if (isShell) setBlock(cx + dx, y0 + layer, cz + dz, SANDSTONE);
-    }
-  }
-  setBlock(cx, y0 + height, cz, GOLD);
-  setBlock(cx, y0 + height + 1, cz, GLOW);
-  for (let d = 0; d < size; d++) {
-    setBlock(cx, y0 + 0, cz + size - d, 0);
-    setBlock(cx, y0 + 1, cz + size - d, 0);
-    setBlock(cx + 1, y0 + 0, cz + size - d, 0);
-    setBlock(cx + 1, y0 + 1, cz + size - d, 0);
-  }
-  for (let i = 0; i < 4; i++) {
-    const a = (i / 4) * Math.PI * 2;
-    const gx = Math.round(cx + Math.cos(a) * (size - 2));
-    const gz = Math.round(cz + Math.sin(a) * (size - 2));
-    setBlock(gx, y0 + 2, gz, GLOW);
-  }
-  setBlock(cx + 1, y0, cz + 1, 23); setBlock(cx - 2, y0, cz - 2, 23);
-  generators.push(makeGen(new THREE.Vector3(cx + 1.5, y0 + 1, cz + 1.5), 'emerald', 15.0));
-  generators.push(makeGen(new THREE.Vector3(cx - 1.5, y0 + 1, cz - 1.5), 'emerald', 15.0));
-  for (let dx = -size + 1; dx <= size - 1; dx++) for (let dz = -size + 1; dz <= size - 1; dz++) {
-    if (!getBlock(cx + dx, y0 - 1, cz + dz)) setBlock(cx + dx, y0 - 1, cz + dz, SANDSTONE);
-  }
-  const rnd = mulberry32(7200);
-  for (let i = 0; i < 18; i++) {
-    const a = rnd() * Math.PI * 2, r = size + 2 + rnd() * 3;
-    const mx = Math.round(cx + Math.cos(a) * r);
-    const mz = Math.round(cz + Math.sin(a) * r);
-    if (getBlock(mx, BASE_Y, mz) === 5) {
-      setBlock(mx, BASE_Y + 1, mz, 31);
-      if (rnd() < 0.5) setBlock(mx, BASE_Y + 2, mz, 31);
-    }
+  const topY = y0 + 6;
+  for (const px of [-3, 3]) for (const pz of [-3, 3]) setBlock(cx + px, topY, cz + pz, 12);
+  setBlock(cx, topY, cz, 20);
+  setBlock(cx - 1, topY, cz, 23);
+  setBlock(cx + 1, topY, cz, 23);
+  generators.push(makeGen(new THREE.Vector3(cx - 0.5, topY + 1, cz + 0.5), 'emerald', 15.0));
+  generators.push(makeGen(new THREE.Vector3(cx + 1.5, topY + 1, cz + 0.5), 'emerald', 15.0));
+  /* Sandstone stairs on the inward face. */
+  for (let step = 0; step < 6; step++) {
+    const z = cz - 9 + step;
+    for (let w = -1; w <= 1; w++) setBlock(cx + w, y0 + step, z, 30);
   }
 }
 
-/* ==================== MAP: WINTER ==================== */
+function generateDesert() {
+  const cfg = BASE_THEMES.desert;
+  makeIsland(0, 0, MAIN_R, cfg.surf, cfg.sub);
+  buildDesertPyramid(0, 0);
+
+  makePath(10, 0, 17, 0, 30, 1); makePath(-10, 0, -17, 0, 30, 1);
+  makePath(0, 10, 0, 17, 30, 1); makePath(0, -10, 0, -17, 30, 1);
+  for (const [gx, gz] of [[10, 0], [-10, 0]]) {
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) setBlock(gx + dx, BASE_Y, gz + dz, 30);
+    setBlock(gx, BASE_Y, gz, 23);
+    generators.push(makeGen(new THREE.Vector3(gx + 0.5, BASE_Y + 1, gz + 0.5), 'emerald', 15.0));
+  }
+  for (const [tx, tz] of [[13, 12], [-13, 12], [13, -12], [-13, -12]]) {
+    if (getBlock(tx, BASE_Y, tz) === 5) {
+      setBlock(tx, BASE_Y + 1, tz, 31);
+      setBlock(tx, BASE_Y + 2, tz, 31);
+    }
+  }
+  for (const [lx, lz] of [[15, 0], [-15, 0], [0, 15], [0, -15]]) makeLampPost(lx, lz, 30, 20, 3);
+  scatterSurface(0, 0, MAIN_R - 1, 5, 30, 50, 6100);
+  scatterSurface(0, 0, MAIN_R - 1, 5, 26, 25, 6200);
+
+  for (const [mx, mz] of SUB_SPOTS) buildSubIsland('desert', mx, mz);
+  for (const team of TEAMS) buildBaseTower(team, 'desert');
+}
+
+/* ------------------------------------------------------------------ */
+/*  WINTER — frozen keep                                               */
+/* ------------------------------------------------------------------ */
+function buildWinterKeep(cx, cz) {
+  const y0 = BASE_Y;
+  for (let dx = -6; dx <= 6; dx++) for (let dz = -6; dz <= 6; dz++) setBlock(cx + dx, y0, cz + dz, 34);
+  for (let dx = -6; dx <= 6; dx++) for (let dz = -6; dz <= 6; dz++) {
+    if (!(Math.abs(dx) === 6 || Math.abs(dz) === 6)) continue;
+    for (let h = 1; h <= 4; h++) setBlock(cx + dx, y0 + h, cz + dz, (h % 3 === 0) ? 32 : 38);
+  }
+  for (const px of [-5, 5]) for (const pz of [-5, 5]) {
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+      for (let h = 1; h <= 8; h++) setBlock(cx + px + dx, y0 + h, cz + pz + dz, (h % 4 === 0) ? 32 : 33);
+      setBlock(cx + px + dx, y0 + 9, cz + pz + dz, 33);
+    }
+    for (let h = 9; h <= 10; h++) setBlock(cx + px, y0 + h, cz + pz, 32);
+  }
+  for (let dx = -3; dx <= 3; dx++) for (let dz = -3; dz <= 3; dz++) {
+    if (Math.abs(dx) === 3 || Math.abs(dz) === 3) {
+      for (let h = 1; h <= 6; h++) setBlock(cx + dx, y0 + h, cz + dz, 38);
+    }
+  }
+  for (let dx = -3; dx <= 3; dx++) for (let dz = -3; dz <= 3; dz++) setBlock(cx + dx, y0 + 7, cz + dz, 34);
+  setBlock(cx, y0 + 8, cz, 20);
+  setBlock(cx, y0 + 9, cz, 32);
+  for (const [dx, dz] of [[-3, -3], [3, -3], [-3, 3], [3, 3]]) setBlock(cx + dx, y0 + 7, cz + dz, 33);
+}
+
 function generateWinter() {
-  for (const team of TEAMS) {
-    makeIsland(team.x, team.z, 9, 33, 3);
-    buildIglooBase(team);
-    for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) {
-      if (dx === 0 && dz === 0) continue;
-      if (Math.abs(dx) + Math.abs(dz) > 3) continue;
-      if (!getBlock(team.x + 7 + dx, BASE_Y, team.z + 7 + dz)) setBlock(team.x + 7 + dx, BASE_Y, team.z + 7 + dz, 32);
-    }
-    makeTree(team.x - 6, BASE_Y + 1, team.z - 6, { logId: 42, leafId: 33, height: 4 });
-    makeTree(team.x + 6, BASE_Y + 1, team.z - 6, { logId: 42, leafId: 33, height: 4 });
+  const cfg = BASE_THEMES.winter;
+  makeIsland(0, 0, MAIN_R, cfg.surf, cfg.sub);
+  buildWinterKeep(0, 0);
+
+  makePath(10, 0, 17, 0, 34, 1); makePath(-10, 0, -17, 0, 34, 1);
+  makePath(0, 10, 0, 17, 34, 1); makePath(0, -10, 0, -17, 34, 1);
+  for (const [gx, gz] of [[10, 0], [-10, 0]]) {
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) setBlock(gx + dx, BASE_Y, gz + dz, 34);
+    setBlock(gx, BASE_Y, gz, 23);
+    generators.push(makeGen(new THREE.Vector3(gx + 0.5, BASE_Y + 1, gz + 0.5), 'emerald', 15.0));
   }
-  const dSpots = [[20, 0], [-20, 0], [0, 20], [0, -20]];
-  for (const [mx, mz] of dSpots) {
-    makeIsland(mx, mz, 5, 33, 34);
-    setBlock(mx, BASE_Y, mz, 22);
-    generators.push(makeGen(new THREE.Vector3(mx + 0.5, BASE_Y + 1, mz + 0.5), 'diamond', 30.0));
+  for (const [tx, tz] of [[13, 11], [-13, 11], [13, -11], [-13, -11], [9, 14], [-9, 14], [9, -14], [-9, -14]]) {
+    makeTree(tx, BASE_Y + 1, tz, { logId: 46, leafId: 8, height: 4 });
   }
-  makeIsland(0, 0, 12, 33, 3);
-  buildSnowMountain(0, 0);
-  setBlock(3, BASE_Y + 4, 3, 23); setBlock(-3, BASE_Y + 4, -3, 23);
-  generators.push(makeGen(new THREE.Vector3(3.5, BASE_Y + 5, 3.5), 'emerald', 15.0));
-  generators.push(makeGen(new THREE.Vector3(-2.5, BASE_Y + 5, -2.5), 'emerald', 15.0));
-  const rnd = mulberry32(7300);
-  for (let i = 0; i < 3; i++) {
-    const a = rnd() * Math.PI * 2;
-    for (let r = 6; r < 11; r++) {
-      const ix = Math.round(Math.cos(a) * r);
-      const iz = Math.round(Math.sin(a) * r);
-      if (getBlock(ix, BASE_Y, iz) === 33) setBlock(ix, BASE_Y, iz, 32);
-    }
+  /* Ice spikes around the outer ring. */
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2, r = 14;
+    const x = Math.round(Math.cos(a) * r), z = Math.round(Math.sin(a) * r);
+    if (!getBlock(x, BASE_Y, z)) continue;
+    for (let h = 1; h <= 4; h++) setBlock(x, BASE_Y + h, z, 34);
+    setBlock(x, BASE_Y + 5, z, 33);
   }
+  for (const [lx, lz] of [[15, 0], [-15, 0], [0, 15], [0, -15]]) makeLampPost(lx, lz, 42, 20, 3);
+  scatterSurface(0, 0, MAIN_R - 1, 33, 34, 50, 7100);
+  scatterSurface(0, 0, MAIN_R - 1, 33, 32, 30, 7200);
+
+  for (const [mx, mz] of SUB_SPOTS) buildSubIsland('winter', mx, mz);
+  for (const team of TEAMS) buildBaseTower(team, 'winter');
 }
-function buildIglooBase(team) {
-  const y0 = BASE_Y + 1;
-  const SNOW = 33, ICE = 32, PACKED = 34;
-  for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) {
-    if (dx * dx + dz * dz > 20) continue;
-    if (getBlock(team.x + dx, y0 - 1, team.z + dz) === 0) setBlock(team.x + dx, y0 - 1, team.z + dz, SNOW);
-  }
-  for (let a = 0; a < 360; a += 6) {
-    const rad = a * Math.PI / 180;
-    const wx = Math.round(team.x + Math.cos(rad) * 4);
-    const wz = Math.round(team.z + Math.sin(rad) * 4);
-    if ((a > 80 && a < 100) || (a > 260 && a < 280)) {
-      for (let h = 0; h < 3; h++) setBlock(wx, y0 + h, wz, 0);
-      continue;
-    }
-    for (let h = 0; h < 4; h++) setBlock(wx, y0 + h, wz, SNOW);
-  }
-  const domeLevels = [
-    { r: 3, y: y0 + 4 },
-    { r: 2, y: y0 + 5 },
-    { r: 1, y: y0 + 6 }
-  ];
-  for (const { r, y } of domeLevels) {
-    for (let a = 0; a < 360; a += 4) {
-      const rad = a * Math.PI / 180;
-      const wx = Math.round(team.x + Math.cos(rad) * r);
-      const wz = Math.round(team.z + Math.sin(rad) * r);
-      setBlock(wx, y, wz, SNOW);
-    }
-  }
-  setBlock(team.x, y0 + 7, team.z, SNOW);
-  setBlock(team.x + 2, y0, team.z, team.bed);
-  setBlock(team.x + 2, y0, team.z + 1, team.bed);
-  setBlock(team.x - 2, y0, team.z + 2, 21);
-  team.shopPos = { x: team.x - 1.5, z: team.z + 2.5 };
-  setBlock(team.x - 2, y0, team.z - 2, 29);
-  team.upgradePos = { x: team.x - 1.5, z: team.z - 1.5 };
-  setBlock(team.x + 2, y0 - 1, team.z - 2, 18);
-  generators.push(makeGen(new THREE.Vector3(team.x + 2.5, y0, team.z - 1.5), 'iron', 1.5));
-  setBlock(team.x - 3, y0 - 1, team.z, 20);
-  generators.push(makeGen(new THREE.Vector3(team.x - 2.5, y0, team.z + 0.5), 'gold', 4.0));
-  makeFlagPole(team.x - 6, y0, team.z - 6, team);
-}
-function buildSnowMountain(cx, cz) {
-  const y0 = BASE_Y + 1;
-  const SNOW = 33, PACKED = 34, ICE = 32;
-  const levels = [
-    { r: 7, h: 2 }, { r: 6, h: 2 }, { r: 5, h: 1 }, { r: 4, h: 1 }, { r: 3, h: 1 }, { r: 2, h: 1 }
-  ];
-  let curY = y0;
-  for (const level of levels) {
-    for (let dx = -level.r; dx <= level.r; dx++) for (let dz = -level.r; dz <= level.r; dz++) {
-      if (dx * dx + dz * dz > level.r * level.r) continue;
-      for (let h = 0; h < level.h; h++) {
-        const blockId = (Math.abs(dx) + Math.abs(dz) === level.r) ? SNOW : SNOW;
-        setBlock(cx + dx, curY + h, cz + dz, blockId);
-      }
-    }
-    curY += level.h;
-  }
-  for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) {
-    if (dx * dx + dz * dz > 16) continue;
-    if (!getBlock(cx + dx, curY, cz + dz)) setBlock(cx + dx, curY, cz + dz, SNOW);
-  }
-  setBlock(cx + 5, y0 + 2, cz, PACKED);
-  setBlock(cx - 5, y0 + 2, cz, PACKED);
-  setBlock(cx, y0 + 2, cz + 5, PACKED);
-  setBlock(cx, y0 + 2, cz - 5, PACKED);
-  setBlock(cx, curY + 1, cz, 20);
-}
+
 
 function generateWorld() {
-  if (currentMapKey === 'arena') generateArena();
-  else if (currentMapKey === 'jungle') generateJungle();
+  if (currentMapKey === 'jungle') generateJungle();
   else if (currentMapKey === 'desert') generateDesert();
   else if (currentMapKey === 'winter') generateWinter();
   else generateStandard();
@@ -1296,6 +1599,9 @@ function clearWorld() {
   chunkMeshes.clear();
   for (const [key, mesh] of bedMeshes) { scene.remove(mesh); }
   bedMeshes.clear();
+  for (const [key, mesh] of chestMeshes) { scene.remove(mesh); mesh.traverse(o => { if (o.isMesh) o.geometry.dispose(); }); }
+  chestMeshes.clear();
+  clearChestState();
   for (const gen of generators) { if (gen.labelEl && gen.labelEl.parentNode) gen.labelEl.parentNode.removeChild(gen.labelEl); }
   generators = [];
   world = new Map();
@@ -1305,10 +1611,10 @@ function clearWorld() {
   _worldDiffSentAt.clear();
   for (const t of TEAMS) teamBedBroken[t.name] = false;
   for (const t of TEAMS) teamUpgrades[t.name] = { sharpness: 0, protection: 0, haste: 0 };
-  TEAMS[0].x = -30; TEAMS[0].z = -30;
-  TEAMS[1].x = 30; TEAMS[1].z = -30;
-  TEAMS[2].x = -30; TEAMS[2].z = 30;
-  TEAMS[3].x = 30; TEAMS[3].z = 30;
+  TEAMS[0].x = -36; TEAMS[0].z = -36;
+  TEAMS[1].x = 36; TEAMS[1].z = -36;
+  TEAMS[2].x = -36; TEAMS[2].z = 36;
+  TEAMS[3].x = 36; TEAMS[3].z = 36;
   if (typeof droppedItems !== 'undefined') { for (const d of droppedItems) d.remove(); droppedItems.length = 0; }
   if (typeof throwables !== 'undefined') { for (const t of throwables) t.remove(); throwables.length = 0; }
   if (typeof primedTNTs !== 'undefined') { for (const t of primedTNTs) { scene.remove(t.mesh); t.mesh.geometry.dispose(); } primedTNTs.length = 0; }
@@ -1391,7 +1697,7 @@ function blockedAt(x, y, z, h) {
 const TERMINAL_VELOCITY = 78.4;
 
 /* ============================================================================
-   9. NETWORKING — free public MQTT relay (no P2P, no port forwarding)
+   9. NETWORKING - free public MQTT relay (no P2P, no port forwarding)
    ----------------------------------------------------------------------------
    v7.0 replaces the PeerJS/WebRTC star with a normal pub/sub relay.
 
@@ -1585,7 +1891,7 @@ function stampMsg(msg) {
 /* ---- Outgoing packet batching ----------------------------------------------
    Every netSend() used to open its own MQTT PUBLISH. A player who is walking
    while mining pushed 2-3 separate publishes per frame into the broker, and a
-   free shared broker queues those behind everyone else's traffic — that queue
+   free shared broker queues those behind everyone else's traffic - that queue
    *is* the lag. We now collect everything produced in one frame and hand the
    broker a single publish (a JSON array) instead. Fewer packets, less broker
    work, lower and more stable latency.
@@ -1766,16 +2072,16 @@ function updatePingMeter() {
   const meter = document.getElementById('pingMeter');
   const textEl = document.getElementById('pingText');
   if (!meter || !textEl) return;
-  let text = 'PING — ms', cls = 'ping-idle';
+  let text = 'PING -- ms', cls = 'ping-idle';
   if (NET.connected && NET.transport === 'mqtt') {
     const ms = localPingMs();
     const mode = linkModeLabel();
-    if (ms === null) { text = 'PING … ms · ' + mode; cls = 'ping-idle'; }
+    if (ms === null) { text = 'PING -- ms · ' + mode; cls = 'ping-idle'; }
     else { text = 'PING ' + ms + ' ms · ' + mode; cls = ms < 90 ? 'ping-good' : ms < 180 ? 'ping-ok' : 'ping-bad'; }
   } else if (NET.transport === 'local') {
     text = 'PING 0 ms · LOCAL'; cls = 'ping-good';
   } else if (NET.transport === 'offline') {
-    text = 'PING — ms · OFFLINE'; cls = 'ping-idle';
+    text = 'PING -- ms · OFFLINE'; cls = 'ping-idle';
   }
   if (textEl.textContent !== text) textEl.textContent = text;
   if (meter.className !== cls) meter.className = cls;
@@ -2175,22 +2481,117 @@ function appendChat(who, text, color) {
   chatPanel.scrollTop = chatPanel.scrollHeight;
 }
 function openChat() {
-  if (invOpen || shopOpen || upgradeOpen) return;
+  if (invOpen || shopOpen || upgradeOpen || chestOpen) return;
   if (document.pointerLockElement) document.exitPointerLock();
   chatInputWrap.classList.add('show'); chatInput.focus();
   keys['KeyW'] = keys['KeyA'] = keys['KeyS'] = keys['KeyD'] = false;
 }
 function closeChat() {
   chatInputWrap.classList.remove('show'); chatInput.blur();
-  if (NET.started && !player.eliminated && !player.spectator && !invOpen && !shopOpen && !upgradeOpen) { try { renderer.domElement.requestPointerLock(); } catch (e) { } }
+  if (NET.started && !player.eliminated && !player.spectator && !invOpen && !shopOpen && !upgradeOpen && !chestOpen) { try { renderer.domElement.requestPointerLock(); } catch (e) { } }
 }
+
+/* ---- Developer mode & chat commands ----
+   Type /developer in chat to unlock local testing commands. Everything here
+   only touches the local client (inventory, health) and is never sent to
+   other players, so a test session cannot hand out free items to everyone. */
+const devBadgeEl = document.getElementById('devBadge');
+const DEV_MODE = { enabled: false };
+const DEV_GIVE_ALIASES = {
+  iron: 'iron_ingot', gold: 'gold_ingot', emerald: 'emerald', diamond: 'diamond',
+  iron_ingot: 'iron_ingot', gold_ingot: 'gold_ingot'
+};
+const DEV_HELP_LINES = [
+  ['/developer [on|off]', 'Enable or disable developer mode.'],
+  ['/give <iron|gold|emerald|diamond|item id> [amount]', 'Add resources or any item (default 64).'],
+  ['/heal', 'Refill your health.'],
+  ['/help', 'Show this command list.'],
+  ['/clear', 'Clear the chat log.']
+];
+function devSay(text, color) { appendChat('[Developer]', text, color || '#ffd966'); }
+function printDevHelp() {
+  for (const [usage, desc] of DEV_HELP_LINES) devSay(usage + ' - ' + desc, '#9fe0ff');
+}
+function setDevMode(on) {
+  DEV_MODE.enabled = !!on;
+  if (devBadgeEl) devBadgeEl.classList.toggle('show', DEV_MODE.enabled);
+  return DEV_MODE.enabled;
+}
+function devGive(id, amount) {
+  const def = ITEMS[id];
+  if (!def) {
+    devSay('Unknown item "' + id + '". Try iron, gold, emerald, diamond or an item id like diamond_sword.', '#ff8888');
+    return;
+  }
+  const total = Math.max(1, Math.min(4096, Math.floor(amount)));
+  const leftover = addItemStack({ id, count: total });
+  const given = total - leftover;
+  updateUI();
+  if (shopOpen) updateShopUI();
+  if (upgradeOpen) updateUpgradeUI();
+  if (given <= 0) { devSay('Inventory is full - nothing was added.', '#ff8888'); return; }
+  devSay('Gave ' + given + ' x ' + def.name + (leftover > 0 ? ' (' + leftover + ' did not fit - inventory full)' : ''), '#7fe0a0');
+}
+function runChatCommand(raw) {
+  const parts = raw.replace(/^\//, '').trim().split(/\s+/);
+  const cmd = (parts.shift() || '').toLowerCase();
+  if (cmd === 'developer' || cmd === 'dev') {
+    const arg = (parts[0] || '').toLowerCase();
+    const next = arg === 'on' || arg === '1' || arg === 'true' ? true
+      : arg === 'off' || arg === '0' || arg === 'false' ? false
+        : !DEV_MODE.enabled;
+    setDevMode(next);
+    if (DEV_MODE.enabled) { devSay('Developer mode ENABLED (local only).', '#7fe0a0'); printDevHelp(); }
+    else devSay('Developer mode disabled.', '#ff8888');
+    return;
+  }
+  if (!DEV_MODE.enabled) {
+    devSay('Developer mode is off. Type /developer to unlock testing commands.', '#ff8888');
+    return;
+  }
+  switch (cmd) {
+    case 'give': {
+      const key = (parts[0] || '').toLowerCase();
+      if (!key) { devSay('Usage: /give <iron|gold|emerald|diamond|item id> [amount]', '#ff8888'); return; }
+      const id = DEV_GIVE_ALIASES[key] || key;
+      let amount = 64;
+      if (parts[1] !== undefined) {
+        amount = parseInt(parts[1], 10);
+        if (!Number.isFinite(amount) || amount < 1) { devSay('Amount must be a whole number of at least 1.', '#ff8888'); return; }
+      }
+      devGive(id, amount);
+      break;
+    }
+    case 'heal':
+      player.health = player.maxHealth;
+      updateHealthBar();
+      devSay('Health restored to ' + player.maxHealth + '.', '#7fe0a0');
+      break;
+    case 'help':
+      printDevHelp();
+      break;
+    case 'clear':
+      chatPanel.innerHTML = '';
+      break;
+    case '':
+      devSay('Type /help for the command list.', '#ffd966');
+      break;
+    default:
+      devSay('Unknown command "/' + cmd + '". Type /help for the command list.', '#ff8888');
+  }
+}
+
 chatInput.addEventListener('keydown', e => {
   if (e.code === 'Enter') {
     const t = chatInput.value.trim();
     if (t) {
-      const teamColor = NET.localTeamName ? '#' + TEAMS.find(x => x.name === NET.localTeamName).hex.toString(16).padStart(6, '0') : '#7ff5e8';
-      appendChat(NET.myName, t, teamColor);
-      netSend({ t: 'chat', id: NET.myId, name: NET.myName, text: t, color: teamColor });
+      if (t.startsWith('/')) {
+        runChatCommand(t);
+      } else {
+        const teamColor = NET.localTeamName ? '#' + TEAMS.find(x => x.name === NET.localTeamName).hex.toString(16).padStart(6, '0') : '#7ff5e8';
+        appendChat(NET.myName, t, teamColor);
+        netSend({ t: 'chat', id: NET.myId, name: NET.myName, text: t, color: teamColor });
+      }
     }
     chatInput.value = ''; closeChat(); e.preventDefault(); e.stopPropagation();
   } else if (e.code === 'Escape') { chatInput.value = ''; closeChat(); e.preventDefault(); e.stopPropagation(); }
@@ -2359,7 +2760,7 @@ function probeRelay(info, timeoutMs) {
 
 /* Probe every candidate in parallel and put the quickest first. Results are
    cached (failures too, for 10 minutes), so this costs ~1-3 s once and is
-   instant afterwards — a dead sandbox is not re-probed on every room. */
+   instant afterwards - a dead sandbox is not re-probed on every room. */
 async function rankRelaysByLatency(cands) {
   if (!cands || cands.length < 2) return cands || [];
   const now = Date.now();
@@ -2372,7 +2773,7 @@ async function rankRelaysByLatency(cands) {
   });
   const todo = scored.filter(x => !x.fresh);
   if (todo.length) {
-    if (typeof setLobbyStatus === 'function') setLobbyStatus('Measuring latency of ' + todo.length + ' free relay' + (todo.length > 1 ? 's' : '') + '…');
+    if (typeof setLobbyStatus === 'function') setLobbyStatus('Measuring latency of ' + todo.length + ' free relay' + (todo.length > 1 ? 's' : '') + '.');
     const results = await Promise.all(todo.map(async x => {
       let rtt = null;
       try { rtt = await probeRelay(x.c, 3200); } catch (e) { rtt = null; }
@@ -2396,7 +2797,7 @@ function rebuildTeamButtons() {
     const mine = NET.localTeamName === team.name;
     const sub = document.createElement('span'); sub.className = 'sub';
     let subText = '';
-    if (owner) { const p = NET.players.get(owner); subText = p ? p.name : (mine ? NET.myName : ''); if (owner === NET.myId) subText = 'YOU'; } else subText = '—';
+    if (owner) { const p = NET.players.get(owner); subText = p ? p.name : (mine ? NET.myName : ''); if (owner === NET.myId) subText = 'YOU'; } else subText = '';
     sub.textContent = subText; el.textContent = team.name; el.appendChild(sub);
     if (owner && owner !== NET.myId) el.classList.add('taken');
     if (mine) el.classList.add('mine');
@@ -2495,7 +2896,7 @@ function startGameAsHost() {
   lobbyEl.classList.add('hidden');
   player.eliminated = false; player.spectator = false; player.respawnCooldown = 0;
   player.health = player.maxHealth;
-  player.pos.set(PLAYER_TEAM.x + 0.5, BASE_Y + 2, PLAYER_TEAM.z + 0.5);
+  player.pos.set(PLAYER_TEAM.spawnX, BASE_Y + 2, PLAYER_TEAM.spawnZ);
   player.vel.set(0, 0, 0); player.knockbackTime = 0; maxFallY = player.pos.y;
   rebuildRemotePlayersFromRoster();
   appendChat('[System]', 'Game started on ' + (MAP_OPTIONS.find(m => m.key === currentMapKey)?.name || currentMapKey) + '!', '#ffd966');
@@ -2569,9 +2970,9 @@ function onRelayReady() {
   updateNetBadge();
   updatePingMeter();
   if (NET.mode === 'host' && !NET.started) {
-    setLobbyStatus('Room ' + NET.roomCode + ' is live on ' + relayName() + '. Waiting for players…');
+    setLobbyStatus('Room ' + NET.roomCode + ' is live on ' + relayName() + '. Waiting for players.');
   } else if (NET.mode === 'client' && !NET.hostId) {
-    setLobbyStatus('Connected to ' + relayName() + '. Looking for the host…');
+    setLobbyStatus('Connected to ' + relayName() + '. Looking for the host.');
   }
 }
 function waitForHost(ms) {
@@ -2591,7 +2992,7 @@ async function connectRoom(code, asHost) {
   NET.connected = false;
   const lib = await loadMqttLib();
   if (!lib) {
-    setLobbyStatus('Could not load the relay library (offline?). Using local mode…');
+    setLobbyStatus('Could not load the relay library (offline?). Using local mode.');
     connectLocal(code);
     return;
   }
@@ -2609,7 +3010,7 @@ async function connectRoom(code, asHost) {
   }
   for (let i = 0; i < candidates.length; i++) {
     const info = candidates[i];
-    setLobbyStatus((asHost ? 'Connecting to ' : 'Looking for room on ') + info.name + '… (' + (i + 1) + '/' + candidates.length + ')');
+    setLobbyStatus((asHost ? 'Connecting to ' : 'Looking for room on ') + info.name + ' (' + (i + 1) + '/' + candidates.length + ')');
     let client = null;
     try { client = await mqttConnectOnce(info, 6000); }
     catch (e) { failed.push(info); continue; }
@@ -2627,7 +3028,7 @@ async function connectRoom(code, asHost) {
      flaky broker cannot make an existing room look missing. */
   if (!asHost) {
     for (const info of failed) {
-      setLobbyStatus('Retrying ' + info.name + '…');
+      setLobbyStatus('Retrying ' + info.name + '.');
       let client = null;
       try { client = await mqttConnectOnce(info, 6000); }
       catch (e) { continue; }
@@ -2659,9 +3060,9 @@ function connectLocal(code) {
   subscribeRoomTopics();
   onRelayReady();
   if (NET.mode === 'host' && !NET.started) {
-    setLobbyStatus('Relay unreachable — room is in local mode (same-browser tabs only).');
+    setLobbyStatus('Relay unreachable - room is in local mode (same-browser tabs only).');
   } else if (NET.mode === 'client' && !NET.hostId) {
-    setLobbyStatus('Relay unreachable — local mode has no other players.');
+    setLobbyStatus('Relay unreachable - local mode has no other players.');
   }
   updateNetBadge();
 }
@@ -2690,12 +3091,12 @@ function teardownRelay(publishLeave) {
 function updateNetBadge(force) {
   const el = document.getElementById('netBadge');
   if (!el) return;
-  let text = '● not connected', cls = 'off';
-  if (NET.mode === 'idle') { text = '● not connected'; }
-  else if (!NET.connected || force === 'reconnecting') { text = '● reconnecting…'; cls = 'warn'; }
-  else if (NET.transport === 'local') { text = '● local mode'; cls = 'warn'; }
-  else if (NET.transport === 'offline') { text = '● offline mode'; cls = 'warn'; }
-  else { text = '● ' + relayName() + ' relay'; cls = 'on'; }
+  let text = 'not connected', cls = 'off';
+  if (NET.mode === 'idle') { text = 'not connected'; }
+  else if (!NET.connected || force === 'reconnecting') { text = 'reconnecting'; cls = 'warn'; }
+  else if (NET.transport === 'local') { text = 'local mode'; cls = 'warn'; }
+  else if (NET.transport === 'offline') { text = 'offline mode'; cls = 'warn'; }
+  else { text = relayName() + ' relay'; cls = 'on'; }
   el.textContent = text;
   el.className = 'net-' + cls;
 }
@@ -2715,7 +3116,7 @@ btnCreateRoom.addEventListener('click', async () => {
   NET.mapName = currentMapKey;
   NET.players.set(NET.myId, { name: NET.myName, skin: NET.mySkin, slim: !!NET.mySlim, team: null, isHost: true });
   roomCodeEl.textContent = NET.roomCode;
-  setLobbyStatus('Creating room…');
+  setLobbyStatus('Creating room.');
   try {
     await connectRoom(NET.roomCode, true);
   } catch (e) {
@@ -2742,7 +3143,7 @@ btnJoinRoom.addEventListener('click', async () => {
   NET.roomCode = code;
   NET.players.set(NET.myId, { name: NET.myName, skin: NET.mySkin, slim: !!NET.mySlim, team: null, isHost: false });
   roomCodeEl.textContent = code;
-  setLobbyStatus('Connecting to room ' + code + '…');
+  setLobbyStatus('Connecting to room ' + code + '.');
   try {
     await connectRoom(code, false);
   } catch (e) {
@@ -2914,7 +3315,7 @@ function handleNetData(data, fromId) {
 function beginPlayingAfterStart() {
   player.eliminated = false; player.spectator = false; player.respawnCooldown = 0;
   player.health = player.maxHealth;
-  player.pos.set(PLAYER_TEAM.x + 0.5, BASE_Y + 2, PLAYER_TEAM.z + 0.5);
+  player.pos.set(PLAYER_TEAM.spawnX, BASE_Y + 2, PLAYER_TEAM.spawnZ);
   player.vel.set(0, 0, 0); player.knockbackTime = 0; maxFallY = player.pos.y;
   updateStatusBar();
   try { renderer.domElement.requestPointerLock(); } catch (e) { }
@@ -2956,7 +3357,7 @@ class RemotePlayer {
     this.id = id; this.name = name || 'Player'; this.teamName = teamName || 'Red';
     const team = TEAMS.find(t => t.name === this.teamName) || TEAMS[0];
     this.team = team;
-    this.pos = new THREE.Vector3(team.x + 0.5, BASE_Y + 2, team.z + 0.5);
+    this.pos = new THREE.Vector3(team.spawnX, BASE_Y + 2, team.spawnZ);
     this.renderPos = this.pos.clone();
     this.targetPos = this.pos.clone(); this.vel = new THREE.Vector3();
     this.targetYaw = 0; this.targetPitch = 0; this.yaw = 0; this.pitch = 0;
@@ -2998,7 +3399,7 @@ class RemotePlayer {
     const hpRow = document.createElement('div'); hpRow.className = 'tag-hp';
     const heartEl = document.createElement('span'); heartEl.className = 'tag-heart';
     const hpVal = document.createElement('span'); hpVal.className = 'tag-hpval'; hpVal.textContent = '20';
-    const pingEl = document.createElement('span'); pingEl.className = 'tag-ping'; pingEl.textContent = '— ms';
+    const pingEl = document.createElement('span'); pingEl.className = 'tag-ping'; pingEl.textContent = '-- ms';
     hpRow.appendChild(heartEl); hpRow.appendChild(hpVal); hpRow.appendChild(pingEl);
     el.appendChild(nameEl); el.appendChild(hpRow);
     document.body.appendChild(el);
@@ -3179,7 +3580,7 @@ function updateRemoteNametags() {
        shown a stale ping. */
     const afk = remoteStallMs(rp) > REMOTE_AFK_MS;
     const ms = afk ? null : peerPingMs(rp.id);
-    const pingText = afk ? 'AFK' : (ms === null ? '—' : ms) + ' ms';
+    const pingText = afk ? 'AFK' : (ms === null ? '--' : ms) + ' ms';
     if (rp._lastTagPing !== pingText) {
       rp._lastTagPing = pingText;
       rp.nameTagPingEl.textContent = pingText;
@@ -3257,7 +3658,7 @@ function getAttackCooldownFraction() {
 
 const keys = {};
 let lastW = 0;
-let invOpen = false, shopOpen = false, upgradeOpen = false, camMode = 0;
+let invOpen = false, shopOpen = false, upgradeOpen = false, chestOpen = false, camMode = 0;
 let camYaw = 0, camPitch = 0;
 
 function isTypingInField(e) { const t = e.target; if (!t) return false; const tag = t.tagName; return tag === 'INPUT' || tag === 'TEXTAREA' || t.isContentEditable; }
@@ -3267,7 +3668,7 @@ addEventListener('keydown', e => {
   if (e.repeat && e.code !== 'Space') { keys[e.code] = true; return; }
   keys[e.code] = true;
   if (player.spectator) { if (e.code === 'Space') e.preventDefault(); return; }
-  if (e.code === 'KeyE') { if (shopOpen) closeShop(); else if (upgradeOpen) closeUpgradeShop(); else toggleInventory(); e.preventDefault(); }
+  if (e.code === 'KeyE') { if (shopOpen) closeShop(); else if (upgradeOpen) closeUpgradeShop(); else if (chestOpen) closeChest(); else toggleInventory(); e.preventDefault(); }
   if (e.code === 'F5') { camMode = (camMode + 1) % 3; camYaw = player.yaw; camPitch = player.pitch; e.preventDefault(); }
   if (e.code === 'KeyW') { const now = performance.now(); if (now - lastW < 320) player.sprint = true; lastW = now; }
   if (e.code === 'KeyQ') { dropHeldItem(); e.preventDefault(); }
@@ -3284,7 +3685,7 @@ addEventListener('keydown', e => {
       updateUI();
     }
   }
-  if (e.code === 'Escape') { if (shopOpen) closeShop(); else if (upgradeOpen) closeUpgradeShop(); else if (invOpen) toggleInventory(); }
+  if (e.code === 'Escape') { if (shopOpen) closeShop(); else if (upgradeOpen) closeUpgradeShop(); else if (chestOpen) closeChest(); else if (invOpen) toggleInventory(); }
   if (e.code === 'Space') e.preventDefault();
 });
 addEventListener('keyup', e => { keys[e.code] = false; if (e.code === 'KeyW') player.sprint = false; });
@@ -3296,6 +3697,7 @@ addEventListener('mousemove', e => {
   player.pitch = clamp(player.pitch, -Math.PI / 2 + 0.02, Math.PI / 2 - 0.02);
 });
 let mining = false;
+let rightMouseHeld = false;
 renderer.domElement.addEventListener('mousedown', e => {
   if (document.pointerLockElement !== renderer.domElement) return;
   if (!NET.started) return;
@@ -3303,6 +3705,11 @@ renderer.domElement.addEventListener('mousedown', e => {
   if (camMode === 2 || player.eliminated || player.respawnCooldown > 0) return;
   if (e.button === 0) { mining = true; tryManualAttack(); }
   if (e.button === 2) {
+    /* One right-click must never place more than one block, even if the mouse
+       or OS sends duplicate down events. */
+    if (rightMouseHeld) return;
+    rightMouseHeld = true;
+    e.preventDefault();
     const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
     if (def && def.kind === 'bow') startBowCharge();
     else if (def && def.kind === 'throwable') throwHeldItem();
@@ -3311,20 +3718,25 @@ renderer.domElement.addEventListener('mousedown', e => {
 });
 addEventListener('mouseup', e => {
   if (e.button === 0) mining = false;
-  if (e.button === 2) { if (player.bowCharging) releaseBow(); player.eating = false; }
+  if (e.button === 2) {
+    rightMouseHeld = false;
+    if (player.bowCharging) releaseBow(); player.eating = false;
+  }
 });
+addEventListener('blur', () => { mining = false; rightMouseHeld = false; });
 addEventListener('contextmenu', e => e.preventDefault());
 document.getElementById('hint').addEventListener('click', () => { if (NET.started) renderer.domElement.requestPointerLock(); });
-renderer.domElement.addEventListener('click', () => { if (NET.started && !invOpen && !shopOpen && !upgradeOpen && !player.eliminated && !player.spectator) renderer.domElement.requestPointerLock(); });
+renderer.domElement.addEventListener('click', () => { if (NET.started && !invOpen && !shopOpen && !upgradeOpen && !chestOpen && !player.eliminated && !player.spectator) renderer.domElement.requestPointerLock(); });
 function updateInstructionVisibility() {
   const locked = document.pointerLockElement === renderer.domElement;
   const infoEl = document.getElementById('info');
-  const showInfo = !locked || invOpen || shopOpen || upgradeOpen || player.eliminated;
+  const showInfo = !locked || invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated;
   infoEl.classList.toggle('hidden', !showInfo);
-  document.getElementById('hint').classList.toggle('hidden', !NET.started || locked || invOpen || shopOpen || upgradeOpen || player.eliminated);
+  document.getElementById('hint').classList.toggle('hidden', !NET.started || locked || invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated);
 }
 document.addEventListener('pointerlockchange', () => {
   const locked = document.pointerLockElement === renderer.domElement;
+  rightMouseHeld = false; mining = false;
   updateInstructionVisibility();
   if (!locked && !player.spectator) { player.eating = false; player.bowCharging = false; player.bowCharge = 0; }
 });
@@ -3356,7 +3768,7 @@ const bowChargeFillEl = document.getElementById('bowChargeFill');
 const hotbarSlots = [], invSlots = [], invHotSlots = [], armorSlots = [];
 function makeSlotEl() { const d = document.createElement('div'); d.className = 'slot'; const ic = document.createElement('div'); ic.className = 'icon'; const cn = document.createElement('div'); cn.className = 'cnt'; d.appendChild(ic); d.appendChild(cn); return d; }
 function attachSlotEvents(el, index, kind) {
-  el.addEventListener('click', e => { if (kind === 'inv') { if (e.detail >= 2) gatherItem(index); else slotClick(index); } else if (kind === 'armor') armorSwapClick(index); });
+  el.addEventListener('click', e => { if (kind === 'inv') { if (e.detail >= 2) gatherItem(index); else slotClick(index, e); } else if (kind === 'armor') armorSwapClick(index); });
   el.addEventListener('contextmenu', e => { e.preventDefault(); if (kind === 'inv') rmbInventorySlot(index); });
   el.addEventListener('mouseenter', () => showTooltip(index, kind));
   el.addEventListener('mouseleave', hideTooltip);
@@ -3366,6 +3778,138 @@ for (let i = 0; i < 9; i++) { const el = makeSlotEl(); attachSlotEvents(el, i, '
 for (let i = 0; i < 27; i++) { const el = makeSlotEl(); attachSlotEvents(el, 9 + i, 'inv'); invGridEl.appendChild(el); invSlots.push(el); }
 for (let i = 0; i < 9; i++) { const el = makeSlotEl(); attachSlotEvents(el, i, 'inv'); invHotEl.appendChild(el); invHotSlots.push(el); }
 for (let i = 0; i < 4; i++) { const el = makeSlotEl(); attachSlotEvents(el, i, 'armor'); armorEl.appendChild(el); armorSlots.push(el); }
+
+/* ---- CHEST / ENDER CHEST STORAGE ---- */
+const chestEl = document.getElementById('chestPanel');
+const chestGridEl = document.getElementById('chestGrid');
+const chestInvGridEl = document.getElementById('chestInvGrid');
+const chestHotGridEl = document.getElementById('chestHotGrid');
+const chestTitleEl = document.getElementById('chestTitle');
+const chestStorage = new Map();
+const enderChestInv = new Array(27).fill(null);
+const chestSlots = [], chestInvSlots = [], chestHotSlots = [];
+let chestInv = null;
+let activeChest = null;
+function chestKey(x, y, z) { return x + ',' + y + ',' + z; }
+function getChestStorage(x, y, z) {
+  const key = chestKey(x, y, z);
+  let arr = chestStorage.get(key);
+  if (!arr) { arr = new Array(27).fill(null); chestStorage.set(key, arr); }
+  return arr;
+}
+function mergeIntoStorage(storage, stack) {
+  if (!stack) return 0;
+  const def = ITEMS[stack.id]; if (!def) return stack.count;
+  const max = def.stack; let count = stack.count;
+  for (let i = 0; i < storage.length && count > 0; i++) {
+    const s = storage[i];
+    if (s && s.id === stack.id && s.count < max) { const m = Math.min(max - s.count, count); s.count += m; count -= m; }
+  }
+  for (let i = 0; i < storage.length && count > 0; i++) {
+    if (!storage[i]) { storage[i] = { id: stack.id, count: Math.min(max, count) }; count -= storage[i].count; }
+  }
+  return count;
+}
+function attachChestSlotEvents(el, index) {
+  el.addEventListener('click', e => chestSlotClick(index, e));
+  el.addEventListener('mouseenter', () => { if (!chestInv) return; const st = chestInv[index]; if (!st) { hideTooltip(); return; } showTooltipForStack(st); });
+  el.addEventListener('mouseleave', hideTooltip);
+  el.addEventListener('mousemove', positionTooltip);
+}
+function showTooltipForStack(stack) {
+  const def = ITEMS[stack.id]; if (!def) { hideTooltip(); return; }
+  let html = `<div class="tt-name">${def.name}</div>`;
+  if (def.kind === 'tool') html += `<div class="tt-tier">Tier: ${cap(def.material)}</div>`;
+  else if (def.kind === 'block') html += `<div class="tt-stat">Type: <span>Block</span></div>`;
+  else if (def.kind === 'material') html += `<div class="tt-stat">Type: <span>Material</span></div>`;
+  else if (def.kind === 'armor') html += `<div class="tt-stat">Armor Points: <span>${def.armorPoints}</span></div>`;
+  else if (def.kind === 'consumable' || def.kind === 'throwable' || def.kind === 'bow') html += `<div class="tt-stat">Click to move to your inventory</div>`;
+  if (stack.count > 1) html += `<div class="tt-stat">Quantity: <span>${stack.count}</span></div>`;
+  tooltipEl.innerHTML = html; tooltipEl.style.display = 'block';
+}
+for (let i = 0; i < 27; i++) { const el = makeSlotEl(); attachChestSlotEvents(el, i); chestGridEl.appendChild(el); chestSlots.push(el); }
+for (let i = 0; i < 27; i++) { const el = makeSlotEl(); attachSlotEvents(el, 9 + i, 'inv'); chestInvGridEl.appendChild(el); chestInvSlots.push(el); }
+for (let i = 0; i < 9; i++) { const el = makeSlotEl(); attachSlotEvents(el, i, 'inv'); chestHotGridEl.appendChild(el); chestHotSlots.push(el); }
+function refreshChestUI() {
+  if (!chestInv) return;
+  for (let i = 0; i < 27; i++) paintSlot(chestSlots[i], chestInv[i]);
+  for (let i = 0; i < 27; i++) paintSlot(chestInvSlots[i], inv[9 + i]);
+  for (let i = 0; i < 9; i++) paintSlot(chestHotSlots[i], inv[i]);
+}
+function openChestAt(x, y, z, type) {
+  if (invOpen) { invOpen = false; invEl.classList.remove('open'); }
+  if (shopOpen) closeShop();
+  if (upgradeOpen) closeUpgradeShop();
+  if (chestOpen) closeChest();
+  activeChest = { x, y, z, type, key: chestKey(x, y, z) };
+  chestInv = type === 'ender' ? enderChestInv : getChestStorage(x, y, z);
+  chestOpen = true;
+  chestTitleEl.textContent = type === 'ender' ? 'ENDER CHEST' : 'CHEST';
+  chestEl.classList.add('open');
+  document.exitPointerLock();
+  mining = false; player.eating = false; player.bowCharging = false;
+  const mesh = chestMeshes.get(activeChest.key);
+  if (mesh) mesh.userData.openTarget = 1;
+  refreshChestUI();
+  updateInstructionVisibility();
+}
+function closeChest() {
+  if (!chestOpen) return;
+  chestOpen = false;
+  chestEl.classList.remove('open');
+  hideTooltip();
+  if (cursorItem) {
+    const def = ITEMS[cursorItem.id];
+    const leftover = def && def.kind === 'armor' ? cursorItem.count : addItemStack(cursorItem);
+    if (leftover > 0) {
+      const dir = getLookDir();
+      dropItemLocal(cursorItem.id, leftover, player.pos.x + dir.x * 0.5, player.pos.y + player.height * 0.6, player.pos.z + dir.z * 0.5, null, 1.4);
+    }
+    cursorItem = null;
+  }
+  if (activeChest) { const mesh = chestMeshes.get(activeChest.key); if (mesh) mesh.userData.openTarget = 0; }
+  activeChest = null; chestInv = null;
+  updateUI();
+  if (!player.eliminated && !player.spectator && NET.started) renderer.domElement.requestPointerLock();
+  updateInstructionVisibility();
+}
+function clearChestState() {
+  chestOpen = false;
+  chestEl.classList.remove('open');
+  hideTooltip();
+  cursorItem = null;
+  activeChest = null; chestInv = null;
+  chestStorage.clear();
+  enderChestInv.fill(null);
+}
+function chestSlotClick(index, e) {
+  if (!chestInv) return;
+  const cur = chestInv[index];
+  if (e && e.shiftKey) {
+    if (!cur) return;
+    const leftover = addItemStack(cur);
+    if (leftover <= 0) chestInv[index] = null;
+    else cur.count = leftover;
+    updateUI();
+    return;
+  }
+  if (cursorItem) {
+    if (cur && cur.id === cursorItem.id) {
+      const max = ITEMS[cur.id].stack;
+      const move = Math.min(max - cur.count, cursorItem.count);
+      cur.count += move; cursorItem.count -= move;
+      if (cursorItem.count <= 0) cursorItem = null;
+    } else { chestInv[index] = cursorItem; cursorItem = cur || null; }
+  } else if (cur) { cursorItem = cur; chestInv[index] = null; }
+  updateUI();
+}
+function depositToChest(index) {
+  const stack = inv[index]; if (!stack || !chestInv) return;
+  const leftover = mergeIntoStorage(chestInv, stack);
+  if (leftover <= 0) inv[index] = null;
+  else stack.count = leftover;
+  updateUI();
+}
 function showTooltip(index, kind) {
   if (!invOpen) return;
   let stack; if (kind === 'armor') stack = armorInv[index]; else stack = inv[index];
@@ -3390,7 +3934,7 @@ function showTooltip(index, kind) {
   else if (def.kind === 'consumable') { if (def.effect) { html += `<div class="tt-stat">Effect: <span>${cap(def.effect)}</span></div>`; html += `<div class="tt-stat">Duration: <span>${def.effectDuration}s</span></div>`; } if (def.heal) html += `<div class="tt-stat">Heals: <span>${def.heal} HP</span></div>`; html += `<div class="tt-stat">Hold <span>RMB</span> to use</div>`; }
   else if (def.kind === 'throwable') {
     if (def.throwType === 'fireball') { html += `<div class="tt-stat">AOE: <span>2.5 blocks</span></div><div class="tt-stat">Damage: <span>~4 (no armor)</span></div><div class="tt-stat">Effect: <span>Knockback</span></div>`; }
-    else if (def.throwType === 'ender_pearl') { html += `<div class="tt-stat">Teleports you to hit point</div><div class="tt-stat">Self-Damage: <span>5 HP</span></div>`; }
+    else if (def.throwType === 'ender_pearl') { html += `<div class="tt-stat">Teleports you next to the hit point</div><div class="tt-stat">Self-Damage: <span>5 HP</span></div>`; }
     html += `<div class="tt-stat">RMB to throw</div>`;
   }
   else if (def.kind === 'armor') { const prot = teamUpgrades[PLAYER_TEAM.name] ? teamUpgrades[PLAYER_TEAM.name].protection : 0; html += `<div class="tt-stat">Armor Points: <span>${def.armorPoints}</span></div>`; html += `<div class="tt-stat">Damage Reduction: <span>${Math.round((def.armorPoints * 0.04 + prot * 0.04) * 100)}%</span></div>`; if (def.toughness) html += `<div class="tt-stat">Toughness: <span>+${def.toughness}</span></div>`; html += `<div class="tt-tier">Tier: ${cap(def.tierName)} · ${def.slotName}</div>`; if (prot > 0) html += `<div class="tt-ench">Protection ${prot}</div>`; html += `<div class="tt-stat">RMB to equip</div>`; }
@@ -3429,6 +3973,7 @@ function updateUI() {
   applyPlayerArmorToModel(playerModel);
   applyPlayerArmorToModel(invPreviewModel);
   setFPArm(currentSkinTex, currentSkinSlim);
+  if (chestOpen) refreshChestUI();
 }
 function syncArmorDisplay() { for (let i = 0; i < 4; i++) { const id = player.armor[ARMOR_SLOT_ORDER[i]]; armorInv[i] = id ? { id, count: 1 } : null; paintSlot(armorSlots[i], armorInv[i]); } }
 function updateArmorTier() { let t = 0; for (const k of ARMOR_SLOT_ORDER) { const id = player.armor[k]; if (id && ITEMS[id]) t = Math.max(t, ITEMS[id].tier); } player.armorTier = t; }
@@ -3445,7 +3990,8 @@ function estimateRemoteDamage(rp, amount) {
 }
 function getArmorToughness() { let t = 0; for (const k of ARMOR_SLOT_ORDER) { const id = player.armor[k]; if (id && ITEMS[id]) t += (ITEMS[id].toughness || 0); } return t; }
 document.addEventListener('mousemove', e => { cursorEl.style.left = e.clientX + 'px'; cursorEl.style.top = e.clientY + 'px'; });
-function slotClick(index) {
+function slotClick(index, e) {
+  if (chestOpen && e && e.shiftKey) { depositToChest(index); return; }
   const cur = inv[index];
   if (cursorItem) {
     if (cur && cur.id === cursorItem.id) { const max = ITEMS[cur.id].stack; const move = Math.min(max - cur.count, cursorItem.count); cur.count += move; cursorItem.count -= move; if (cursorItem.count <= 0) cursorItem = null; }
@@ -3478,7 +4024,7 @@ function equipArmorFromSlot(index, def) {
   if (!src || src.id !== def.id) return;
   src.count--; if (src.count <= 0) inv[index] = null;
   player.armor[key] = def.id;
-  if (oldId) { const remainder = addItemStack({ id: oldId, count: 1 }); if (remainder > 0) { const dir = getLookDir(); dropItemLocal(oldId, remainder, player.pos.x + dir.x * 0.5, player.pos.y + player.height * 0.6, player.pos.z + dir.z * 0.5, null, 1.4); showMessage('Inventory full — ' + ITEMS[oldId].name + ' dropped', '#ffcc44'); } }
+  if (oldId) { const remainder = addItemStack({ id: oldId, count: 1 }); if (remainder > 0) { const dir = getLookDir(); dropItemLocal(oldId, remainder, player.pos.x + dir.x * 0.5, player.pos.y + player.height * 0.6, player.pos.z + dir.z * 0.5, null, 1.4); showMessage('Inventory full - ' + ITEMS[oldId].name + ' dropped', '#ffcc44'); } }
   updateArmorTier(); updateHealthBar(); updateUI();
   showMessage('Equipped ' + def.name, '#7fe0a0');
 }
@@ -3624,7 +4170,7 @@ function spawnRemoteDrop(data) {
 }
 function removeDroppedByNetId(nid) { for (let i = droppedItems.length - 1; i >= 0; i--) { if (droppedItems[i].netId === nid) { droppedItems[i].remove(); droppedItems.splice(i, 1); } } }
 function dropHeldItem() {
-  if (invOpen || shopOpen || upgradeOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return;
+  if (invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return;
   const stack = heldStack(); if (!stack) return;
   const dir = getLookDir();
   const px = player.pos.x + dir.x * 0.6; const py = player.pos.y + player.height * 0.7; const pz = player.pos.z + dir.z * 0.6;
@@ -3716,6 +4262,46 @@ const pearlMat = new THREE.MeshStandardMaterial({ color: 0x4ae0c0, emissive: 0x1
 const fireballGeo = new THREE.SphereGeometry(0.22, 10, 8);
 const pearlGeo = new THREE.SphereGeometry(0.18, 10, 8);
 
+/* Projectiles used to detonate at the first sample inside the block they hit.
+   A blast-resistant block (end stone, obsidian, ...) then "shielded" that
+   explosion from its own centre, cancelling the fireball knockback entirely.
+   Binary-search the last free point so the explosion/teleport happens on the
+   surface instead of inside the geometry. */
+function refineImpactPoint(ax, ay, az, bx, by, bz) {
+  for (let i = 0; i < 6; i++) {
+    const mx = (ax + bx) * 0.5, my = (ay + by) * 0.5, mz = (az + bz) * 0.5;
+    if (getBlock(Math.floor(mx), Math.floor(my), Math.floor(mz))) { bx = mx; by = my; bz = mz; }
+    else { ax = mx; ay = my; az = mz; }
+  }
+  return [ax, ay, az];
+}
+
+/* Find a spot for the pearl's owner close to the contact point that the player
+   hitbox can actually occupy. Walking back along the projectile's path keeps
+   the result next to the wall instead of the old behaviour, where landing
+   inside the wall made the collision resolver pop the player onto its top. */
+function findPearlLanding(x, y, z, vx, vz) {
+  const hd = Math.hypot(vx, vz);
+  const bx = hd > 0.001 ? -vx / hd : 0, bz = hd > 0.001 ? -vz / hd : 0;
+  const sx = hd > 0.001 ? -bz : 1, sz = hd > 0.001 ? bx : 0;
+  /* Try the contact height first, then step downwards (a ceiling hit has to
+     drop below the block), and only step upwards as a last resort so the
+     player is never popped on top of a wall or ceiling. */
+  const yOffsets = [0, -0.2, -0.4, -0.6, -0.8, -1.0, -1.2, -1.4, -1.6, -1.8, -2.0, 0.3, 0.6, 0.9, 1.2];
+  const laterals = [0, 0.35, -0.35, 0.7, -0.7];
+  for (let back = 0; back <= 2.0; back += 0.15) {
+    for (const lat of laterals) {
+      const px = x + bx * back + sx * lat;
+      const pz = z + bz * back + sz * lat;
+      for (const dy of yOffsets) {
+        const py = y + dy;
+        if (!blockedAt(px, py, pz, 1.8)) return [px, py, pz];
+      }
+    }
+  }
+  return [x, y + 1.2, z];
+}
+
 class Throwable {
   constructor(type, x, y, z, vx, vy, vz, ownerIsPlayer) {
     this.type = type;
@@ -3745,7 +4331,8 @@ class Throwable {
       const ny = this.pos.y + this.vel.y * sdt;
       const nz = this.pos.z + this.vel.z * sdt;
       if (getBlock(Math.floor(nx), Math.floor(ny), Math.floor(nz))) {
-        this.pos.set(nx, ny, nz);
+        const [ix, iy, iz] = refineImpactPoint(this.pos.x, this.pos.y, this.pos.z, nx, ny, nz);
+        this.pos.set(ix, iy, iz);
         this.doImpact();
         return;
       }
@@ -3774,7 +4361,8 @@ class Throwable {
       fireballExplode(this.pos.x, this.pos.y, this.pos.z);
     } else if (this.type === 'ender_pearl' && this.ownerIsPlayer) {
       spawnGlintParticles(this.pos.x, this.pos.y, this.pos.z);
-      player.pos.set(this.pos.x, this.pos.y + 0.05, this.pos.z);
+      const [lx, ly, lz] = findPearlLanding(this.pos.x, this.pos.y, this.pos.z, this.vel.x, this.vel.z);
+      player.pos.set(lx, ly, lz);
       player.vel.set(0, -1.5, 0);
       player.onGround = false;
       maxFallY = player.pos.y; player.fallDistance = 0;
@@ -4014,6 +4602,7 @@ function getCrosshairTarget() {
 }
 function breakTime(blockId, item, teamName) {
   const def = BLOCKS[blockId]; if (!def) return 1;
+  if (def.unbreakable) return 1e9;
   let speed = 1;
   const tool = item && item.tool;
   if (tool && tool === def.tool) speed = TOOL_SPEED[item.material] || 1;
@@ -4063,6 +4652,11 @@ function broadcastBedDestroyed(teamName, byName) { const msg = { t: 'bed', team:
 function breakBlock(hit) {
   const id = getBlock(hit.x, hit.y, hit.z);
   const def = BLOCKS[id];
+  if (def && def.unbreakable) {
+    showMessage('That block is unbreakable!', '#ffcc44');
+    mineProgress = 0; mineTarget = null; crackMesh.visible = false;
+    return;
+  }
   if (def && def.bed) {
     if (def.bed === PLAYER_TEAM.name) { showMessage("You can't break your own bed!", '#ffcc44'); mineProgress = 0; mineTarget = null; crackMesh.visible = false; return; }
     let zStart = hit.z;
@@ -4097,7 +4691,7 @@ function breakBlock(hit) {
   player.attackStrengthTicker = 0;
 }
 function tryStartEating() {
-  if (invOpen || shopOpen || upgradeOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return false;
+  if (invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return false;
   if (!document.pointerLockElement) return false;
   const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
   if (!def || def.kind !== 'consumable') return false;
@@ -4120,18 +4714,26 @@ function updateEating(dt) {
   }
 }
 function tryInteract() {
-  if (invOpen || shopOpen || upgradeOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return;
+  if (invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return;
   const { entity, block } = getCrosshairTarget();
   if (entity) return;
   if (!block) return;
   if (block.id === 21) { openShop(); return; }
   if (block.id === 29) { openUpgradeShop(); return; }
+  if (block.id === 44) { openChestAt(block.x, block.y, block.z, 'normal'); return; }
+  if (block.id === 45) { openChestAt(block.x, block.y, block.z, 'ender'); return; }
   placeBlock(block);
 }
+let lastPlaceTime = 0;
 function placeBlock(hit) {
   const stack = heldStack(); if (!stack) return;
   const def = ITEMS[stack.id];
   if (!def || !def.block) return;
+  /* Debounce duplicate right-clicks from mouse chatter / OS double-clicks.
+     Only block placement is debounced, so using tools is never delayed. */
+  const now = performance.now();
+  if (now - lastPlaceTime < 100) return;
+  lastPlaceTime = now;
   const nx = hit.x + hit.face[0];
   const ny = hit.y + hit.face[1];
   const nz = hit.z + hit.face[2];
@@ -4166,7 +4768,7 @@ function placeBlock(hit) {
 }
 function updateMining(dt) {
   const locked = document.pointerLockElement === renderer.domElement;
-  const canMine = mining && !invOpen && !shopOpen && !upgradeOpen && locked && camMode !== 2 && !player.eliminated && !player.eating && !player.bowCharging && player.respawnCooldown <= 0 && !player.spectator;
+  const canMine = mining && !invOpen && !shopOpen && !upgradeOpen && !chestOpen && locked && camMode !== 2 && !player.eliminated && !player.eating && !player.bowCharging && player.respawnCooldown <= 0 && !player.spectator;
   mineNetTimer += dt;
   if (!canMine) {
     mineTarget = null; mineProgress = 0; crackMesh.visible = false;
@@ -4415,7 +5017,7 @@ function attackEntityTarget(hit) {
 }
 function updateAutoAttack(dt) {
   if (!mining) return;
-  if (invOpen || shopOpen || upgradeOpen || camMode === 2) return;
+  if (invOpen || shopOpen || upgradeOpen || chestOpen || camMode === 2) return;
   if (player.eliminated || player.eating || player.bowCharging || player.respawnCooldown > 0 || player.spectator) return;
   if (document.pointerLockElement !== renderer.domElement) return;
   const p = getAttackCooldownFraction();
@@ -4678,14 +5280,14 @@ function updateEffectDisplay(dt) {
   if (effectDisplayTimer < 0.2) return;
   effectDisplayTimer = 0;
   let html = ''; let has = false;
-  if (player.effects.speed > 0) { html += `<span style="color:#60d0ff">⚡ SPEED ${Math.ceil(player.effects.speed)}s</span>`; has = true; }
-  if (player.effects.jump > 0) { html += `<span style="color:#60ff80">↑ JUMP ${Math.ceil(player.effects.jump)}s</span>`; has = true; }
-  if (player.effects.invis > 0) { html += `<span style="color:#c060ff">◌ INVIS ${Math.ceil(player.effects.invis)}s</span>`; has = true; }
-  if (player.spawnProtection > 0) { html += `<span style="color:#7ff5e8">✵ SHIELD ${Math.ceil(player.spawnProtection)}s</span>`; has = true; }
+  if (player.effects.speed > 0) { html += `<span style="color:#60d0ff">SPEED ${Math.ceil(player.effects.speed)}s</span>`; has = true; }
+  if (player.effects.jump > 0) { html += `<span style="color:#60ff80">JUMP ${Math.ceil(player.effects.jump)}s</span>`; has = true; }
+  if (player.effects.invis > 0) { html += `<span style="color:#c060ff">INVIS ${Math.ceil(player.effects.invis)}s</span>`; has = true; }
+  if (player.spawnProtection > 0) { html += `<span style="color:#7ff5e8">SHIELD ${Math.ceil(player.spawnProtection)}s</span>`; has = true; }
   const tu = teamUpgrades[PLAYER_TEAM.name];
-  if (tu && tu.sharpness > 0) { html += `<span style="color:#c060ff">✦ SHARP ${tu.sharpness}</span>`; has = true; }
-  if (tu && tu.protection > 0) { html += `<span style="color:#7ff5e8">✜ PROT ${tu.protection}</span>`; has = true; }
-  if (tu && tu.haste > 0) { html += `<span style="color:#ffd966">⛏ HASTE ${tu.haste}</span>`; has = true; }
+  if (tu && tu.sharpness > 0) { html += `<span style="color:#c060ff">SHARP ${tu.sharpness}</span>`; has = true; }
+  if (tu && tu.protection > 0) { html += `<span style="color:#7ff5e8">PROT ${tu.protection}</span>`; has = true; }
+  if (tu && tu.haste > 0) { html += `<span style="color:#ffd966">HASTE ${tu.haste}</span>`; has = true; }
   const key = has ? html : '';
   if (key === effectDisplayKey) return;
   effectDisplayKey = key;
@@ -4698,7 +5300,7 @@ function updateEffectDisplay(dt) {
    ========================================================================== */
 function respawnPlayer() {
   player.health = player.maxHealth; player.absorption = 0; player.absorptionTimer = 0; player.regenTimer = 0;
-  player.pos.set(PLAYER_TEAM.x + 0.5, BASE_Y + 2, PLAYER_TEAM.z + 0.5);
+  player.pos.set(PLAYER_TEAM.spawnX, BASE_Y + 2, PLAYER_TEAM.spawnZ);
   player.vel.set(0, 0, 0);
   player.lastDamageSource = null; player.lastDamageTime = 0; player.hurtTime = 0;
   player.invulnerableTime = 0; player.lastHurt = 0;
@@ -4717,11 +5319,12 @@ function startRespawnCooldown() {
   player.spectatorPos.set(player.pos.x, BASE_Y + 35, player.pos.z);
   player.spectatorYaw = player.yaw; player.spectatorPitch = -0.7;
   player.health = 0; player.absorption = 0; player.absorptionTimer = 0; player.regenTimer = 0; player.hurtTime = 0;
-  player.pos.set(PLAYER_TEAM.x + 0.5, BASE_Y + 2, PLAYER_TEAM.z + 0.5);
+  player.pos.set(PLAYER_TEAM.spawnX, BASE_Y + 2, PLAYER_TEAM.spawnZ);
   player.vel.set(0, 0, 0); player.knockbackTime = 0; player.noFallDamageUntil = 0;
   maxFallY = player.pos.y;
   updateHealthBar();
   mining = false; player.eating = false; player.bowCharging = false;
+  if (chestOpen) closeChest();
   player.effects.speed = 0; player.effects.jump = 0; player.effects.invis = 0;
   document.getElementById('respawnOverlay').classList.add('show');
   document.getElementById('respawnTimer').textContent = player.respawnCooldown.toFixed(1);
@@ -4731,6 +5334,7 @@ function eliminatePlayer() {
   player.spectator = false;
   updateHealthBar();
   mining = false; player.eating = false; player.bowCharging = false;
+  if (chestOpen) closeChest();
   document.exitPointerLock();
   document.getElementById('deadOverlay').classList.add('show');
   document.getElementById('deadTeamInfo').textContent = 'You were playing as ' + PLAYER_TEAM.name;
@@ -4807,7 +5411,7 @@ function updateStatusBar() {
     const broken = teamBedBroken[team.name];
     const alive = teamAliveCount(team.name);
     const hex = '#' + team.hex.toString(16).padStart(6, '0');
-    const bedIcon = broken ? '✗' : '✓';
+    const bedIcon = broken ? 'X' : 'OK';
     const bedCls = broken ? 'bed-bad' : 'bed-ok';
     const eliminated = alive === 0;
     const isYou = team.name === PLAYER_TEAM.name;
@@ -5083,9 +5687,17 @@ function applyArmorTierToModel(model, tier) { const parts = model.userData.armor
 let currentSkinTex = null; let currentSkinSlim = false;
 let playerModel = createPlayerModel(PLAYER_TEAM.name, null, false);
 scene.add(playerModel);
+/* Inventory portrait: the model is built facing -Z, so turn it around to face
+   the camera and add a small body tilt like the vanilla inventory screen.
+   The head is counter-rotated slightly so it looks straight at the viewer
+   until the mouse moves. */
+const INV_PREVIEW_BODY_YAW = Math.PI + 0.30;
+const INV_PREVIEW_HEAD_REST = -0.30;
 let invPreviewModel = createPlayerModel(PLAYER_TEAM.name, null, false);
+invPreviewModel.rotation.y = INV_PREVIEW_BODY_YAW;
 invPreviewScene.add(invPreviewModel);
 let invPreviewHead = invPreviewModel.userData.parts.headGrp;
+if (invPreviewHead) invPreviewHead.rotation.y = INV_PREVIEW_HEAD_REST;
 
 function buildPixelToolGroup(tile, pxUnit, thickness) {
   const pixels = toolPixelData[tile] || [];
@@ -5171,15 +5783,36 @@ function setModelHeldItem(model, itemId) {
   else { mesh.rotation.set(0.1, Math.PI / 2, 0.1); mesh.position.set(0, -0.78, -0.18); }
   armR.add(mesh); model.userData.heldItemMesh = mesh;
 }
-function updatePreview() { const stack = heldStack(); setModelHeldItem(invPreviewModel, stack ? stack.id : null); applyPlayerArmorToModel(invPreviewModel); }
-previewContainer.addEventListener('mousemove', e => {
+/* The pointer is tracked across the whole inventory panel, not just the
+   portrait: the head turns to follow it and the body twists/leans a little in
+   the same direction, like a character looking at where you point. */
+const INV_PREVIEW_BODY_FOLLOW = 0.35;                    // share of the turn taken by the body
+const INV_PREVIEW_HEAD_FOLLOW = 1 - INV_PREVIEW_BODY_FOLLOW; // remainder handled by the head
+function setInvPreviewLook(clientX, clientY) {
   const rect = previewContainer.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2;
-  const dx = (e.clientX - cx) / (rect.width / 2); const dy = (e.clientY - cy) / (rect.height / 2);
-  const yaw = Math.atan2(dx, 1.2) * 0.7; const pitch = -dy * 0.35;
-  if (invPreviewHead) { invPreviewHead.rotation.y = yaw; invPreviewHead.rotation.x = pitch; }
-});
-previewContainer.addEventListener('mouseleave', () => { if (invPreviewHead) { invPreviewHead.rotation.y = 0; invPreviewHead.rotation.x = 0; } });
+  const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+  /* 220 / 200 px to full turn lets the pointer reach the far side of the item
+     grid and still produce a readable, clamped head/body rotation. */
+  const dx = clamp((clientX - cx) / 220, -1, 1);
+  const dy = clamp((clientY - cy) / 200, -1, 1);
+  const yaw = dx * 0.55;
+  const pitch = clamp(-dy * 0.40, -0.40, 0.40);
+  const bodyYaw = yaw * INV_PREVIEW_BODY_FOLLOW;
+  invPreviewModel.rotation.y = INV_PREVIEW_BODY_YAW + bodyYaw;
+  invPreviewModel.rotation.z = bodyYaw * 0.22;           // subtle lean towards the pointer
+  if (invPreviewHead) {
+    invPreviewHead.rotation.y = INV_PREVIEW_HEAD_REST + yaw * INV_PREVIEW_HEAD_FOLLOW;
+    invPreviewHead.rotation.x = pitch;
+  }
+}
+function resetInvPreviewLook() {
+  invPreviewModel.rotation.y = INV_PREVIEW_BODY_YAW;
+  invPreviewModel.rotation.z = 0;
+  if (invPreviewHead) { invPreviewHead.rotation.y = INV_PREVIEW_HEAD_REST; invPreviewHead.rotation.x = 0; }
+}
+function updatePreview() { resetInvPreviewLook(); const stack = heldStack(); setModelHeldItem(invPreviewModel, stack ? stack.id : null); applyPlayerArmorToModel(invPreviewModel); }
+invEl.addEventListener('mousemove', e => setInvPreviewLook(e.clientX, e.clientY));
+invEl.addEventListener('mouseleave', resetInvPreviewLook);
 
 const armGroup = new THREE.Group(); camera.add(armGroup);
 const fpArmMat = new THREE.MeshStandardMaterial({ color: SKIN, roughness: 0.88, metalness: 0.0, envMapIntensity: 0.5 });
@@ -5304,7 +5937,9 @@ function setPlayerSkin(skinTex, slim, dataUrl) {
   rebuildLocalPlayerModel();
   invPreviewScene.remove(invPreviewModel); disposeModel(invPreviewModel);
   invPreviewModel = createPlayerModel(PLAYER_TEAM.name, skinTex, currentSkinSlim);
+  invPreviewModel.rotation.y = INV_PREVIEW_BODY_YAW;
   invPreviewScene.add(invPreviewModel); invPreviewHead = invPreviewModel.userData.parts.headGrp;
+  if (invPreviewHead) invPreviewHead.rotation.y = INV_PREVIEW_HEAD_REST;
   updatePreview(); setFPArm(skinTex, currentSkinSlim); updateUI();
   if (dataUrl) { NET.mySkin = dataUrl; publishMySkin(); }
 }
@@ -5504,7 +6139,7 @@ function updateGenerators(dt) {
           const t = gen.cooldown;
           const accumStr = gen.accumulated > 0 ? ` [${gen.accumulated}]` : '';
           const txt = t <= 0 ? 'READY' : t.toFixed(1) + 's';
-          const full = gen.type.toUpperCase() + ' — ' + txt + accumStr;
+          const full = gen.type.toUpperCase() + ' - ' + txt + accumStr;
           if (gen._lastText !== full) { gen.labelEl.textContent = full; gen._lastText = full; }
         }
       }
@@ -5742,7 +6377,7 @@ function buyItem(entry) {
   updateShopUI();
 }
 function rebuildShopForTeam() { if (_shopBuilt) buildShopUI(); }
-function openShop() { shopOpen = true; shopEl.classList.add('open'); document.exitPointerLock(); if (!_shopBuilt) { _shopBuilt = true; buildShopUI(); } updateShopUI(); updateInstructionVisibility(); }
+function openShop() { if (chestOpen) closeChest(); shopOpen = true; shopEl.classList.add('open'); document.exitPointerLock(); if (!_shopBuilt) { _shopBuilt = true; buildShopUI(); } updateShopUI(); updateInstructionVisibility(); }
 function closeShop() { shopOpen = false; shopEl.classList.remove('open'); hideShopTip(); if (!player.eliminated && !player.spectator && NET.started) renderer.domElement.requestPointerLock(); updateInstructionVisibility(); }
 document.getElementById('shopClose').addEventListener('click', closeShop);
 
@@ -5819,7 +6454,7 @@ function buyUpgrade(up) {
   currentItemKey = null; updateItemMesh();
   effectDisplayKey = '';
 }
-function openUpgradeShop() { upgradeOpen = true; upgradeShopEl.classList.add('open'); document.exitPointerLock(); if (!_upgradeBuilt) { _upgradeBuilt = true; buildUpgradeUI(); } updateUpgradeUI(); updateInstructionVisibility(); }
+function openUpgradeShop() { if (chestOpen) closeChest(); upgradeOpen = true; upgradeShopEl.classList.add('open'); document.exitPointerLock(); if (!_upgradeBuilt) { _upgradeBuilt = true; buildUpgradeUI(); } updateUpgradeUI(); updateInstructionVisibility(); }
 function closeUpgradeShop() { upgradeOpen = false; upgradeShopEl.classList.remove('open'); hideShopTip(); if (!player.eliminated && !player.spectator && NET.started) renderer.domElement.requestPointerLock(); updateInstructionVisibility(); }
 document.getElementById('upgradeClose').addEventListener('click', closeUpgradeShop);
 
@@ -5849,7 +6484,7 @@ let _lastSunX = -99999, _lastSunY = -99999, _lastSunZ = -99999;
    (at a reduced rate) while the tab is in the background. */
 function stepWorld(dt, now) {
   if (NET.started) {
-    if (!invOpen && !shopOpen && !upgradeOpen && !chatInputWrap.classList.contains('show')) updatePlayer(dt);
+    if (!invOpen && !shopOpen && !upgradeOpen && !chestOpen && !chatInputWrap.classList.contains('show')) updatePlayer(dt);
     updateEating(dt); updateMining(dt); updateAutoAttack(dt); updateGenerators(dt);
     /* State publishing lives here, not inside updatePlayer: a spectating or
        eliminated player still has to broadcast health 0, otherwise the other
@@ -5861,6 +6496,7 @@ function stepWorld(dt, now) {
   updateArrows(dt); updateThrowables(dt);
   updateCritParticles(dt); updateEatParticles(dt); updateTrailParticles(dt);
   updateGlintParticles(dt); updateEnchantedGlint(dt); updateTNT(dt);
+  updateChestAnimations(dt);
   updateEffectDisplay(dt); updateGlints();
   updateRemoteMine();
   skyTime += dt; skyUniforms.uTime.value = skyTime; skyMesh.position.copy(camera.position);
@@ -5992,4 +6628,3 @@ window.vbwNetStats = () => ({
 });
 requestAnimationFrame(animate);
 </script></body></html>
-
