@@ -138,6 +138,57 @@
 #pingMeter.ping-bad{color:#ff7a7a;border-color:rgba(255,122,122,.45)}
 #pingMeter.ping-bad .ping-bars i:nth-child(1){opacity:.9}
 #pingMeter.ping-idle{color:#8a93a8}
+/* ---- v7.4: scoreboard, match result, countdown, settings, touch ---- */
+#scoreboard{font-size:12px;line-height:1.55;color:#fff;background:rgba(0,0,0,.4);padding:7px 10px;border-radius:5px;text-shadow:1px 1px 0 #000;min-width:168px}
+#scoreboard .sb-title{font-size:10px;letter-spacing:2px;color:#9fb4d9;margin-bottom:3px}
+#scoreboard .sb-row{display:flex;justify-content:space-between;gap:8px;padding:1px 0}
+#scoreboard .sb-team{font-weight:bold}
+#scoreboard .sb-stats{color:#c8d4e8;font-size:11px;white-space:nowrap}
+#matchOverlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(8,14,28,.94);border:3px solid #ffd966;border-radius:10px;padding:30px 60px;text-align:center;color:#fff;display:none;pointer-events:auto;z-index:120;box-shadow:0 0 60px rgba(0,0,0,.8)}
+#matchOverlay.show{display:block}
+#matchOverlay.defeat{border-color:#ff4444}
+#matchOverlay h2{margin:0 0 12px;font-size:30px;letter-spacing:5px;color:#ffd966;text-shadow:0 0 18px rgba(255,217,102,.4)}
+#matchOverlay.defeat h2{color:#ff6666;text-shadow:0 0 18px rgba(255,68,68,.4)}
+#matchOverlay p{margin:6px 0;font-size:14px;color:#c8d4e8}
+#matchOverlay .mo-stats{margin:14px 0;font-size:13px;line-height:1.8;color:#e6f0ff}
+#matchOverlay button{margin-top:12px;padding:10px 24px;background:#ffd966;border:2px solid #fff;color:#1a1400;font-family:inherit;font-size:14px;font-weight:bold;cursor:pointer;border-radius:5px;letter-spacing:2px}
+#matchOverlay button:hover{background:#ffe89a}
+#countdownOverlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;pointer-events:none;z-index:130;text-align:center}
+#countdownOverlay.show{display:block}
+#countdownOverlay .cd-num{font-family:'Press Start 2P','Courier New',monospace;font-size:64px;color:#ffd966;text-shadow:0 0 30px rgba(255,217,102,.7),0 4px 0 #6b4f00;animation:cdPop .45s ease-out}
+#countdownOverlay .cd-sub{margin-top:10px;font-size:13px;letter-spacing:3px;color:#e6f0ff;text-shadow:1px 1px 0 #000}
+@keyframes cdPop{from{transform:scale(1.8);opacity:0}to{transform:scale(1);opacity:1}}
+#settingsPanel{position:absolute;right:14px;bottom:58px;width:260px;background:rgba(10,14,26,.97);border:2px solid #33406b;border-radius:7px;padding:14px;display:none;pointer-events:auto;z-index:40;color:#e6f0ff;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+#settingsPanel.open{display:block}
+#settingsPanel h3{margin:0 0 10px;font-size:12px;letter-spacing:2px;color:#7ff5e8;text-align:center}
+#settingsPanel label{display:block;margin:9px 0 3px;color:#9fb4d9;letter-spacing:.5px}
+#settingsPanel input[type=range]{width:100%;accent-color:#7ff5e8}
+#settingsPanel .set-val{float:right;color:#ffd966}
+#settingsPanel .set-hint{margin-top:10px;font-size:10px;color:#5f7099;line-height:1.5}
+#touchControls{display:none;position:fixed;inset:0;z-index:60;pointer-events:none}
+body.touch #touchControls{display:block}
+body.touch #hotbar{bottom:92px}
+body.touch #healthBar{bottom:150px}
+body.touch #chatPanel{bottom:270px}
+body.touch #info{display:none!important}
+#touchStickZone{position:absolute;left:0;bottom:0;width:46%;height:58%;pointer-events:auto;touch-action:none}
+#touchLookZone{position:absolute;right:0;top:0;width:54%;height:100%;pointer-events:auto;touch-action:none}
+#touchStickBase{position:absolute;left:26px;bottom:26px;width:132px;height:132px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.25);pointer-events:none}
+#touchStickKnob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(127,245,232,.45);border:2px solid rgba(255,255,255,.6);pointer-events:none;box-shadow:0 0 12px rgba(127,245,232,.35)}
+.touch-btn{position:absolute;pointer-events:auto;touch-action:none;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(10,20,34,.62);border:2px solid rgba(255,255,255,.32);color:#fff;font-family:'Courier New',monospace;font-size:11px;font-weight:bold;letter-spacing:1px;text-shadow:1px 1px 0 #000;user-select:none;-webkit-user-select:none}
+.touch-btn:active{background:rgba(127,245,232,.35);border-color:#7ff5e8}
+#tbMine{right:22px;bottom:150px;width:78px;height:78px}
+#tbPlace{right:108px;bottom:118px;width:66px;height:66px}
+#tbJump{right:30px;bottom:240px;width:64px;height:64px}
+#tbSneak{right:108px;bottom:206px;width:58px;height:58px}
+#tbInv{right:184px;bottom:30px;width:52px;height:52px;font-size:10px}
+#tbShop{right:118px;bottom:30px;width:52px;height:52px;font-size:10px}
+/* Menus and the hotbar must sit above the transparent touch zones. */
+body.touch #hotbar{bottom:92px;z-index:70;pointer-events:auto}
+body.touch #inventory,body.touch #chestPanel,body.touch #shop,body.touch #upgradeShop{z-index:80}
+body.touch #deadOverlay{z-index:90}
+#lobbyHowTo{margin-top:12px;padding:10px 12px;background:rgba(127,245,232,.07);border:1px solid rgba(127,245,232,.25);border-radius:6px;font-size:11px;line-height:1.6;color:#b8c8e0;letter-spacing:.3px}
+#lobbyHowTo b{color:#7ff5e8}
 </style></head><body>
 <div id="hud">
   <div id="crosshair"></div>
@@ -154,6 +205,7 @@
       <div><span class="k">/developer</span> unlock testing commands in chat</div>
     </div>
     <div id="statusBar"></div>
+    <div id="scoreboard"></div>
     <div id="netBadge" class="net-off">not connected</div>
     <div id="devBadge">DEVELOPER MODE</div>
   </div>
@@ -180,8 +232,28 @@
   <div id="cursorItem"></div>
   <div id="deadOverlay"><h2>DEFEATED</h2><p>Your bed has been destroyed.</p><p id="deadTeamInfo"></p><button id="respawnBtn">RETURN TO LOBBY</button></div>
   <div id="respawnOverlay"><h2>SPECTATING</h2><p id="respawnTimer">5.0</p><p style="font-size:11px;opacity:.7;margin-top:8px;letter-spacing:1px;color:#aaa;font-weight:normal">WASD · SPACE / SHIFT · MOUSE</p></div>
+  <div id="matchOverlay"><h2 id="matchTitle">VICTORY</h2><p id="matchSub"></p><div class="mo-stats" id="matchStats"></div><button id="matchBtn">RETURN TO LOBBY</button></div>
+  <div id="countdownOverlay"><div class="cd-num" id="countdownNum">3</div><div class="cd-sub">GET READY</div></div>
+  <div id="settingsPanel">
+    <h3>SETTINGS</h3>
+    <label>Mouse sensitivity <span class="set-val" id="sensVal">1.00</span></label>
+    <input type="range" id="sensRange" min="0.35" max="2.5" step="0.05" value="1">
+    <label>Master volume <span class="set-val" id="volVal">50%</span></label>
+    <input type="range" id="volRange" min="0" max="1" step="0.05" value="0.5">
+    <div class="set-hint">Sensitivity also applies to touch look. Sound is generated live with WebAudio.</div>
+  </div>
+  <div id="touchControls">
+    <div id="touchLookZone"></div>
+    <div id="touchStickZone"><div id="touchStickBase"><div id="touchStickKnob"></div></div></div>
+    <div class="touch-btn" id="tbMine">MINE</div>
+    <div class="touch-btn" id="tbPlace">PLACE</div>
+    <div class="touch-btn" id="tbJump">JUMP</div>
+    <div class="touch-btn" id="tbSneak">SNEAK</div>
+    <div class="touch-btn" id="tbInv">INV</div>
+    <div class="touch-btn" id="tbShop">SHOP</div>
+  </div>
   <div id="hint"><b>VOXEL BED WARS</b><br><br>Click to play<br><span style="opacity:.7;font-size:12px">Destroy the enemy beds · protect your own</span></div>
-  <div id="skinPanel"><button id="skinBtn" type="button">SKIN</button><button id="skinResetBtn" type="button" title="Reset to default skin">Reset</button></div>
+  <div id="skinPanel"><button id="skinBtn" type="button">SKIN</button><button id="skinResetBtn" type="button" title="Reset to default skin">Reset</button><button id="settingsBtn" type="button" title="Settings">SETTINGS</button></div>
   <div id="skinToast">Drop a 64x64 PNG skin · press P</div>
 </div>
 <div id="hurtOverlay"></div>
@@ -232,6 +304,7 @@
     <div class="map-grid" id="mapGrid"></div>
     <div id="lobbyRoomCode"></div>
     <div id="lobbyStatus">Not connected.</div>
+    <div id="lobbyHowTo"><b>HOW TO PLAY</b> · Break the enemy beds, protect yours. Iron, gold, diamond and emerald generators drop resources on the islands. Press <b>E</b> for your inventory and shop, <b>RMB</b> to place/use, <b>LMB</b> to mine/attack. Buy team upgrades with diamonds. If your bed is destroyed you cannot respawn — so defend it!</div>
   </div>
   <div id="lobbyHint">Rooms are relayed by a free public server · no port forwarding needed<br>Share the code with friends · up to 4 players (one per team)</div>
 </div>
@@ -290,7 +363,21 @@
    - Reinforced Glass (id 43) kept, "Normal Glass" (id 27) removed.
    ========================================================================== */
 
-import * as THREE from 'three';
+/* three.js import with CDN fallback: an import map only names one URL, so if
+   that CDN is down the whole game would otherwise fail to boot. */
+const THREE = await (async () => {
+  const urls = [
+    'three',
+    'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js',
+    'https://unpkg.com/three@0.160.0/build/three.module.js',
+    'https://esm.sh/three@0.160.0'
+  ];
+  let lastErr = null;
+  for (const url of urls) {
+    try { return await import(url); } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('Could not load three.js');
+})();
 
 /* ============================================================================
    1. UTILITIES
@@ -315,6 +402,124 @@ const _tmpColor = new THREE.Color();
 let WORLD_SEED = 1337;
 let worldRng = mulberry32(WORLD_SEED);
 function resetWorldRng() { worldRng = mulberry32(WORLD_SEED); }
+
+/* ============================================================================
+   SETTINGS + PROCEDURAL AUDIO (no asset files)
+   ========================================================================== */
+const SETTINGS = { sensitivity: 1.0, volume: 0.5 };
+try {
+  const raw = localStorage.getItem('vbw_settings');
+  if (raw) {
+    const s = JSON.parse(raw);
+    if (typeof s.sensitivity === 'number') SETTINGS.sensitivity = clamp(s.sensitivity, 0.35, 2.5);
+    if (typeof s.volume === 'number') SETTINGS.volume = clamp(s.volume, 0, 1);
+  }
+} catch (e) { }
+function saveSettings() { try { localStorage.setItem('vbw_settings', JSON.stringify(SETTINGS)); } catch (e) { } }
+
+const SFX = (() => {
+  let ctx = null, master = null;
+  const lastAt = Object.create(null);
+  function ensure() {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      try { ctx = new AC(); } catch (e) { return null; }
+      master = ctx.createGain();
+      master.gain.value = SETTINGS.volume;
+      master.connect(ctx.destination);
+    }
+    if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) { } }
+    return ctx;
+  }
+  function guard(key, ms) {
+    const t = performance.now();
+    if (lastAt[key] && t - lastAt[key] < ms) return false;
+    lastAt[key] = t;
+    return true;
+  }
+  function tone(freq, dur, type, gain, slideTo, delay) {
+    const c = ensure(); if (!c) return;
+    const t0 = c.currentTime + (delay || 0);
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(Math.max(20, freq), t0);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20, slideTo), t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(master);
+    o.start(t0); o.stop(t0 + dur + 0.03);
+  }
+  function noise(dur, gain, cutoff) {
+    const c = ensure(); if (!c) return;
+    const len = Math.max(1, Math.floor(c.sampleRate * dur));
+    const buf = c.createBuffer(1, len, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = cutoff || 1200;
+    const g = c.createGain(); g.gain.value = gain;
+    src.connect(f); f.connect(g); g.connect(master);
+    src.start();
+  }
+  return {
+    ensure,
+    setVolume(v) { SETTINGS.volume = clamp(v, 0, 1); if (master) master.gain.value = SETTINGS.volume; saveSettings(); },
+    hit(crit) {
+      if (!guard('hit', 45)) return;
+      tone(crit ? 460 : 220, 0.09, 'square', 0.11, crit ? 190 : 120);
+      if (crit) tone(900, 0.1, 'sawtooth', 0.07, 1500);
+      noise(0.06, 0.05, 1800);
+    },
+    breakBlock() { if (!guard('brk', 45)) return; noise(0.13, 0.15, 1000); tone(150, 0.09, 'square', 0.07, 80); },
+    place() { if (!guard('place', 45)) return; tone(190, 0.06, 'square', 0.09, 120); noise(0.04, 0.04, 700); },
+    buy() { tone(660, 0.08, 'triangle', 0.11); tone(990, 0.13, 'triangle', 0.09, null, 0.07); },
+    upgrade() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.14, 'triangle', 0.10, null, i * 0.07)); },
+    bed() { if (!guard('bed', 200)) return; tone(220, 0.55, 'sawtooth', 0.16, 70); noise(0.4, 0.18, 500); tone(110, 0.7, 'square', 0.10, 45, 0.15); },
+    death() { if (!guard('death', 250)) return; tone(190, 0.5, 'sawtooth', 0.13, 65); noise(0.25, 0.08, 400); },
+    respawn() { tone(440, 0.18, 'triangle', 0.10, 880); tone(880, 0.2, 'sine', 0.07, 1320, 0.12); },
+    bowDraw() { if (!guard('bowd', 100)) return; tone(280, 0.16, 'sawtooth', 0.06, 760); },
+    bowShot() { if (!guard('bows', 60)) return; tone(760, 0.14, 'sawtooth', 0.08, 260); noise(0.08, 0.05, 2400); },
+    arrowHit() { if (!guard('arh', 50)) return; tone(1200, 0.06, 'square', 0.05, 700); },
+    explosion() { if (!guard('exp', 80)) return; noise(0.55, 0.30, 420); tone(95, 0.45, 'sawtooth', 0.16, 28); },
+    pop() { if (!guard('pop', 60)) return; tone(720, 0.05, 'sine', 0.06, 1080); },
+    pickup() { if (!guard('pick', 50)) return; tone(880, 0.06, 'sine', 0.06, 1280); },
+    eat() { if (!guard('eat', 180)) return; tone(320, 0.06, 'triangle', 0.05, 260); },
+    click() { if (!guard('click', 40)) return; tone(520, 0.04, 'square', 0.05, 420); }
+  };
+})();
+document.addEventListener('pointerdown', () => { try { SFX.ensure(); } catch (e) { } }, { passive: true });
+
+/* ---- Settings panel ---- */
+(function initSettingsUI() {
+  const panel = document.getElementById('settingsPanel');
+  const btn = document.getElementById('settingsBtn');
+  const sens = document.getElementById('sensRange');
+  const vol = document.getElementById('volRange');
+  const sensVal = document.getElementById('sensVal');
+  const volVal = document.getElementById('volVal');
+  if (!panel || !btn || !sens || !vol) return;
+  sens.value = String(SETTINGS.sensitivity);
+  vol.value = String(SETTINGS.volume);
+  sensVal.textContent = SETTINGS.sensitivity.toFixed(2);
+  volVal.textContent = Math.round(SETTINGS.volume * 100) + '%';
+  btn.addEventListener('click', e => { e.stopPropagation(); panel.classList.toggle('open'); SFX.click(); });
+  sens.addEventListener('input', () => {
+    SETTINGS.sensitivity = clamp(parseFloat(sens.value) || 1, 0.35, 2.5);
+    sensVal.textContent = SETTINGS.sensitivity.toFixed(2);
+    saveSettings();
+  });
+  vol.addEventListener('input', () => {
+    SFX.setVolume(parseFloat(vol.value) || 0);
+    volVal.textContent = Math.round(SETTINGS.volume * 100) + '%';
+  });
+  document.addEventListener('pointerdown', e => {
+    if (!panel.classList.contains('open')) return;
+    if (panel.contains(e.target) || btn.contains(e.target)) return;
+    panel.classList.remove('open');
+  }, true);
+})();
 
 /* ============================================================================
    2. TEXTURE ATLAS
@@ -966,6 +1171,88 @@ const TEAMS = [
 let PLAYER_TEAM = TEAMS[0];
 const teamBedBroken = {}; for (const t of TEAMS) teamBedBroken[t.name] = false;
 const teamUpgrades = {}; for (const t of TEAMS) teamUpgrades[t.name] = { sharpness: 0, protection: 0, haste: 0 };
+/* Team upgrades are shared state, so every client applies the same tier. The
+   purchase message is broadcast and the host also folds the current levels
+   into the retained lobby snapshot for late joiners. */
+const teamStats = {}; for (const t of TEAMS) teamStats[t.name] = { kills: 0, deaths: 0, beds: 0, finals: 0 };
+function teamNameFromPlayerName(name) {
+  if (!name) return null;
+  if (name === NET.myName) return PLAYER_TEAM.name;
+  for (const [, p] of NET.players) if (p.name === name && p.team) return p.team;
+  return null;
+}
+function recordDeath(victimTeam, killerName, final) {
+  if (teamStats[victimTeam]) teamStats[victimTeam].deaths++;
+  const kt = teamNameFromPlayerName(killerName);
+  if (kt && kt !== victimTeam && teamStats[kt]) {
+    teamStats[kt].kills++;
+    if (final) teamStats[kt].finals++;
+  }
+  updateScoreboard();
+}
+function recordBedBreak(byTeam, victimTeam) {
+  if (teamStats[byTeam]) teamStats[byTeam].beds++;
+  updateScoreboard();
+}
+function reportLocalDeath(killerName, final) {
+  recordDeath(PLAYER_TEAM.name, killerName, !!final);
+  netSend({ t: 'death', team: PLAYER_TEAM.name, killer: killerName || null, final: !!final });
+  SFX.death();
+}
+let _lastScoreboardHTML = '';
+function updateScoreboard() {
+  const el = document.getElementById('scoreboard');
+  if (!el) return;
+  let html = '<div class="sb-title">SCOREBOARD</div>';
+  for (const team of TEAMS) {
+    const s = teamStats[team.name] || { kills: 0, deaths: 0, beds: 0, finals: 0 };
+    const hex = '#' + team.hex.toString(16).padStart(6, '0');
+    html += `<div class="sb-row"><span class="sb-team" style="color:${hex}">${team.name}</span><span class="sb-stats">K ${s.kills} · D ${s.deaths} · B ${s.beds} · F ${s.finals}</span></div>`;
+  }
+  if (html === _lastScoreboardHTML) return;
+  _lastScoreboardHTML = html;
+  el.innerHTML = html;
+}
+function showMatchResult(winner) {
+  const ov = document.getElementById('matchOverlay');
+  if (!ov) return;
+  const won = winner === PLAYER_TEAM.name;
+  ov.classList.toggle('defeat', !won);
+  document.getElementById('matchTitle').textContent = won ? 'VICTORY' : 'DEFEAT';
+  document.getElementById('matchSub').textContent = won ? 'Your team survived and destroyed every enemy bed.' : (winner + ' won the match.');
+  const lines = [];
+  for (const team of TEAMS) {
+    const s = teamStats[team.name];
+    lines.push(`<span style="color:#${team.hex.toString(16).padStart(6, '0')}">${team.name}</span> — ${s.kills} kills · ${s.beds} beds · ${s.finals} finals`);
+  }
+  document.getElementById('matchStats').innerHTML = lines.join('<br>');
+  ov.classList.add('show');
+  document.exitPointerLock();
+}
+document.getElementById('matchBtn').addEventListener('click', () => { location.reload(); });
+function applyTeamUpgrade(teamName, key, lvl) {
+  const tu = teamUpgrades[teamName];
+  if (!tu || !(key in tu)) return;
+  const next = Math.max(tu[key] || 0, clamp(lvl | 0, 0, 9));
+  if (next === tu[key]) return;
+  tu[key] = next;
+  if (teamName === PLAYER_TEAM.name) {
+    try {
+      applyPlayerArmorToModel(playerModel);
+      applyPlayerArmorToModel(invPreviewModel);
+      setFPArm(currentSkinTex, currentSkinSlim);
+      currentItemKey = null; updateItemMesh();
+    } catch (e) { }
+    effectDisplayKey = '';
+    try { updateUpgradeUI(); } catch (e) { }
+  }
+  for (const rp of remotePlayers) {
+    if (rp.teamName !== teamName) continue;
+    rp.applyArmor();
+    if (typeof rp.refreshTeamUpgradeVisuals === 'function') rp.refreshTeamUpgradeVisuals();
+  }
+  updateStatusBar();
+}
 let generators = [];
 
 const MAP_OPTIONS = [
@@ -1156,7 +1443,7 @@ function buildBaseTower(team, key) {
   setBlock(bx - 1, y0, bz + 1, cfg.ironBase);
   generators.push(makeGen(new THREE.Vector3(bx - 0.5, y1, bz + 1.5), 'iron', 1.5));
   setBlock(bx + 1, y0, bz + 1, cfg.goldBase);
-  generators.push(makeGen(new THREE.Vector3(bx + 1.5, y1, bz + 1.5), 'gold', 4.0));
+  generators.push(makeGen(new THREE.Vector3(bx + 1.5, y1, bz + 1.5), 'gold', 3.0));
 
   /* Normal chest + ender chest against the outer wall. */
   setBlock(bx + sx * 3, y1, bz - 2, 44);
@@ -1309,7 +1596,7 @@ function buildSubIsland(key, mx, mz) {
   const cfg = BASE_THEMES[key];
   makeIsland(mx, mz, SUB_R, cfg.surf, cfg.sub);
   setBlock(mx, BASE_Y, mz, 22);
-  generators.push(makeGen(new THREE.Vector3(mx + 0.5, BASE_Y + 1, mz + 0.5), 'diamond', 30.0));
+  generators.push(makeGen(new THREE.Vector3(mx + 0.5, BASE_Y + 1, mz + 0.5), 'diamond', 20.0));
   /* Path to the main island. */
   const dx = mx === 0 ? 0 : -Math.sign(mx), dz = mz === 0 ? 0 : -Math.sign(mz);
   makePath(mx + dx * 4, mz + dz * 4, mx + dx * (SUB_R - 1), mz + dz * (SUB_R - 1), cfg.trim, 1);
@@ -2151,6 +2438,9 @@ function attachDataChannel(link, dc, fast) {
   dc.binaryType = 'arraybuffer';
   dc.onopen = () => {
     link.lastRecv = performance.now();
+    /* A working P2P link must reset the retry budget, otherwise a peer that
+       dropped once and reconnected can never be retried after another blip. */
+    if (PEER_TRIES.get(link.id)) PEER_TRIES.set(link.id, 0);
     if (!link.openedAt) {
       link.openedAt = performance.now();
       /* Ask for a full state packet right away instead of waiting for the next
@@ -2396,6 +2686,7 @@ function publishLobbyState() {
     t: 'lobby', hostId: NET.myId, hostName: NET.myName, players,
     teams: NET.teamsTaken, started: NET.started,
     beds: Object.assign({}, teamBedBroken),
+    upgrades: JSON.parse(JSON.stringify(teamUpgrades)),
     seed: WORLD_SEED, map: currentMapKey, ts: Date.now()
   };
   rawPublish(NT('lobby'), payload, { qos: 1, retain: true });
@@ -2406,10 +2697,19 @@ function handleLobbyState(d) {
   if (NET.hostId && NET.hostId !== d.hostId) return;
   NET.hostId = d.hostId;
   if (d.teams) NET.teamsTaken = d.teams;
-  if (d.beds && NET.started) {
+  if (d.beds) {
+    /* Also apply before startClientGame: the snapshot has to survive the
+       clearWorld() rebuild for players who join a match in progress. */
     let changed = false;
     for (const k in d.beds) if (!!teamBedBroken[k] !== !!d.beds[k]) { teamBedBroken[k] = !!d.beds[k]; changed = true; }
     if (changed) updateStatusBar();
+  }
+  if (d.upgrades) {
+    for (const team in d.upgrades) {
+      const up = d.upgrades[team];
+      if (!up) continue;
+      for (const key in up) applyTeamUpgrade(team, key, up[key]);
+    }
   }
   let rosterChanged = false;
   for (const p of (d.players || [])) {
@@ -2453,13 +2753,55 @@ function handleLobbyState(d) {
     setLobbyStatus('Connected to ' + (d.hostName || 'the host') + ' · ' + relayName() + '. Pick a team.');
   }
 }
+/* Shared 3-2-1 countdown. Runs locally on every client so the overlay is
+   frame-accurate even when packets arrive a little late. */
+let _countdownRunning = false;
+function runStartCountdown(done) {
+  if (_countdownRunning) return;
+  _countdownRunning = true;
+  const ov = document.getElementById('countdownOverlay');
+  const numEl = document.getElementById('countdownNum');
+  const pop = n => {
+    if (!numEl) return;
+    numEl.textContent = n;
+    numEl.style.animation = 'none';
+    void numEl.offsetWidth;
+    numEl.style.animation = '';
+  };
+  if (ov) ov.classList.add('show');
+  let n = 3;
+  pop(String(n));
+  SFX.click();
+  const tick = () => {
+    n--;
+    if (n > 0) { pop(String(n)); SFX.click(); setTimeout(tick, 1000); return; }
+    pop('GO!');
+    SFX.respawn();
+    setTimeout(() => {
+      if (ov) ov.classList.remove('show');
+      _countdownRunning = false;
+      try { done(); } catch (e) { console.error(e); }
+    }, 550);
+  };
+  setTimeout(tick, 1000);
+}
 function startClientGame(seed, map) {
   if (NET.started || NET.mode !== 'client') return;
   NET.started = true;
   if (typeof seed === 'number' && seed > 0) WORLD_SEED = seed;
   if (map) { currentMapKey = map; NET.mapName = map; }
+  /* clearWorld() zeroes the shared state. A client joining a match already in
+     progress has just read the retained lobby snapshot, so keep that snapshot
+     across the rebuild instead of losing bought upgrades and broken beds. */
+  const keepBeds = Object.assign({}, teamBedBroken);
+  const keepUpgrades = JSON.parse(JSON.stringify(teamUpgrades));
   clearWorld();
   buildInitialWorld();
+  for (const t of TEAMS) {
+    if (keepBeds[t.name]) teamBedBroken[t.name] = true;
+    const up = keepUpgrades[t.name];
+    if (up) for (const key in up) applyTeamUpgrade(t.name, key, up[key]);
+  }
   rebuildRemotePlayersFromRoster();
   lobbyEl.classList.add('hidden');
   beginPlayingAfterStart();
@@ -2488,7 +2830,7 @@ function openChat() {
 }
 function closeChat() {
   chatInputWrap.classList.remove('show'); chatInput.blur();
-  if (NET.started && !player.eliminated && !player.spectator && !invOpen && !shopOpen && !upgradeOpen && !chestOpen) { try { renderer.domElement.requestPointerLock(); } catch (e) { } }
+  if (NET.started && !player.eliminated && !player.spectator && !invOpen && !shopOpen && !upgradeOpen && !chestOpen) requestGamePointerLock();
 }
 
 /* ---- Developer mode & chat commands ----
@@ -2547,6 +2889,12 @@ function runChatCommand(raw) {
   }
   if (!DEV_MODE.enabled) {
     devSay('Developer mode is off. Type /developer to unlock testing commands.', '#ff8888');
+    return;
+  }
+  /* /give and /heal mutate real match state. They are fine for solo testing,
+     but in a room with other players they are a griefing vector. */
+  if (NET.players.size > 1 && (cmd === 'give' || cmd === 'heal')) {
+    devSay('Developer commands that change the match are disabled in multiplayer rooms.', '#ff8888');
     return;
   }
   switch (cmd) {
@@ -2628,6 +2976,19 @@ function setLobbyStatus(s) { if (s === _lastLobbyStatus) return; _lastLobbyStatu
 function relayName() { return relay ? relay.name : 'relay'; }
 function generateRoomCode() { const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)]; return s; }
 function newPeerId(kind) { return (kind || 'p') + Math.random().toString(36).slice(2, 9) + Math.random().toString(36).slice(2, 5); }
+/* Keep one identity per room for the lifetime of the tab. A refresh or a
+   dropped relay connection then re-uses the same peer id, so the host
+   recognises the player instead of showing a duplicate ghost entry. */
+function peerIdForRoom(code) {
+  const key = 'vbwPeer:' + String(code || '');
+  try {
+    const saved = sessionStorage.getItem(key);
+    if (saved && /^[a-z0-9]{3,40}$/i.test(saved)) return saved;
+  } catch (e) { }
+  const id = newPeerId('p');
+  try { sessionStorage.setItem(key, id); } catch (e) { }
+  return id;
+}
 function normalizeWsUrl(u) {
   u = (u || '').trim();
   if (!u) return '';
@@ -2840,6 +3201,7 @@ function pickTeam(name) {
 }
 function checkStartReady() {
   if (NET.mode !== 'host') return;
+  if (_countdownRunning || NET.started) { btnStartGame.disabled = true; return; }
   const assigned = Object.values(NET.teamsTaken).filter(Boolean).length;
   const total = Math.max(1, NET.players.size);
   btnStartGame.disabled = !(assigned === total);
@@ -2871,8 +3233,16 @@ function resetNetSession() {
   if (typeof disposeAllRemotes === 'function') disposeAllRemotes();
   PLAYER_TEAM = TEAMS[0];
   matchEvolved = false;
+  for (const t of TEAMS) {
+    teamBedBroken[t.name] = false;
+    teamUpgrades[t.name] = { sharpness: 0, protection: 0, haste: 0 };
+    teamStats[t.name] = { kills: 0, deaths: 0, beds: 0, finals: 0 };
+  }
+  updateScoreboard();
+  document.getElementById('matchOverlay').classList.remove('show');
   player.eliminated = false;
   player.spectator = false;
+  player.respawning = false;
   player.respawnCooldown = 0;
   player.health = player.maxHealth;
   player.knockbackTime = 0;
@@ -2894,16 +3264,21 @@ function startGameAsHost() {
   netSend({ t: 'start', seed: WORLD_SEED, map: currentMapKey });
   publishLobbyState();
   lobbyEl.classList.add('hidden');
-  player.eliminated = false; player.spectator = false; player.respawnCooldown = 0;
+  player.eliminated = false; player.spectator = false; player.respawning = false; player.respawnCooldown = 0;
   player.health = player.maxHealth;
   player.pos.set(PLAYER_TEAM.spawnX, BASE_Y + 2, PLAYER_TEAM.spawnZ);
   player.vel.set(0, 0, 0); player.knockbackTime = 0; maxFallY = player.pos.y;
   rebuildRemotePlayersFromRoster();
   appendChat('[System]', 'Game started on ' + (MAP_OPTIONS.find(m => m.key === currentMapKey)?.name || currentMapKey) + '!', '#ffd966');
-  if (!player.spectator) try { renderer.domElement.requestPointerLock(); } catch (e) { }
+  if (!player.spectator) requestGamePointerLock();
   updateStatusBar(); rebuildShopForTeam();
 }
-btnStartGame.addEventListener('click', () => startGameAsHost());
+btnStartGame.addEventListener('click', () => {
+  if (NET.mode !== 'host' || NET.started) return;
+  btnStartGame.disabled = true;
+  netSend({ t: 'countdown', seed: WORLD_SEED, map: currentMapKey });
+  runStartCountdown(() => startGameAsHost());
+});
 
 /* ---- Transport lifecycle ---- */
 function attachRelayHandlers(client) {
@@ -3139,7 +3514,7 @@ btnJoinRoom.addEventListener('click', async () => {
   resetNetSession();
   NET.myName = (joinNameInput.value.trim() || 'Player').slice(0, 16);
   NET.mode = 'client';
-  NET.myId = newPeerId('p');
+  NET.myId = peerIdForRoom(code);
   NET.roomCode = code;
   NET.players.set(NET.myId, { name: NET.myName, skin: NET.mySkin, slim: !!NET.mySlim, team: null, isHost: false });
   roomCodeEl.textContent = code;
@@ -3221,8 +3596,13 @@ function handleNetData(data, fromId) {
       break;
     }
     case 'team-reject': { setLobbyStatus('Team ' + data.team + ' is already taken.'); break; }
+    case 'countdown': {
+      if (NET.mode !== 'client' || NET.started || _countdownRunning) break;
+      runStartCountdown(() => startClientGame(data.seed, data.map));
+      break;
+    }
     case 'start': {
-      if (NET.mode !== 'client' || NET.started) break;
+      if (NET.mode !== 'client' || NET.started || _countdownRunning) break;
       startClientGame(data.seed, data.map);
       break;
     }
@@ -3248,6 +3628,17 @@ function handleNetData(data, fromId) {
       if (!Array.isArray(data.b)) break;
       for (const e of data.b) if (e && e.length === 4) applyRemoteBlock(e[0], e[1], e[2], e[3]);
       processDirty(24);
+      break;
+    }
+    case 'chest': {
+      applyRemoteChest(data);
+      break;
+    }
+    case 'chestq': {
+      if (NET.started && data && Number.isFinite(data.x)) {
+        const key = chestKey(data.x, data.y, data.z);
+        if (chestStorage.has(key)) netSendTo(src, { t: 'chest', x: data.x, y: data.y, z: data.z, b: serializeChest(chestStorage.get(key)) });
+      }
       break;
     }
     case 'tnt': {
@@ -3283,12 +3674,23 @@ function handleNetData(data, fromId) {
       handleSkinTopic(data.id, { skin: data.skin, slim: !!data.slim });
       break;
     }
+    case 'tupg': {
+      applyTeamUpgrade(data.team, data.key, data.lvl);
+      if (NET.mode === 'host') publishLobbyStateSoon();
+      break;
+    }
+    case 'death': {
+      if (data.team) recordDeath(data.team, data.killer, !!data.final);
+      break;
+    }
     case 'bed': {
       const tname = data.team;
       if (tname && !teamBedBroken[tname]) {
         teamBedBroken[tname] = true;
+        if (data.byTeam) recordBedBreak(data.byTeam, tname);
         updateStatusBar();
         addEventMessage('<b style="color:#ff8888">' + tname + "'s bed</b> was destroyed by <b>" + (data.by || 'a player') + '</b>', '#ff6666');
+        SFX.bed();
       }
       break;
     }
@@ -3313,18 +3715,34 @@ function handleNetData(data, fromId) {
 }
 
 function beginPlayingAfterStart() {
-  player.eliminated = false; player.spectator = false; player.respawnCooldown = 0;
+  player.eliminated = false; player.spectator = false; player.respawning = false; player.respawnCooldown = 0;
   player.health = player.maxHealth;
   player.pos.set(PLAYER_TEAM.spawnX, BASE_Y + 2, PLAYER_TEAM.spawnZ);
   player.vel.set(0, 0, 0); player.knockbackTime = 0; maxFallY = player.pos.y;
   updateStatusBar();
-  try { renderer.domElement.requestPointerLock(); } catch (e) { }
+  requestGamePointerLock();
 }
 function applyRemoteBlock(x, y, z, id) {
+  const key = x + ',' + y + ',' + z;
+  /* A bed/chest may be removed, replaced or (in dev/future modes) placed.
+     Clear the old entity mesh in every case, then recreate it if the new
+     block is an entity. buildChunk also reconciles the whole chunk later. */
+  if (bedMeshes.has(key)) { scene.remove(bedMeshes.get(key)); bedMeshes.delete(key); }
+  if (chestMeshes.has(key)) {
+    const cm = chestMeshes.get(key); scene.remove(cm);
+    cm.traverse(o => { if (o.isMesh && o.geometry) o.geometry.dispose(); });
+    chestMeshes.delete(key);
+  }
   setBlock(x, y, z, id);
   markDirty(x, y, z);
   recordBlockChange(x, y, z, id);
-  if (id === 0) { const key = x + ',' + y + ',' + z; if (bedMeshes.has(key)) { scene.remove(bedMeshes.get(key)); bedMeshes.delete(key); } }
+  const def = id ? BLOCKS[id] : null;
+  if (def && def.bed && getBlock(x, y, z - 1) !== id) {
+    const mesh = makeBedMesh(id); mesh.position.set(x, y, z); scene.add(mesh); bedMeshes.set(key, mesh);
+  }
+  if (def && def.chest) {
+    const mesh = makeChestMesh(id, x, z); mesh.position.set(x + 0.5, y, z + 0.5); scene.add(mesh); chestMeshes.set(key, mesh);
+  }
 }
 
 /* ============================================================================
@@ -3361,7 +3779,7 @@ class RemotePlayer {
     this.renderPos = this.pos.clone();
     this.targetPos = this.pos.clone(); this.vel = new THREE.Vector3();
     this.targetYaw = 0; this.targetPitch = 0; this.yaw = 0; this.pitch = 0;
-    this.height = 1.8; this.health = 20; this.maxHealth = 20; this.alive = true;
+    this.height = 1.8; this.health = 20; this.maxHealth = 20; this.alive = true; this.respawning = false;
     this.onGround = true; this.sneak = false;
     this.heldItemId = 'wood_sword'; this._lastHeldId = null;
     this.miningActive = false;
@@ -3423,7 +3841,7 @@ class RemotePlayer {
      else's screen and effectively soak hits. Show the hit locally right away;
      the victim's next state packet is authoritative and overrides this guess. */
   applyOptimisticDamage(amount, canKill) {
-    if (!this.alive || !(amount > 0)) return;
+    if (!this.alive || this.respawning || !(amount > 0)) return;
     const next = this.health - estimateRemoteDamage(this, amount);
     /* While the victim is still reporting in, leave a sliver of health so a
        slightly pessimistic estimate can never fake their death. */
@@ -3461,14 +3879,20 @@ class RemotePlayer {
       this.stateBuffer.push({ t: now, p: [data.p[0], data.p[1], data.p[2]], ry: (data.r && data.r.length === 2) ? data.r[0] : this.targetYaw, rp: (data.r && data.r.length === 2) ? data.r[1] : this.targetPitch });
       while (this.stateBuffer.length > 60) this.stateBuffer.shift();
     }
+    if (typeof data.rs === 'boolean') this.respawning = data.rs;
     if (typeof data.h === 'number') {
-      const wasAlive = this.alive;
+      const wasVisible = this.alive && !this.respawning;
       if (data.h < this.health - 0.01) this.flashHurt();
-      this.health = data.h; this.alive = this.health > 0;
+      this.health = data.h;
+      /* A respawning player is still "alive" for the scoreboard/status bar,
+         but their model and nametag stay hidden until they actually respawn. */
+      this.alive = this.health > 0 || this.respawning;
       /* Authoritative report: any tentative local death guess is settled now. */
       this._optDead = false;
-      if (wasAlive && !this.alive) { this.model.visible = false; this.nameTag.style.display = 'none'; addEventMessage('<b>' + this.name + '</b> was slain', '#ffaaaa'); }
-      else if (!wasAlive && this.alive) { this.model.visible = true; this.nameTag.style.display = 'block'; }
+      const visible = this.health > 0;
+      this.model.visible = visible;
+      this.nameTag.style.display = visible ? 'block' : 'none';
+      if (wasVisible && !visible) addEventMessage('<b>' + this.name + '</b> was slain', '#ffaaaa');
       this._lastTagHp = -1;
     }
     if (data.i !== undefined && data.i !== this.heldItemId) { this.heldItemId = data.i; }
@@ -3528,6 +3952,13 @@ class RemotePlayer {
       for (const k of slotMap[slot]) setArmorPieceTier(parts[k], tierIdx, false);
     }
   }
+  refreshTeamUpgradeVisuals() {
+    if (!this.model) return;
+    this._lastHeldId = null;
+    setModelHeldItem(this.model, this.heldItemId);
+    const tu = teamUpgrades[this.teamName];
+    if (tu && tu.sharpness > 0 && this.model.userData.heldItemMesh) applyGlintToMesh(this.model.userData.heldItemMesh);
+  }
   dispose() { if (this.model) scene.remove(this.model); if (this.nameTag) this.nameTag.remove(); }
   update(dt) {
     this.updateInterpolation();
@@ -3549,7 +3980,7 @@ class RemotePlayer {
     }
     if (this.heldItemId !== this._lastHeldId) { this._lastHeldId = this.heldItemId; setModelHeldItem(this.model, this.heldItemId); }
     this.applyArmor();
-    if (this.alive) { animateModel(this.model, dt, this, false); }
+    if (this.alive && !this.respawning) { this.model.visible = true; animateModel(this.model, dt, this, false); }
     else { this.model.visible = false; this.nameTag.style.display = 'none'; }
   }
 }
@@ -3620,7 +4051,7 @@ const player = {
      ticking (background throttle, freeze, hitch) must never keep stale
      invulnerability, otherwise hiding the tab becomes a free damage shield. */
   invulnerableUntil: 0, spawnProtectUntil: 0,
-  fallDistance: 0, respawnCooldown: 0, lastDamageSource: null, lastDamageTime: 0, hurtTime: 0,
+  fallDistance: 0, respawnCooldown: 0, respawning: false, lastDamageSource: null, lastDamageTime: 0, hurtTime: 0,
   bowCharging: false, bowCharge: 0, effects: { speed: 0, jump: 0, invis: 0 },
   spectator: false,
   spectatorPos: new THREE.Vector3(), spectatorYaw: 0, spectatorPitch: 0,
@@ -3657,6 +4088,20 @@ function getAttackCooldownFraction() {
 }
 
 const keys = {};
+/* Touch devices cannot use pointer lock, so "locked" means either the real
+   pointer lock or the virtual touch controls being active. */
+function isTouchMode() { return document.body.classList.contains('touch'); }
+function isPlayLocked() { return isTouchMode() || document.pointerLockElement === renderer.domElement; }
+/* requestPointerLock() rejects when the browser withholds the gesture (for
+   example after the start countdown). Swallow that rejection: the player can
+   always click the canvas to lock, and it must not surface as an error. */
+function requestGamePointerLock() {
+  if (isTouchMode()) return;
+  try {
+    const p = renderer.domElement.requestPointerLock();
+    if (p && typeof p.catch === 'function') p.catch(() => { });
+  } catch (e) { }
+}
 let lastW = 0;
 let invOpen = false, shopOpen = false, upgradeOpen = false, chestOpen = false, camMode = 0;
 let camYaw = 0, camPitch = 0;
@@ -3725,10 +4170,137 @@ addEventListener('mouseup', e => {
 });
 addEventListener('blur', () => { mining = false; rightMouseHeld = false; });
 addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---- Touch controls (phones/tablets) -------------------------------------
+   Left thumb drives a virtual stick, right thumb looks around, and the round
+   buttons mirror the mouse/keyboard actions. Pointer lock is bypassed through
+   isPlayLocked(). */
+(function initTouchControls() {
+  const mq = window.matchMedia ? window.matchMedia.bind(window) : null;
+  const coarse = !!(mq && mq('(pointer: coarse)').matches);
+  const fine = !!(mq && mq('(pointer: fine)').matches);
+  /* Hybrid laptops with a mouse keep pointer lock; phones/tablets get the
+     virtual controls because they have no fine pointer at all. */
+  const hasTouch = !fine && (coarse || ('ontouchstart' in window) || navigator.maxTouchPoints > 0);
+  if (!hasTouch) return;
+  document.body.classList.add('touch');
+  /* Tapping a hotbar slot selects it instead of starting an inventory drag. */
+  const hotbarEl = document.getElementById('hotbar');
+  if (hotbarEl) hotbarEl.addEventListener('click', e => {
+    if (!NET.started || invOpen) return;
+    const slot = e.target && e.target.closest ? e.target.closest('.slot') : null;
+    if (!slot) return;
+    const idx = Array.prototype.indexOf.call(hotbarEl.children, slot);
+    if (idx < 0) return;
+    e.preventDefault(); e.stopPropagation();
+    selectedSlot = idx;
+    player.eating = false;
+    player.attackStrengthTicker = 0;
+    updateUI();
+  }, true);
+  const stickZone = document.getElementById('touchStickZone');
+  const stickBase = document.getElementById('touchStickBase');
+  const stickKnob = document.getElementById('touchStickKnob');
+  const lookZone = document.getElementById('touchLookZone');
+  if (!stickZone || !lookZone) return;
+  const STICK_R = 52, DEAD = 0.18;
+  let stickId = null, stickCX = 0, stickCY = 0;
+  const clearMove = () => {
+    keys['KeyW'] = keys['KeyA'] = keys['KeyS'] = keys['KeyD'] = false;
+    player.sprint = false;
+  };
+  function applyStick(e) {
+    const dx = e.clientX - stickCX, dy = e.clientY - stickCY;
+    const d = Math.hypot(dx, dy) || 1;
+    const k = Math.min(1, d / STICK_R);
+    const nx = (dx / d) * k, ny = (dy / d) * k;
+    if (stickKnob) stickKnob.style.transform = `translate(${nx * STICK_R}px, ${ny * STICK_R}px)`;
+    keys['KeyW'] = ny < -DEAD;
+    keys['KeyS'] = ny > DEAD;
+    keys['KeyA'] = nx < -DEAD;
+    keys['KeyD'] = nx > DEAD;
+    player.sprint = keys['KeyW'] && k > 0.9;
+  }
+  stickZone.addEventListener('pointerdown', e => {
+    if (stickId !== null || !NET.started) return;
+    stickId = e.pointerId;
+    const r = stickBase.getBoundingClientRect();
+    stickCX = r.left + r.width / 2; stickCY = r.top + r.height / 2;
+    try { stickZone.setPointerCapture(e.pointerId); } catch (err) { }
+    applyStick(e); e.preventDefault();
+  });
+  stickZone.addEventListener('pointermove', e => {
+    if (e.pointerId !== stickId) return;
+    applyStick(e); e.preventDefault();
+  });
+  const endStick = e => {
+    if (e.pointerId !== stickId) return;
+    stickId = null;
+    if (stickKnob) stickKnob.style.transform = '';
+    clearMove();
+  };
+  stickZone.addEventListener('pointerup', endStick);
+  stickZone.addEventListener('pointercancel', endStick);
+
+  let lookId = null, lastLX = 0, lastLY = 0;
+  lookZone.addEventListener('pointerdown', e => {
+    if (lookId !== null || !NET.started) return;
+    lookId = e.pointerId; lastLX = e.clientX; lastLY = e.clientY;
+    try { lookZone.setPointerCapture(e.pointerId); } catch (err) { }
+    e.preventDefault();
+  });
+  lookZone.addEventListener('pointermove', e => {
+    if (e.pointerId !== lookId) return;
+    if (invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated) return;
+    const dx = e.clientX - lastLX, dy = e.clientY - lastLY;
+    lastLX = e.clientX; lastLY = e.clientY;
+    const s = 0.0028 * SETTINGS.sensitivity;
+    if (player.spectator) {
+      player.spectatorYaw -= dx * s;
+      player.spectatorPitch = clamp(player.spectatorPitch - dy * s, -Math.PI / 2 + 0.02, Math.PI / 2 - 0.02);
+    } else {
+      player.yaw -= dx * s;
+      player.pitch = clamp(player.pitch - dy * s, -Math.PI / 2 + 0.02, Math.PI / 2 - 0.02);
+    }
+    e.preventDefault();
+  });
+  const endLook = e => { if (e.pointerId === lookId) lookId = null; };
+  lookZone.addEventListener('pointerup', endLook);
+  lookZone.addEventListener('pointercancel', endLook);
+
+  function bindTouchBtn(id, onDown, onUp) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (onDown) onDown(); });
+    const up = e => { e.preventDefault(); if (onUp) onUp(); };
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+    el.addEventListener('pointerleave', up);
+  }
+  bindTouchBtn('tbMine', () => {
+    if (!NET.started || player.eliminated || player.respawnCooldown > 0) return;
+    mining = true; tryManualAttack();
+  }, () => { mining = false; });
+  bindTouchBtn('tbPlace', () => {
+    if (!NET.started || player.eliminated || player.respawnCooldown > 0) return;
+    const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
+    if (def && def.kind === 'bow') startBowCharge();
+    else if (def && def.kind === 'throwable') throwHeldItem();
+    else if (!tryStartEating()) tryInteract();
+  }, () => {
+    rightMouseHeld = false;
+    if (player.bowCharging) releaseBow();
+    player.eating = false;
+  });
+  bindTouchBtn('tbJump', () => { keys['Space'] = true; }, () => { keys['Space'] = false; });
+  bindTouchBtn('tbSneak', () => { keys['ShiftLeft'] = !keys['ShiftLeft']; });
+  bindTouchBtn('tbInv', () => { if (NET.started) toggleInventory(); });
+  bindTouchBtn('tbShop', () => { if (NET.started) openShop(); });
+})();
 document.getElementById('hint').addEventListener('click', () => { if (NET.started) renderer.domElement.requestPointerLock(); });
 renderer.domElement.addEventListener('click', () => { if (NET.started && !invOpen && !shopOpen && !upgradeOpen && !chestOpen && !player.eliminated && !player.spectator) renderer.domElement.requestPointerLock(); });
 function updateInstructionVisibility() {
-  const locked = document.pointerLockElement === renderer.domElement;
+  const locked = isPlayLocked();
   const infoEl = document.getElementById('info');
   const showInfo = !locked || invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated;
   infoEl.classList.toggle('hidden', !showInfo);
@@ -3797,6 +4369,38 @@ function getChestStorage(x, y, z) {
   if (!arr) { arr = new Array(27).fill(null); chestStorage.set(key, arr); }
   return arr;
 }
+/* Normal chests are team chests in Bed Wars; ender chests stay personal.
+   Every mutation is broadcast as the full 27-slot array, which is small and
+   makes the sync idempotent. */
+function serializeChest(storage) {
+  return storage.map(s => (s && ITEMS[s.id]) ? [s.id, s.count | 0] : 0);
+}
+function deserializeChest(raw) {
+  const out = new Array(27).fill(null);
+  if (!Array.isArray(raw)) return out;
+  for (let i = 0; i < 27 && i < raw.length; i++) {
+    const e = raw[i];
+    if (Array.isArray(e) && e.length === 2 && ITEMS[e[0]] && e[1] > 0) out[i] = { id: e[0], count: Math.min(ITEMS[e[0]].stack, e[1] | 0) };
+  }
+  return out;
+}
+function broadcastChest(x, y, z) {
+  if (!NET.started || !NET.myId) return;
+  netSend({ t: 'chest', x, y, z, b: serializeChest(getChestStorage(x, y, z)) });
+}
+function requestChest(x, y, z) {
+  if (!NET.started || !NET.myId) return;
+  netSend({ t: 'chestq', x, y, z });
+}
+function applyRemoteChest(data) {
+  if (!data || !Array.isArray(data.b)) return;
+  const key = chestKey(data.x, data.y, data.z);
+  chestStorage.set(key, deserializeChest(data.b));
+  if (activeChest && activeChest.key === key && activeChest.type === 'normal') {
+    chestInv = chestStorage.get(key);
+    refreshChestUI();
+  }
+}
 function mergeIntoStorage(storage, stack) {
   if (!stack) return 0;
   const def = ITEMS[stack.id]; if (!def) return stack.count;
@@ -3844,7 +4448,8 @@ function openChestAt(x, y, z, type) {
   activeChest = { x, y, z, type, key: chestKey(x, y, z) };
   chestInv = type === 'ender' ? enderChestInv : getChestStorage(x, y, z);
   chestOpen = true;
-  chestTitleEl.textContent = type === 'ender' ? 'ENDER CHEST' : 'CHEST';
+  chestTitleEl.textContent = type === 'ender' ? 'ENDER CHEST' : 'TEAM CHEST';
+  if (type === 'normal') requestChest(x, y, z);
   chestEl.classList.add('open');
   document.exitPointerLock();
   mining = false; player.eating = false; player.bowCharging = false;
@@ -3870,7 +4475,7 @@ function closeChest() {
   if (activeChest) { const mesh = chestMeshes.get(activeChest.key); if (mesh) mesh.userData.openTarget = 0; }
   activeChest = null; chestInv = null;
   updateUI();
-  if (!player.eliminated && !player.spectator && NET.started) renderer.domElement.requestPointerLock();
+  if (!player.eliminated && !player.spectator && NET.started) requestGamePointerLock();
   updateInstructionVisibility();
 }
 function clearChestState() {
@@ -3882,6 +4487,9 @@ function clearChestState() {
   chestStorage.clear();
   enderChestInv.fill(null);
 }
+function syncActiveChest() {
+  if (activeChest && activeChest.type === 'normal') broadcastChest(activeChest.x, activeChest.y, activeChest.z);
+}
 function chestSlotClick(index, e) {
   if (!chestInv) return;
   const cur = chestInv[index];
@@ -3890,7 +4498,7 @@ function chestSlotClick(index, e) {
     const leftover = addItemStack(cur);
     if (leftover <= 0) chestInv[index] = null;
     else cur.count = leftover;
-    updateUI();
+    syncActiveChest(); updateUI();
     return;
   }
   if (cursorItem) {
@@ -3901,14 +4509,14 @@ function chestSlotClick(index, e) {
       if (cursorItem.count <= 0) cursorItem = null;
     } else { chestInv[index] = cursorItem; cursorItem = cur || null; }
   } else if (cur) { cursorItem = cur; chestInv[index] = null; }
-  updateUI();
+  syncActiveChest(); updateUI();
 }
 function depositToChest(index) {
   const stack = inv[index]; if (!stack || !chestInv) return;
   const leftover = mergeIntoStorage(chestInv, stack);
   if (leftover <= 0) inv[index] = null;
   else stack.count = leftover;
-  updateUI();
+  syncActiveChest(); updateUI();
 }
 function showTooltip(index, kind) {
   if (!invOpen) return;
@@ -4057,7 +4665,7 @@ function toggleInventory() {
   else {
     hideTooltip();
     if (cursorItem) { const leftover = addItemStack(cursorItem); if (leftover > 0) { const dir = getLookDir(); dropItemLocal(cursorItem.id, leftover, player.pos.x + dir.x * 0.5, player.pos.y + player.height * 0.6, player.pos.z + dir.z * 0.5, null, 1.4); } cursorItem = null; }
-    if (!player.eliminated && !player.spectator && NET.started) renderer.domElement.requestPointerLock();
+    if (!player.eliminated && !player.spectator && NET.started) requestGamePointerLock();
   }
   updateUI();
 }
@@ -4141,6 +4749,7 @@ class DroppedItem {
       const dy = (player.pos.y + player.height * 0.5) - this.pos.y;
       if (Math.hypot(dx, dz) < 1.4 && Math.abs(dy) < 1.8 && !player.spectator && !player.eliminated) {
         addItem(this.itemId, this.count);
+        SFX.pickup();
         if (this.netId) netSend({ t: 'pickup', nid: this.netId, _from: NET.myId });
         this.remove();
       }
@@ -4235,6 +4844,7 @@ function startBowCharge() {
   if (player.eliminated || player.respawnCooldown > 0 || player.spectator) return;
   if (countItem('arrow') <= 0) { showMessage('No arrows!', '#ff6666'); return; }
   player.bowCharging = true; player.bowCharge = 0;
+  SFX.bowDraw();
 }
 function releaseBow() {
   if (!player.bowCharging) return;
@@ -4251,7 +4861,7 @@ function releaseBow() {
   const damage = charge * (5 + power * 4);
   const knockback = 1 + punch * 1.5;
   const a = new Arrow(eye.x + dir.x * 0.4, eye.y + dir.y * 0.4, eye.z + dir.z * 0.4, dir.x * speed, dir.y * speed + 1.5, dir.z * speed, damage, knockback, true);
-  arrows.push(a); startSwing();
+  arrows.push(a); startSwing(); SFX.bowShot();
 }
 function updateArrows(dt) { for (let i = arrows.length - 1; i >= 0; i--) { arrows[i].update(dt); if (arrows[i].removed) arrows.splice(i, 1); } }
 
@@ -4492,6 +5102,7 @@ function updateTNT(dt) {
   }
 }
 function explodeAt(ex, ey, ez, radius) {
+  SFX.explosion();
   const r = Math.ceil(radius);
   const cx = Math.floor(ex), cy = Math.floor(ey), cz = Math.floor(ez);
   for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) for (let dz = -r; dz <= r; dz++) {
@@ -4648,7 +5259,7 @@ function addEventMessage(html, color) {
 }
 function getKillerName(entity) { if (!entity || !entity.lastDamageSource) return null; if (performance.now() - (entity.lastDamageTime || 0) > 5000) return null; return entity.lastDamageSource; }
 function broadcastBlock(x, y, z, id) { queueBlockChange(x, y, z, id); }
-function broadcastBedDestroyed(teamName, byName) { const msg = { t: 'bed', team: teamName, by: byName, _from: NET.myId }; netSend(msg); }
+function broadcastBedDestroyed(teamName, byName) { const msg = { t: 'bed', team: teamName, by: byName, byTeam: PLAYER_TEAM.name, _from: NET.myId }; netSend(msg); }
 function breakBlock(hit) {
   const id = getBlock(hit.x, hit.y, hit.z);
   const def = BLOCKS[id];
@@ -4665,6 +5276,8 @@ function breakBlock(hit) {
     markDirty(hit.x, hit.y, zStart); markDirty(hit.x, hit.y, zStart + 1);
     broadcastBlock(hit.x, hit.y, zStart, 0); broadcastBlock(hit.x, hit.y, zStart + 1, 0);
     teamBedBroken[def.bed] = true;
+    recordBedBreak(PLAYER_TEAM.name, def.bed);
+    SFX.bed();
     showMessage(def.bed + ' Bed destroyed!', '#ff6666');
     addEventMessage(`<b style="color:#ff8888">${def.bed}'s bed</b> was destroyed by <b>${NET.myName}</b>`, '#ff6666');
     broadcastBedDestroyed(def.bed, NET.myName);
@@ -4688,11 +5301,12 @@ function breakBlock(hit) {
   setBlock(hit.x, hit.y, hit.z, 0); markDirty(hit.x, hit.y, hit.z);
   broadcastBlock(hit.x, hit.y, hit.z, 0);
   if (def) dropItemLocal('b' + id, 1, hit.x + 0.5, hit.y + 0.4, hit.z + 0.5, null, 0.6);
+  SFX.breakBlock();
   player.attackStrengthTicker = 0;
 }
 function tryStartEating() {
   if (invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return false;
-  if (!document.pointerLockElement) return false;
+  if (!isPlayLocked()) return false;
   const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
   if (!def || def.kind !== 'consumable') return false;
   if (!def.effect && player.health >= player.maxHealth) return false;
@@ -4764,10 +5378,11 @@ function placeBlock(hit) {
     else { setBlock(nx, ny, nz, blockId); markDirty(nx, ny, nz); broadcastBlock(nx, ny, nz, blockId); }
   }
   stack.count--; if (stack.count <= 0) inv[selectedSlot] = null;
+  SFX.place();
   updateUI(); startSwing();
 }
 function updateMining(dt) {
-  const locked = document.pointerLockElement === renderer.domElement;
+  const locked = isPlayLocked();
   const canMine = mining && !invOpen && !shopOpen && !upgradeOpen && !chestOpen && locked && camMode !== 2 && !player.eliminated && !player.eating && !player.bowCharging && player.respawnCooldown <= 0 && !player.spectator;
   mineNetTimer += dt;
   if (!canMine) {
@@ -4995,6 +5610,7 @@ function attackEntityTarget(hit) {
 
   player.attackStrengthTicker = 0;
   startSwing();
+  SFX.hit(isCrit);
 
   let dxv = rp.renderPos.x - player.pos.x, dzv = rp.renderPos.z - player.pos.z;
   const dd = Math.hypot(dxv, dzv) || 1; dxv /= dd; dzv /= dd;
@@ -5019,7 +5635,7 @@ function updateAutoAttack(dt) {
   if (!mining) return;
   if (invOpen || shopOpen || upgradeOpen || chestOpen || camMode === 2) return;
   if (player.eliminated || player.eating || player.bowCharging || player.respawnCooldown > 0 || player.spectator) return;
-  if (document.pointerLockElement !== renderer.domElement) return;
+  if (!isPlayLocked()) return;
   const p = getAttackCooldownFraction();
   if (p < 0.999) return;
   const { entity } = getCrosshairTarget();
@@ -5040,7 +5656,7 @@ const NET_SEND_INTERVAL = 0.033;          // 30 Hz while moving: smooth without 
 const NET_IDLE_SEND_INTERVAL = 0.75;      // standing still: a keep-alive every 750 ms is enough
 const NET_KEYFRAME_INTERVAL = 1000;       // repeat the optional fields once a second so a lost packet self-heals
 let netSeqCounter = 0;
-const _lastSentState = { px: 99999, py: 99999, pz: 99999, yaw: 999, pitch: 999, hp: -1, item: null, sneak: null, mining: null, sw: null, ar: '', lastTime: 0, lastFull: 0 };
+const _lastSentState = { px: 99999, py: 99999, pz: 99999, yaw: 999, pitch: 999, hp: -1, item: null, sneak: null, mining: null, sw: null, ar: '', rs: null, lastTime: 0, lastFull: 0 };
 function sendLocalState() {
   if (!NET.started) return;
   if (NET.mode !== 'host' && NET.mode !== 'client') return;
@@ -5052,18 +5668,19 @@ function sendLocalState() {
   const sw = swinging && swingT < 0.2;
   const arKey = (player.armor.helmet || '') + '|' + (player.armor.chest || '') + '|' + (player.armor.legs || '') + '|' + (player.armor.boots || '');
   const mg = !!(mining && mineTarget);
+  const rs = !!player.respawning;
   const now = performance.now();
   const distSq = (px - _lastSentState.px) ** 2 + (py - _lastSentState.py) ** 2 + (pz - _lastSentState.pz) ** 2;
   const rotChanged = Math.abs(ry - _lastSentState.yaw) > 0.02 || Math.abs(rp - _lastSentState.pitch) > 0.02;
-  const changed = distSq > 0.0016 || rotChanged || hp !== _lastSentState.hp || item !== _lastSentState.item || player.sneak !== _lastSentState.sneak || mg !== _lastSentState.mining || sw !== _lastSentState.sw || arKey !== _lastSentState.ar || now - _lastSentState.lastTime > (NET_IDLE_SEND_INTERVAL * 1000);
+  const changed = distSq > 0.0016 || rotChanged || hp !== _lastSentState.hp || item !== _lastSentState.item || player.sneak !== _lastSentState.sneak || mg !== _lastSentState.mining || sw !== _lastSentState.sw || arKey !== _lastSentState.ar || rs !== _lastSentState.rs || now - _lastSentState.lastTime > (NET_IDLE_SEND_INTERVAL * 1000);
   if (!changed) return;
   const keyframe = now - _lastSentState.lastFull >= NET_KEYFRAME_INTERVAL;
   if (keyframe) _lastSentState.lastFull = now;
-  const prevItem = _lastSentState.item, prevSneak = _lastSentState.sneak, prevMg = _lastSentState.mining, prevSw = _lastSentState.sw, prevAr = _lastSentState.ar;
+  const prevItem = _lastSentState.item, prevSneak = _lastSentState.sneak, prevMg = _lastSentState.mining, prevSw = _lastSentState.sw, prevAr = _lastSentState.ar, prevRs = _lastSentState.rs;
   _lastSentState.px = px; _lastSentState.py = py; _lastSentState.pz = pz;
   _lastSentState.yaw = ry; _lastSentState.pitch = rp;
   _lastSentState.hp = hp; _lastSentState.item = item; _lastSentState.sneak = player.sneak;
-  _lastSentState.mining = mg; _lastSentState.sw = sw; _lastSentState.ar = arKey;
+  _lastSentState.mining = mg; _lastSentState.sw = sw; _lastSentState.ar = arKey; _lastSentState.rs = rs;
   _lastSentState.lastTime = now;
   netSeqCounter++;
   /* Only send the optional animation/appearance fields when they actually
@@ -5074,6 +5691,7 @@ function sendLocalState() {
   if (keyframe || player.sneak !== prevSneak) s.sn = player.sneak;
   if (keyframe || mg !== prevMg) s.mg = mg;
   if (keyframe || sw !== prevSw) s.sw = sw;
+  if (keyframe || rs !== prevRs) s.rs = rs;
   if (keyframe || arKey !== prevAr) s.ar = { helmet: player.armor.helmet, chest: player.armor.chest, legs: player.armor.legs, boots: player.armor.boots };
   netSend(s);
 }
@@ -5186,6 +5804,7 @@ function updatePlayer(dt) {
     const killer = getKillerName(player);
     const msg = killer ? `<b>${NET.myName}</b> was kicked into the void by <b>${killer}</b>` : `<b>${NET.myName}</b> fell into the void`;
     addEventMessage(msg, '#ff8888');
+    reportLocalDeath(killer, teamBedBroken[PLAYER_TEAM.name]);
     if (teamBedBroken[PLAYER_TEAM.name]) eliminatePlayer();
     else startRespawnCooldown();
     return;
@@ -5298,7 +5917,32 @@ function updateEffectDisplay(dt) {
 /* ============================================================================
    22. DEATH / RESPAWN
    ========================================================================== */
+/* Bed Wars keeps your armour on death but drops your hotbar/inventory. Doing
+   this before the respawn teleport means the loot stays where you died. */
+function dropInventoryOnDeath() {
+  const dx = player.pos.x, dy = Math.max(BASE_Y + 1.2, player.pos.y + 0.8), dz = player.pos.z;
+  let any = false;
+  for (let i = 0; i < 36; i++) {
+    const s = inv[i]; if (!s) continue;
+    inv[i] = null; any = true;
+    dropItemLocal(s.id, s.count, dx + (Math.random() - 0.5) * 0.9, dy, dz + (Math.random() - 0.5) * 0.9, null, 1.4);
+  }
+  if (cursorItem) {
+    dropItemLocal(cursorItem.id, cursorItem.count, dx, dy, dz, null, 1.4);
+    cursorItem = null; any = true;
+  }
+  selectedSlot = 0;
+  if (any) updateUI();
+}
+function ensureRespawnKit() {
+  const hasSword = inv.some(s => s && ITEMS[s.id] && ITEMS[s.id].tool === 'sword');
+  if (!hasSword) { addItemStack({ id: 'wood_sword', count: 1 }); updateUI(); }
+}
 function respawnPlayer() {
+  player.respawning = false;
+  player.spectator = false;
+  ensureRespawnKit();
+  SFX.respawn();
   player.health = player.maxHealth; player.absorption = 0; player.absorptionTimer = 0; player.regenTimer = 0;
   player.pos.set(PLAYER_TEAM.spawnX, BASE_Y + 2, PLAYER_TEAM.spawnZ);
   player.vel.set(0, 0, 0);
@@ -5314,7 +5958,9 @@ function respawnPlayer() {
   updateHealthBar();
 }
 function startRespawnCooldown() {
+  dropInventoryOnDeath();
   player.respawnCooldown = 5.0;
+  player.respawning = true;
   player.spectator = true;
   player.spectatorPos.set(player.pos.x, BASE_Y + 35, player.pos.z);
   player.spectatorYaw = player.yaw; player.spectatorPitch = -0.7;
@@ -5330,7 +5976,8 @@ function startRespawnCooldown() {
   document.getElementById('respawnTimer').textContent = player.respawnCooldown.toFixed(1);
 }
 function eliminatePlayer() {
-  player.eliminated = true; player.health = 0; player.absorption = 0;
+  dropInventoryOnDeath();
+  player.eliminated = true; player.respawning = false; player.health = 0; player.absorption = 0;
   player.spectator = false;
   updateHealthBar();
   mining = false; player.eating = false; player.bowCharging = false;
@@ -5389,6 +6036,7 @@ function damagePlayer(amount, source, bypassArmor, kb) {
     const killer = getKillerName(player);
     const msg = killer ? `<b>${NET.myName}</b> was slain by <b>${killer}</b>` : `<b>${NET.myName}</b> died`;
     addEventMessage(msg, '#ffaaaa');
+    reportLocalDeath(killer, teamBedBroken[PLAYER_TEAM.name]);
     if (teamBedBroken[PLAYER_TEAM.name]) eliminatePlayer();
     else startRespawnCooldown();
   }
@@ -6117,6 +6765,7 @@ function updateGenerators(dt) {
         else if (gen.type === 'diamond') itemId = 'diamond';
         else if (gen.type === 'emerald') itemId = 'emerald';
         if (itemId) {
+          if (player.pos.distanceTo(gen.pos) < 14) SFX.pop();
           const v = new THREE.Vector3((Math.random() - 0.5) * 1.5, 5.5, (Math.random() - 0.5) * 1.5);
           dropItemLocal(itemId, 1, gen.pos.x, gen.pos.y + 0.5, gen.pos.z, v, 0.4, gi);
         }
@@ -6367,6 +7016,7 @@ function buyItem(entry) {
     updateArmorTier(); applyPlayerArmorToModel(playerModel); applyPlayerArmorToModel(invPreviewModel);
     updateHealthBar(); updateUI(); updateShopUI();
     showMessage('Purchased ' + getEntryName(entry), '#7fe0a0');
+    SFX.buy();
     return;
   }
   const def = ITEMS[getEntryIconId(entry)]; if (!def) return;
@@ -6374,11 +7024,12 @@ function buyItem(entry) {
   consumeItem(entry.costId, entry.costCount);
   addItem(getEntryGiveId(entry), entry.giveCount);
   showMessage('Purchased ' + def.name, '#7fe0a0');
+  SFX.buy();
   updateShopUI();
 }
 function rebuildShopForTeam() { if (_shopBuilt) buildShopUI(); }
 function openShop() { if (chestOpen) closeChest(); shopOpen = true; shopEl.classList.add('open'); document.exitPointerLock(); if (!_shopBuilt) { _shopBuilt = true; buildShopUI(); } updateShopUI(); updateInstructionVisibility(); }
-function closeShop() { shopOpen = false; shopEl.classList.remove('open'); hideShopTip(); if (!player.eliminated && !player.spectator && NET.started) renderer.domElement.requestPointerLock(); updateInstructionVisibility(); }
+function closeShop() { shopOpen = false; shopEl.classList.remove('open'); hideShopTip(); if (!player.eliminated && !player.spectator && NET.started) requestGamePointerLock(); updateInstructionVisibility(); }
 document.getElementById('shopClose').addEventListener('click', closeShop);
 
 const upgradeShopEl = document.getElementById('upgradeShop');
@@ -6446,31 +7097,53 @@ function buyUpgrade(up) {
   const cost = up.costs[lvl];
   if (countItem('diamond') < cost) { showMessage('Not enough Diamonds', '#ff6666'); return; }
   consumeItem('diamond', cost); tu[up.key]++;
-  showMessage(up.name + ' upgraded to Tier ' + tu[up.key] + '!', '#c060ff');
-  addEventMessage(`<b style="color:#c060ff">${PLAYER_TEAM.name}</b> bought <b>${up.name} ${tu[up.key]}</b>`, '#c060ff');
+  const newLevel = tu[up.key];
+  /* Broadcast the team-wide purchase. Applying locally first keeps the buyer
+     responsive; the message is idempotent (max level wins) for everyone else. */
+  netSend({ t: 'tupg', team: PLAYER_TEAM.name, key: up.key, lvl: newLevel });
+  if (NET.mode === 'host') publishLobbyStateSoon();
+  showMessage(up.name + ' upgraded to Tier ' + newLevel + '!', '#c060ff');
+  addEventMessage(`<b style="color:#c060ff">${PLAYER_TEAM.name}</b> bought <b>${up.name} ${newLevel}</b>`, '#c060ff');
+  SFX.upgrade();
   updateUpgradeUI();
   applyPlayerArmorToModel(playerModel); applyPlayerArmorToModel(invPreviewModel);
   setFPArm(currentSkinTex, currentSkinSlim);
   currentItemKey = null; updateItemMesh();
   effectDisplayKey = '';
+  for (const rp of remotePlayers) if (rp.teamName === PLAYER_TEAM.name) rp.refreshTeamUpgradeVisuals();
 }
 function openUpgradeShop() { if (chestOpen) closeChest(); upgradeOpen = true; upgradeShopEl.classList.add('open'); document.exitPointerLock(); if (!_upgradeBuilt) { _upgradeBuilt = true; buildUpgradeUI(); } updateUpgradeUI(); updateInstructionVisibility(); }
-function closeUpgradeShop() { upgradeOpen = false; upgradeShopEl.classList.remove('open'); hideShopTip(); if (!player.eliminated && !player.spectator && NET.started) renderer.domElement.requestPointerLock(); updateInstructionVisibility(); }
+function closeUpgradeShop() { upgradeOpen = false; upgradeShopEl.classList.remove('open'); hideShopTip(); if (!player.eliminated && !player.spectator && NET.started) requestGamePointerLock(); updateInstructionVisibility(); }
 document.getElementById('upgradeClose').addEventListener('click', closeUpgradeShop);
 
 let matchEvolved = false;
 function checkMatchEnd() {
   if (matchEvolved) return;
   if (!NET.started) return;
-  const aliveTeams = new Set();
+  /* Empty teams must not keep the match alive forever: only teams that
+     actually have a player in the room can win or lose. A solo test session
+     also never shows a victory screen instantly. */
+  const participants = [];
   for (const team of TEAMS) {
+    let hasMember = team.name === PLAYER_TEAM.name;
+    for (const rp of remotePlayers) if (rp.teamName === team.name) hasMember = true;
+    if (hasMember) participants.push(team);
+  }
+  if (participants.length < 2) return;
+  const aliveTeams = new Set();
+  for (const team of participants) {
     const bedBroken = teamBedBroken[team.name];
     let hasAlive = false;
     if (team.name === PLAYER_TEAM.name) hasAlive = !player.eliminated;
     for (const rp of remotePlayers) { if (rp.teamName === team.name && (rp.alive || rp._optDead)) hasAlive = true; }
     if (!(bedBroken && !hasAlive)) aliveTeams.add(team.name);
   }
-  if (aliveTeams.size === 1) { const winner = [...aliveTeams][0]; matchEvolved = true; addEventMessage(`<b>Match ended.</b> Winner: <b>${winner}</b>`, '#88ccff'); }
+  if (aliveTeams.size === 1) {
+    const winner = [...aliveTeams][0];
+    matchEvolved = true;
+    addEventMessage(`<b>Match ended.</b> Winner: <b>${winner}</b>`, '#88ccff');
+    try { showMatchResult(winner); } catch (e) { }
+  }
 }
 
 /* ============================================================================
@@ -6513,7 +7186,7 @@ function stepWorld(dt, now) {
   for (let i = droppedItems.length - 1; i >= 0; i--) { droppedItems[i].update(dt); if (droppedItems[i].removed) droppedItems.splice(i, 1); }
   if (invOpen && !document.hidden) invPreviewRenderer.render(invPreviewScene, invPreviewCamera);
   statusTimer += dt;
-  if (statusTimer > 0.3) { statusTimer = 0; updateStatusBar(); checkMatchEnd(); updatePingMeter(); }
+  if (statusTimer > 0.3) { statusTimer = 0; updateStatusBar(); checkMatchEnd(); updatePingMeter(); updateScoreboard(); }
   pingTick(now);
   processDirty(3);
 }
@@ -6601,7 +7274,7 @@ window.addEventListener('blur', () => { if (!document.hidden) releaseInputs(); }
 setInterval(backgroundWatchdog, 250);
 if (document.hidden) startBackgroundMode();
 
-updateUI(); updateHealthBar(); updateStatusBar(); rebuildTeamButtons(); rebuildMapButtons();
+updateUI(); updateHealthBar(); updateStatusBar(); rebuildTeamButtons(); rebuildMapButtons(); updateScoreboard();
 updateNetBadge();
 setLobbyStatus('Create or join a room to play.');window.addEventListener('beforeunload', () => { try { teardownRelay(true); } catch (e) { } });
 window.addEventListener('pagehide', () => { try { teardownRelay(true); } catch (e) { } });
