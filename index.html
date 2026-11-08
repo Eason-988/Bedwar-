@@ -153,7 +153,7 @@
 #matchOverlay .mo-stats{margin:14px 0;font-size:13px;line-height:1.8;color:#e6f0ff}
 #matchOverlay button{margin-top:12px;padding:10px 24px;background:#ffd966;border:2px solid #fff;color:#1a1400;font-family:inherit;font-size:14px;font-weight:bold;cursor:pointer;border-radius:5px;letter-spacing:2px}
 #matchOverlay button:hover{background:#ffe89a}
-#countdownOverlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;pointer-events:none;z-index:130;text-align:center}
+#countdownOverlay{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:none;pointer-events:none;z-index:600;text-align:center}
 #countdownOverlay.show{display:block}
 #countdownOverlay .cd-num{font-family:'Press Start 2P','Courier New',monospace;font-size:64px;color:#ffd966;text-shadow:0 0 30px rgba(255,217,102,.7),0 4px 0 #6b4f00;animation:cdPop .45s ease-out}
 #countdownOverlay .cd-sub{margin-top:10px;font-size:13px;letter-spacing:3px;color:#e6f0ff;text-shadow:1px 1px 0 #000}
@@ -182,13 +182,172 @@ body.touch #info{display:none!important}
 #tbJump{right:30px;bottom:240px;width:64px;height:64px}
 #tbSneak{right:108px;bottom:206px;width:58px;height:58px}
 #tbInv{right:184px;bottom:30px;width:52px;height:52px;font-size:10px}
-#tbShop{right:118px;bottom:30px;width:52px;height:52px;font-size:10px}
 /* Menus and the hotbar must sit above the transparent touch zones. */
 body.touch #hotbar{bottom:92px;z-index:70;pointer-events:auto}
 body.touch #inventory,body.touch #chestPanel,body.touch #shop,body.touch #upgradeShop{z-index:80}
 body.touch #deadOverlay{z-index:90}
 #lobbyHowTo{margin-top:12px;padding:10px 12px;background:rgba(127,245,232,.07);border:1px solid rgba(127,245,232,.25);border-radius:6px;font-size:11px;line-height:1.6;color:#b8c8e0;letter-spacing:.3px}
 #lobbyHowTo b{color:#7ff5e8}
+/* ==========================================================================
+   v7.5 - RESPONSIVE / MOBILE LAYOUT
+   Phones are short in landscape (e.g. 780x360 CSS px). The lobby therefore
+   scrolls and the in-game HUD switches to compact sizes on touch devices.
+   ========================================================================== */
+
+/* ---- Lobby: never clip content, scale with the viewport ---- */
+#lobby{display:block;overflow-y:auto;overflow-x:hidden;padding:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;-webkit-text-size-adjust:100%}
+#lobbyInner{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 14px}
+#lobby h1{font-size:clamp(16px,calc(3.2vmin + 8px),26px);letter-spacing:clamp(1px,.55vw,4px);text-align:center}
+#lobby h2{font-size:clamp(8px,calc(1.4vmin + 4px),12px);letter-spacing:clamp(1px,.5vw,3px);text-align:center;margin-bottom:clamp(10px,3vh,26px)}
+.lobby-box{min-width:0;width:min(560px,100%);padding:clamp(12px,2.4vh,22px) clamp(12px,3vw,30px)}
+.lobby-row input[type=text],.lobby-row select,#relaySelect{min-width:0}
+
+@media (max-width:560px){
+  #lobbyInner{padding:14px 10px}
+  .lobby-row label{width:74px;font-size:10px}
+  #lobbyTabs .tab{font-size:10px;padding:7px 4px;letter-spacing:1px}
+  .team-slot{font-size:11px;padding:9px 3px}
+  .map-slot{font-size:10px}
+  #lobbyHint{font-size:9px}
+}
+
+/* Short landscape phones: compress so every control is reachable. */
+@media (max-height:560px){
+  #lobbyInner{padding:6px 10px;justify-content:flex-start}
+  #lobby h1{font-size:16px;letter-spacing:2px;margin-bottom:4px}
+  #lobby h2{font-size:8px;letter-spacing:2px;margin-bottom:8px}
+  .lobby-box{padding:8px 12px;width:min(720px,100%)}
+  #lobbyTabs{margin-bottom:8px}
+  #lobbyTabs .tab{padding:8px 4px;font-size:10px;letter-spacing:1px}
+  .lobby-row{margin-bottom:6px;gap:6px}
+  .lobby-row label{width:82px;font-size:10px}
+  .lobby-row input[type=text]{font-size:11px;padding:7px 9px;letter-spacing:1px}
+  #relaySelect{font-size:11px;padding:7px 9px}
+  #roomCodeBox{font-size:12px!important;padding:7px 9px!important;letter-spacing:3px!important}
+  .lobby-btn{padding:9px 14px;font-size:11px;letter-spacing:1px}
+  .team-grid{gap:6px;margin:6px 0 8px}
+  .team-slot{padding:7px 3px;font-size:11px}
+  .team-slot .sub{font-size:8px;margin-top:1px}
+  .map-grid{gap:5px;margin-top:3px}
+  .map-slot{padding:5px 2px;font-size:10px}
+  #lobbyRoomCode{font-size:14px;letter-spacing:4px;margin-top:4px;min-height:16px}
+  #lobbyStatus{margin-top:5px;font-size:10px;line-height:1.3;min-height:0}
+  #lobbyHowTo{display:none}
+  #lobbyHint{display:none}
+}
+@media (max-height:410px){
+  /* Extremely short landscape (e.g. 780x360): shave the last few pixels so the
+     whole lobby fits without scrolling. */
+  #lobby h2{display:none}
+  #lobbyInner{padding:2px 10px}
+  .lobby-box{padding:6px 12px}
+  #lobbyTabs{margin-bottom:6px}
+  #lobbyTabs .tab{padding:7px 4px}
+  #lobbyRoomCode{margin-top:2px}
+  #lobbyStatus{margin-top:3px}
+}
+
+/* ---- In-game layout on touch devices ---- */
+body.touch #leftPanel{left:6px;top:6px;gap:4px;max-width:176px}
+body.touch #info{display:none!important}
+body.touch #statusBar{font-size:9px;line-height:1.45;padding:4px 6px;min-width:118px}
+body.touch #statusBar .team-row{gap:4px;padding:0}
+body.touch #statusBar .team-dot{width:7px;height:7px}
+body.touch #scoreboard{font-size:9px;line-height:1.45;padding:5px 7px;min-width:132px}
+body.touch #scoreboard .sb-title{font-size:8px;letter-spacing:1px;margin-bottom:2px}
+body.touch #scoreboard .sb-stats{font-size:8px}
+body.touch #pingMeter{font-size:9px;padding:3px 6px;gap:4px}
+body.touch #pingMeter .ping-bars{height:9px}
+body.touch #netBadge,body.touch #devBadge{font-size:8px;padding:3px 6px;letter-spacing:.5px}
+body.touch #eventLog{right:6px;top:6px;font-size:9px;line-height:1.35;max-width:210px}
+body.touch #eventLog .ev{padding:2px 6px;margin-bottom:2px}
+body.touch .gen-label{font-size:9px;padding:2px 5px}
+
+/* Text chat needs a keyboard, so the mobile HUD shows messages in #msg only. */
+body.touch #chatPanel,body.touch #chatHint,body.touch #chatInputWrap{display:none!important}
+
+/* Compact hotbar + health, centered so they never collide with the thumb zones. */
+body.touch #hotbar{left:50%;bottom:4px;gap:2px;padding:3px;z-index:71}
+body.touch .slot{width:30px;height:30px;border-width:1px}
+body.touch .slot .icon{width:20px;height:20px;background-size:contain}
+body.touch .slot .cnt{font-size:9px;right:1px;bottom:0}
+body.touch #healthBar{left:50%;bottom:44px;transform:translateX(-50%);z-index:71}
+body.touch #healthBar canvas{max-width:min(212px,54vw);height:auto}
+body.touch #effectDisplay{left:8px;bottom:140px;font-size:9px;padding:3px 7px}
+body.touch #crosshair{width:18px;height:18px}
+
+/* Right-hand action cluster: no more squeezing / overlapping. */
+body.touch .touch-btn{font-size:10px;letter-spacing:.5px;z-index:65}
+body.touch #tbMine{right:10px;bottom:10px;width:64px;height:64px;font-size:11px}
+body.touch #tbPlace{right:80px;bottom:14px;width:54px;height:54px}
+body.touch #tbJump{right:10px;bottom:80px;width:52px;height:52px}
+body.touch #tbSneak{right:68px;bottom:80px;width:46px;height:46px}
+body.touch #tbInv{right:120px;bottom:82px;width:42px;height:42px;font-size:9px}
+
+/* Left thumb stick, slightly smaller on phones. */
+body.touch #touchStickBase{left:12px;bottom:12px;width:118px;height:118px}
+body.touch #touchStickKnob{width:50px;height:50px;margin:-25px 0 0 -25px}
+
+/* Contextual use button: only shown when aiming at a shop / upgrade / chest. */
+#tbInteract{left:50%;top:50%;width:62px;height:62px;display:none;z-index:66;font-size:10px;background:rgba(18,104,76,.84);border-color:#7ff5e8;color:#e8fff7;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(0,0,0,.35),0 0 18px rgba(127,245,232,.55);animation:tbPulse 1.5s ease-in-out infinite}
+#tbInteract.show{display:flex}
+#tbInteract:active{transform:translate(-50%,-50%) scale(.94)}
+@keyframes tbPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.06)}}
+
+/* Buttons only disappear while a GUI panel is actually open. */
+body.menu-open #touchControls{pointer-events:none}
+body.menu-open #touchStickZone,body.menu-open #touchLookZone{pointer-events:none}
+body.menu-open #touchControls .touch-btn,body.menu-open #tbInteract{opacity:0;pointer-events:none}
+body.menu-open #touchStickBase,body.menu-open #touchStickKnob{opacity:.15}
+
+/* Skin / settings buttons must sit above the transparent touch zones. */
+body.touch #skinPanel{right:8px;bottom:146px;flex-direction:column;align-items:flex-end;gap:4px;z-index:75}
+body.touch #skinPanel button{font-size:9px;padding:5px 9px;letter-spacing:1px;background:rgba(10,20,34,.72);border-width:1px}
+body.touch #skinToast{right:auto;left:50%;top:auto;bottom:60px;transform:translateX(-50%);font-size:9px}
+body.touch #settingsPanel{right:8px;bottom:auto;top:8px;width:min(300px,calc(100vw - 16px));max-height:calc(100vh - 16px);overflow-y:auto;z-index:80;font-size:11px;padding:10px 12px}
+body.touch #settingsPanel h3{font-size:10px;margin-bottom:6px}
+body.touch #settingsPanel label{margin:6px 0 2px}
+body.touch #settingsPanel input[type=range]{height:22px}
+body.touch #settingsPanel .set-hint{display:none}
+
+/* Start / click-to-play overlay scales down, and is dismissed on tap. */
+body.touch #hint{z-index:66;font-size:11px;padding:14px 18px;line-height:1.7}
+body.touch #hint b{font-size:14px;letter-spacing:2px}
+
+/* Portrait safety: keep the hotbar clear of the thumb cluster. */
+@media (orientation:portrait){
+  body.touch #touchStickBase{left:10px;bottom:96px;width:108px;height:108px}
+  body.touch #touchStickKnob{width:46px;height:46px;margin:-23px 0 0 -23px}
+  body.touch #hotbar{gap:1px;padding:2px;bottom:4px}
+  body.touch .slot{width:23px;height:23px}
+  body.touch .slot .icon{width:15px;height:15px}
+  body.touch .slot .cnt{font-size:8px}
+  body.touch #tbMine{width:56px;height:56px;right:8px;bottom:8px;font-size:10px}
+  body.touch #tbPlace{width:46px;height:46px;right:64px;bottom:70px}
+  body.touch #tbJump{width:48px;height:48px;right:8px;bottom:122px}
+  body.touch #tbSneak{width:44px;height:44px;right:8px;bottom:70px}
+  body.touch #tbInv{width:40px;height:40px;right:64px;bottom:126px}
+  body.touch #healthBar{bottom:38px}
+  body.touch #healthBar canvas{max-width:min(160px,42vw)}
+  body.touch #effectDisplay{bottom:214px}
+  body.touch #skinPanel{right:6px;bottom:auto;top:34px;flex-direction:row;gap:4px}
+  body.touch #eventLog{right:6px;top:112px}
+}
+
+/* GUI panels: fit small landscape screens. */
+.panel-close{position:absolute;top:-6px;right:-6px;width:30px;height:30px;line-height:26px;text-align:center;background:#8b8b8b;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #555;color:#3f3f3f;font-size:20px;font-weight:bold;cursor:pointer;z-index:6}
+.panel-close:hover{background:#b8b8b8;color:#000}
+body.touch .panel-close{width:46px;height:46px;line-height:42px;font-size:24px;top:-9px;right:-9px}
+body.touch #shopClose,body.touch #upgradeClose{width:42px;height:42px;line-height:38px;font-size:22px;right:-8px;top:-8px}
+@media (max-height:560px){
+  #shop,#upgradeShop{transform:translate(-50%,-50%) scale(.62)}
+  #inventory{transform:translate(-50%,-50%) scale(.62)}
+  #chestPanel{transform:translate(-50%,-50%) scale(.62)}
+  #matchOverlay{padding:18px 30px}
+  #matchOverlay h2{font-size:20px;letter-spacing:3px}
+  #deadOverlay{padding:18px 30px}
+  #countdownOverlay .cd-num{font-size:44px}
+}
 </style></head><body>
 <div id="hud">
   <div id="crosshair"></div>
@@ -214,8 +373,8 @@ body.touch #deadOverlay{z-index:90}
   <div id="healthBar"><canvas id="armorCanvas" width="222" height="18"></canvas><canvas id="healthCanvas" width="222" height="22"></canvas></div>
   <div id="effectDisplay"></div>
   <div id="hotbar"></div>
-  <div id="inventory"><h3>INVENTORY</h3><div id="invTop"><div id="invLeft"><div id="armorSlots"></div><div id="invPreview"></div></div></div><div class="grid" id="invGrid"></div><div class="grid" id="invHotbar"></div></div>
-  <div id="chestPanel"><h3 id="chestTitle">CHEST</h3><div id="chestGrid"></div><div class="chest-sub">YOUR INVENTORY</div><div id="chestInvGrid"></div><div id="chestHotGrid"></div><div class="chest-hint">Click to move stacks &middot; Shift-click to transfer &middot; E to close</div></div>
+  <div id="inventory"><div class="panel-close" id="invClose">&times;</div><h3>INVENTORY</h3><div id="invTop"><div id="invLeft"><div id="armorSlots"></div><div id="invPreview"></div></div></div><div class="grid" id="invGrid"></div><div class="grid" id="invHotbar"></div></div>
+  <div id="chestPanel"><div class="panel-close" id="chestClose">&times;</div><h3 id="chestTitle">CHEST</h3><div id="chestGrid"></div><div class="chest-sub">YOUR INVENTORY</div><div id="chestInvGrid"></div><div id="chestHotGrid"></div><div class="chest-hint">Click to move stacks &middot; Shift-click to transfer &middot; E to close</div></div>
   <div id="shop">
     <div class="gui-head"><span class="gui-title">ITEM SHOP</span><div id="shopClose">&times;</div></div>
     <div class="gui-grid" id="shopGrid"></div>
@@ -233,10 +392,9 @@ body.touch #deadOverlay{z-index:90}
   <div id="deadOverlay"><h2>DEFEATED</h2><p>Your bed has been destroyed.</p><p id="deadTeamInfo"></p><button id="respawnBtn">RETURN TO LOBBY</button></div>
   <div id="respawnOverlay"><h2>SPECTATING</h2><p id="respawnTimer">5.0</p><p style="font-size:11px;opacity:.7;margin-top:8px;letter-spacing:1px;color:#aaa;font-weight:normal">WASD · SPACE / SHIFT · MOUSE</p></div>
   <div id="matchOverlay"><h2 id="matchTitle">VICTORY</h2><p id="matchSub"></p><div class="mo-stats" id="matchStats"></div><button id="matchBtn">RETURN TO LOBBY</button></div>
-  <div id="countdownOverlay"><div class="cd-num" id="countdownNum">3</div><div class="cd-sub">GET READY</div></div>
   <div id="settingsPanel">
     <h3>SETTINGS</h3>
-    <label>Mouse sensitivity <span class="set-val" id="sensVal">1.00</span></label>
+    <label>Look sensitivity <span class="set-val" id="sensVal">1.00</span></label>
     <input type="range" id="sensRange" min="0.35" max="2.5" step="0.05" value="1">
     <label>Master volume <span class="set-val" id="volVal">50%</span></label>
     <input type="range" id="volRange" min="0" max="1" step="0.05" value="0.5">
@@ -250,12 +408,13 @@ body.touch #deadOverlay{z-index:90}
     <div class="touch-btn" id="tbJump">JUMP</div>
     <div class="touch-btn" id="tbSneak">SNEAK</div>
     <div class="touch-btn" id="tbInv">INV</div>
-    <div class="touch-btn" id="tbShop">SHOP</div>
+    <div class="touch-btn" id="tbInteract">SHOP</div>
   </div>
   <div id="hint"><b>VOXEL BED WARS</b><br><br>Click to play<br><span style="opacity:.7;font-size:12px">Destroy the enemy beds · protect your own</span></div>
   <div id="skinPanel"><button id="skinBtn" type="button">SKIN</button><button id="skinResetBtn" type="button" title="Reset to default skin">Reset</button><button id="settingsBtn" type="button" title="Settings">SETTINGS</button></div>
   <div id="skinToast">Drop a 64x64 PNG skin · press P</div>
 </div>
+<div id="countdownOverlay"><div class="cd-num" id="countdownNum">3</div><div class="cd-sub">GET READY</div></div>
 <div id="hurtOverlay"></div>
 <div id="tooltip"></div>
 <div id="shopTip"></div>
@@ -266,6 +425,7 @@ body.touch #deadOverlay{z-index:90}
 <div id="chatHint">Press T to chat · /developer for testing commands</div>
 
 <div id="lobby">
+  <div id="lobbyInner">
   <h1>VOXEL BED WARS</h1>
   <h2>MULTIPLAYER v7.3 · RELAY + PING</h2>
   <div class="lobby-box">
@@ -307,6 +467,7 @@ body.touch #deadOverlay{z-index:90}
     <div id="lobbyHowTo"><b>HOW TO PLAY</b> · Break the enemy beds, protect yours. Iron, gold, diamond and emerald generators drop resources on the islands. Press <b>E</b> for your inventory and shop, <b>RMB</b> to place/use, <b>LMB</b> to mine/attack. Buy team upgrades with diamonds. If your bed is destroyed you cannot respawn — so defend it!</div>
   </div>
   <div id="lobbyHint">Rooms are relayed by a free public server · no port forwarding needed<br>Share the code with friends · up to 4 players (one per team)</div>
+  </div>
 </div>
 
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
@@ -3271,6 +3432,7 @@ function startGameAsHost() {
   rebuildRemotePlayersFromRoster();
   appendChat('[System]', 'Game started on ' + (MAP_OPTIONS.find(m => m.key === currentMapKey)?.name || currentMapKey) + '!', '#ffd966');
   if (!player.spectator) requestGamePointerLock();
+  updateInstructionVisibility();
   updateStatusBar(); rebuildShopForTeam();
 }
 btnStartGame.addEventListener('click', () => {
@@ -3721,6 +3883,8 @@ function beginPlayingAfterStart() {
   player.vel.set(0, 0, 0); player.knockbackTime = 0; maxFallY = player.pos.y;
   updateStatusBar();
   requestGamePointerLock();
+  /* Touch mode has no pointer-lock event, so dismiss the start overlay here. */
+  updateInstructionVisibility();
 }
 function applyRemoteBlock(x, y, z, id) {
   const key = x + ',' + y + ',' + z;
@@ -4171,6 +4335,50 @@ addEventListener('mouseup', e => {
 addEventListener('blur', () => { mining = false; rightMouseHeld = false; });
 addEventListener('contextmenu', e => e.preventDefault());
 
+/* ---- Contextual "use" button -------------------------------------------
+   The shop is no longer opened from a permanent HUD button. A single
+   interact button pops up next to the block you are actually aiming at
+   (vending machine, team-upgrade stand or chest), which saves HUD space and
+   makes it impossible to open the shop while looking elsewhere. */
+let interactTarget = null;
+let interactBtnTimer = 0;
+function updateTouchInteract(dt) {
+  if (!isTouchMode()) return;
+  const btn = document.getElementById('tbInteract');
+  if (!btn) return;
+  const canShow = NET.started && !invOpen && !shopOpen && !upgradeOpen && !chestOpen &&
+    !player.eliminated && !player.spectator && player.respawnCooldown <= 0;
+  if (!canShow) {
+    interactTarget = null;
+    btn.classList.remove('show');
+    return;
+  }
+  interactBtnTimer += dt;
+  if (interactBtnTimer < 0.08) return;
+  interactBtnTimer = 0;
+  interactTarget = null;
+  const hit = getCrosshairTarget();
+  const block = hit && hit.block;
+  if (block) {
+    let kind = null, label = null;
+    if (block.id === 21) { kind = 'shop'; label = 'SHOP'; }
+    else if (block.id === 29) { kind = 'upgrade'; label = 'UPGRADE'; }
+    else if (block.id === 44 || block.id === 45) { kind = 'chest'; label = 'CHEST'; }
+    if (kind) interactTarget = { kind, label, x: block.x, y: block.y, z: block.z };
+  }
+  if (!interactTarget) { btn.classList.remove('show'); return; }
+  tempV.set(interactTarget.x + 0.5, interactTarget.y + 0.9, interactTarget.z + 0.5).project(camera);
+  if (tempV.z < -1 || tempV.z > 1) { interactTarget = null; btn.classList.remove('show'); return; }
+  /* Offset to the right of the crosshair so it never swallows look swipes. */
+  const bottomPad = innerWidth > innerHeight ? 140 : 250;
+  const sx = clamp((tempV.x * 0.5 + 0.5) * innerWidth + 70, 48, innerWidth - 48);
+  const sy = clamp((-tempV.y * 0.5 + 0.5) * innerHeight - 20, 56, innerHeight - bottomPad);
+  btn.style.left = sx + 'px';
+  btn.style.top = sy + 'px';
+  if (btn.textContent !== interactTarget.label) btn.textContent = interactTarget.label;
+  btn.classList.add('show');
+}
+
 /* ---- Touch controls (phones/tablets) -------------------------------------
    Left thumb drives a virtual stick, right thumb looks around, and the round
    buttons mirror the mouse/keyboard actions. Pointer lock is bypassed through
@@ -4203,7 +4411,9 @@ addEventListener('contextmenu', e => e.preventDefault());
   const stickKnob = document.getElementById('touchStickKnob');
   const lookZone = document.getElementById('touchLookZone');
   if (!stickZone || !lookZone) return;
-  const STICK_R = 52, DEAD = 0.18;
+  /* Size the virtual stick from its rendered box so tightened mobile CSS
+     automatically tightens the travel distance too. */
+  const STICK_R = Math.max(36, Math.round((stickBase.offsetWidth || 118) * 0.4)), DEAD = 0.18;
   let stickId = null, stickCX = 0, stickCY = 0;
   const clearMove = () => {
     keys['KeyW'] = keys['KeyA'] = keys['KeyS'] = keys['KeyD'] = false;
@@ -4254,7 +4464,9 @@ addEventListener('contextmenu', e => e.preventDefault());
     if (invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated) return;
     const dx = e.clientX - lastLX, dy = e.clientY - lastLY;
     lastLX = e.clientX; lastLY = e.clientY;
-    const s = 0.0028 * SETTINGS.sensitivity;
+    /* Touch look needs a much higher rad/px gain than a mouse: the old 0.0028
+       made a full swipe barely turn the camera. */
+    const s = 0.0060 * SETTINGS.sensitivity;
     if (player.spectator) {
       player.spectatorYaw -= dx * s;
       player.spectatorPitch = clamp(player.spectatorPitch - dy * s, -Math.PI / 2 + 0.02, Math.PI / 2 - 0.02);
@@ -4295,16 +4507,32 @@ addEventListener('contextmenu', e => e.preventDefault());
   bindTouchBtn('tbJump', () => { keys['Space'] = true; }, () => { keys['Space'] = false; });
   bindTouchBtn('tbSneak', () => { keys['ShiftLeft'] = !keys['ShiftLeft']; });
   bindTouchBtn('tbInv', () => { if (NET.started) toggleInventory(); });
-  bindTouchBtn('tbShop', () => { if (NET.started) openShop(); });
+  bindTouchBtn('tbInteract', () => {
+    if (!NET.started || !interactTarget) return;
+    if (interactTarget.kind === 'shop') openShop();
+    else if (interactTarget.kind === 'upgrade') openUpgradeShop();
+    else if (interactTarget.kind === 'chest') {
+      const type = getBlock(interactTarget.x, interactTarget.y, interactTarget.z) === 45 ? 'ender' : 'normal';
+      openChestAt(interactTarget.x, interactTarget.y, interactTarget.z, type);
+    }
+  });
 })();
-document.getElementById('hint').addEventListener('click', () => { if (NET.started) renderer.domElement.requestPointerLock(); });
+const hintEl = document.getElementById('hint');
+hintEl.addEventListener('click', () => {
+  /* Touch players have no pointer lock: a tap simply dismisses the overlay. */
+  if (isTouchMode()) { hintEl.classList.add('hidden'); return; }
+  if (NET.started) requestGamePointerLock();
+});
 renderer.domElement.addEventListener('click', () => { if (NET.started && !invOpen && !shopOpen && !upgradeOpen && !chestOpen && !player.eliminated && !player.spectator) renderer.domElement.requestPointerLock(); });
 function updateInstructionVisibility() {
   const locked = isPlayLocked();
+  const menuOpen = invOpen || shopOpen || upgradeOpen || chestOpen;
   const infoEl = document.getElementById('info');
-  const showInfo = !locked || invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated;
+  const showInfo = !locked || menuOpen || player.eliminated;
   infoEl.classList.toggle('hidden', !showInfo);
-  document.getElementById('hint').classList.toggle('hidden', !NET.started || locked || invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated);
+  hintEl.classList.toggle('hidden', !NET.started || locked || menuOpen || player.eliminated);
+  /* Hide the thumb buttons only while a GUI panel is actually open. */
+  document.body.classList.toggle('menu-open', menuOpen);
 }
 document.addEventListener('pointerlockchange', () => {
   const locked = document.pointerLockElement === renderer.domElement;
@@ -4478,6 +4706,7 @@ function closeChest() {
   if (!player.eliminated && !player.spectator && NET.started) requestGamePointerLock();
   updateInstructionVisibility();
 }
+document.getElementById('chestClose').addEventListener('click', () => { if (chestOpen) closeChest(); });
 function clearChestState() {
   chestOpen = false;
   chestEl.classList.remove('open');
@@ -4669,6 +4898,7 @@ function toggleInventory() {
   }
   updateUI();
 }
+document.getElementById('invClose').addEventListener('click', () => { if (invOpen) toggleInventory(); });
 function addItemStack(stack) {
   const def = ITEMS[stack.id]; if (!def) return stack.count;
   const max = def.stack; let count = stack.count;
@@ -7165,7 +7395,7 @@ function stepWorld(dt, now) {
     netSendAccum += dt;
     if (netSendAccum >= NET_SEND_INTERVAL) { netSendAccum = 0; sendLocalState(); }
   }
-  updateCamera(dt); updateArm(dt); updateModel(dt);
+  updateCamera(dt); updateTouchInteract(dt); updateArm(dt); updateModel(dt);
   updateArrows(dt); updateThrowables(dt);
   updateCritParticles(dt); updateEatParticles(dt); updateTrailParticles(dt);
   updateGlintParticles(dt); updateEnchantedGlint(dt); updateTNT(dt);
