@@ -1,8 +1,8 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#070a18"><title>Voxel Bed Wars · Multiplayer v7.3</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#070a18"><title>Voxel Bed Wars · Multiplayer v7.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>*{box-sizing:border-box}html{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#8ec9ff}body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;margin:0;padding:0;overflow:hidden;overscroll-behavior:none;background:#8ec9ff;font-family:'Courier New',monospace;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}canvas{display:block;touch-action:none}#hud{position:fixed;inset:0;pointer-events:none;color:#fff;z-index:10;overflow:hidden}#crosshair{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%)}#crosshair:before,#crosshair:after{content:'';position:absolute;background:#fff;mix-blend-mode:difference;opacity:.9}#crosshair:before{left:50%;top:0;width:2px;height:100%;transform:translateX(-50%)}#crosshair:after{top:50%;left:0;height:2px;width:100%;transform:translateY(-50%)}#cooldownBar{position:absolute;left:50%;top:calc(50% + 18px);transform:translateX(-50%);width:80px;height:5px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.35);border-radius:2px;overflow:hidden;display:none;box-shadow:0 0 4px rgba(0,0,0,.6)}#cooldownBar.show{display:block}#cooldownFill{height:100%;width:0%;background:linear-gradient(90deg,#ffe9a0,#ffd24a);transition:width .02s linear}#hotbar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:3px;padding:4px;background:rgba(0,0,0,.35);border:2px solid rgba(0,0,0,.5);border-radius:3px}.slot{width:46px;height:46px;background:rgba(255,255,255,.10);border:2px solid rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center}.slot.sel{border-color:#fff;background:rgba(255,255,255,.28)}.slot .icon{width:32px;height:32px;background-repeat:no-repeat;image-rendering:pixelated}.slot .cnt{position:absolute;right:2px;bottom:0;font-size:12px;font-weight:bold;text-shadow:1px 1px 0 #000,-1px 1px 0 #000}
+<style>:root{--app-vw:100vw;--app-vh:100vh;--app-top:0px;--app-left:0px}@supports (height:100dvh){:root{--app-vh:100dvh}}*{box-sizing:border-box}html{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#8ec9ff}body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;margin:0;padding:0;overflow:hidden;overscroll-behavior:none;background:#8ec9ff;font-family:'Courier New',monospace;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}canvas{display:block;touch-action:none}#hud{position:fixed;top:var(--app-top);left:var(--app-left);width:var(--app-vw);height:var(--app-vh);pointer-events:none;color:#fff;z-index:10;overflow:hidden}#crosshair{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%)}#crosshair:before,#crosshair:after{content:'';position:absolute;background:#fff;mix-blend-mode:difference;opacity:.9}#crosshair:before{left:50%;top:0;width:2px;height:100%;transform:translateX(-50%)}#crosshair:after{top:50%;left:0;height:2px;width:100%;transform:translateY(-50%)}#cooldownBar{position:absolute;left:50%;top:calc(50% + 18px);transform:translateX(-50%);width:80px;height:5px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.35);border-radius:2px;overflow:hidden;display:none;box-shadow:0 0 4px rgba(0,0,0,.6)}#cooldownBar.show{display:block}#cooldownFill{height:100%;width:0%;background:linear-gradient(90deg,#ffe9a0,#ffd24a);transition:width .02s linear}#hotbar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:3px;padding:4px;background:rgba(0,0,0,.35);border:2px solid rgba(0,0,0,.5);border-radius:3px}.slot{width:46px;height:46px;background:rgba(255,255,255,.10);border:2px solid rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center}.slot.sel{border-color:#fff;background:rgba(255,255,255,.28)}.slot .icon{width:32px;height:32px;background-repeat:no-repeat;image-rendering:pixelated}.slot .cnt{position:absolute;right:2px;bottom:0;font-size:12px;font-weight:bold;text-shadow:1px 1px 0 #000,-1px 1px 0 #000}
 #leftPanel{position:absolute;left:10px;top:10px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;max-width:300px;pointer-events:none}#info{font-size:13px;line-height:1.65;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.28);padding:8px 12px;border-radius:5px;transition:opacity .2s}#info.hidden{display:none}#info .k{color:#9fe0ff}#statusBar{font-size:13px;line-height:1.7;color:#fff;background:rgba(0,0,0,.4);padding:8px 12px;border-radius:5px;text-shadow:1px 1px 0 #000;min-width:168px}#statusBar .team-row{display:flex;align-items:center;gap:6px;padding:2px 0}#statusBar .team-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,.5)}#statusBar .bed-ok{color:#5eff8a;font-weight:bold}#statusBar .bed-bad{color:#ff4444;font-weight:bold}#statusBar .dead{color:#888;text-decoration:line-through}
 #healthBar{position:absolute;bottom:74px;left:calc(50% - 225px);pointer-events:none}
 #armorCanvas{display:block;margin-bottom:1px}
@@ -14,9 +14,9 @@
 #chestPanel .chest-sub{margin:10px 0 6px;padding-top:8px;border-top:2px solid #444;font-size:11px;letter-spacing:2px;color:#9a9a9a;text-align:center}
 #chestGrid,#chestInvGrid,#chestHotGrid{display:grid;grid-template-columns:repeat(9,46px);gap:3px}
 #chestHotGrid{margin-top:6px}
-#chestPanel .chest-hint{margin-top:8px;font-size:10px;color:#777;text-align:center;letter-spacing:1px}.grid{display:grid;grid-template-columns:repeat(9,46px);gap:3px}#invHotbar{margin-top:10px;padding-top:10px;border-top:2px solid #444}#invTop{display:flex;gap:14px;margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid #444}#invLeft{display:flex;gap:12px}#armorSlots{display:grid;grid-template-columns:46px;gap:6px;align-self:flex-start}#invPreview{width:160px;height:220px;background:#0b0b0e;border:2px solid #444;border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}#invPreview canvas{width:160px;height:220px;image-rendering:pixelated}#cursorItem{position:absolute;width:32px;height:32px;pointer-events:none;background-repeat:no-repeat;image-rendering:pixelated;z-index:50;transform:translate(-50%,-50%);display:none}
+#chestPanel .chest-hint{margin-top:8px;font-size:10px;color:#777;text-align:center;letter-spacing:1px}.grid{display:grid;grid-template-columns:repeat(9,46px);gap:3px}#inventory,#chestPanel{left:50%;top:50%}#invHotbar{margin-top:10px;padding-top:10px;border-top:2px solid #444}#invTop{display:flex;gap:14px;margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid #444}#invLeft{display:flex;gap:12px}#armorSlots{display:grid;grid-template-columns:46px;gap:6px;align-self:flex-start}#invPreview{width:160px;height:220px;background:#0b0b0e;border:2px solid #444;border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}#invPreview canvas{width:160px;height:220px;image-rendering:pixelated}#cursorItem{position:absolute;width:32px;height:32px;pointer-events:none;background-repeat:no-repeat;image-rendering:pixelated;z-index:50;transform:translate(-50%,-50%);display:none}
 /* ---- Hypixel-style Bed Wars GUI ---- */
-#shop,#upgradeShop{--gslot:50px;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:none;flex-direction:column;pointer-events:auto;background:#c6c6c6;padding:10px 12px 11px;border:2px solid #000;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #555,0 18px 60px rgba(0,0,0,.78);z-index:30;font-family:'Courier New',monospace;image-rendering:pixelated;max-width:calc(100vw - 8px);max-height:calc(100vh - 8px)}
+#shop,#upgradeShop{--gslot:50px;position:fixed;left:calc(var(--app-left) + var(--app-vw) * 0.5);top:calc(var(--app-top) + var(--app-vh) * 0.5);transform:translate(-50%,-50%);display:none;flex-direction:column;pointer-events:auto;background:#c6c6c6;padding:10px 12px 11px;border:2px solid #000;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #555,0 18px 60px rgba(0,0,0,.78);z-index:30;font-family:'Courier New',monospace;image-rendering:pixelated;max-width:calc(var(--app-vw) - 8px);max-height:calc(var(--app-vh) - 8px)}
 #shop.open,#upgradeShop.open{display:flex}
 .gui-head{position:relative;display:flex;align-items:center;justify-content:center;min-width:calc(var(--gslot, 50px) * 9 + 22px);padding:0 0 8px;margin-bottom:8px;border-bottom:2px solid #8b8b8b}
 .gui-title{font-family:'Press Start 2P','Courier New',monospace;font-size:10px;color:#3f3f3f;text-shadow:1px 1px 0 #fff;text-align:center;letter-spacing:1px}
@@ -77,7 +77,7 @@
 #skinPanel{position:absolute;right:14px;bottom:14px;display:flex;gap:6px;pointer-events:auto;z-index:12}#skinPanel button{font-family:inherit;font-size:12px;font-weight:bold;letter-spacing:1px;color:#fff;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.35);border-radius:4px;padding:8px 12px;cursor:pointer;text-shadow:1px 1px 0 #000}#skinPanel button:hover{background:rgba(255,255,255,.2);border-color:#fff}#skinPanel button:active{transform:translateY(1px)}#skinInput{display:none}#skinToast{position:absolute;right:14px;bottom:52px;font-size:11px;color:#fff;background:rgba(0,0,0,.5);padding:4px 9px;border-radius:4px;pointer-events:none;text-shadow:1px 1px 0 #000;opacity:0;transition:opacity .3s}#skinToast.show{opacity:1}#bowChargeWrap{position:absolute;left:50%;top:calc(50% + 40px);transform:translateX(-50%);width:120px;height:8px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.4);border-radius:4px;display:none;overflow:hidden}#bowChargeWrap.show{display:block}#bowChargeFill{height:100%;width:0%;background:linear-gradient(90deg,#c060ff,#ff80ff)}
 #hurtOverlay{position:fixed;inset:0;pointer-events:none;z-index:200;background:radial-gradient(ellipse at center, rgba(255,0,0,0) 32%, rgba(220,0,0,0.10) 60%, rgba(200,0,0,0.72) 100%);opacity:0;transition:opacity .10s ease-out}
 #hurtOverlay.show{opacity:1}
-#lobby{position:fixed;inset:0;z-index:500;background:radial-gradient(circle at 50% 30%,#1b2340,#070a18 70%);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#e6f0ff;font-family:'Courier New',monospace}
+#lobby{position:fixed;top:var(--app-top);left:var(--app-left);width:var(--app-vw);height:var(--app-vh);z-index:500;background:radial-gradient(circle at 50% 30%,#1b2340,#070a18 70%);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#e6f0ff;font-family:'Courier New',monospace}
 #lobby.hidden{display:none}
 #lobby h1{font-family:'Press Start 2P',monospace;font-size:26px;letter-spacing:4px;color:#7ff5e8;text-shadow:0 0 18px #2ba99a,0 4px 0 #0a3a34;margin:0 0 6px}
 #lobby h2{font-family:'Press Start 2P',monospace;font-size:12px;letter-spacing:3px;color:#ffd966;margin:0 0 26px;font-weight:normal}
@@ -108,6 +108,9 @@
 #lobbyTabs{display:flex;gap:4px;margin-bottom:18px}
 #lobbyTabs .tab{flex:1;padding:10px;text-align:center;font-size:12px;letter-spacing:2px;font-weight:bold;background:rgba(255,255,255,.05);border:2px solid #2f3a5c;border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;color:#9fb4d9}
 #lobbyTabs .tab.active{background:rgba(127,245,232,.15);color:#7ff5e8;border-color:#7ff5e8}
+#lobbyFsBtn{flex:0 0 46px;align-self:stretch;background:rgba(255,255,255,.05);border:2px solid #2f3a5c;border-bottom:none;border-radius:6px 6px 0 0;color:#9fb4d9;font-family:inherit;font-size:10px;font-weight:bold;letter-spacing:1px;line-height:1;cursor:pointer;padding:0}
+#lobbyFsBtn:hover,#lobbyFsBtn:active{color:#7ff5e8;border-color:#7ff5e8}
+#lobbyFsBtn.on{color:#7ff5e8;border-color:#7ff5e8;background:rgba(127,245,232,.15)}
 .lobby-panel{display:none}.lobby-panel.active{display:block}
 #chatPanel{position:fixed;left:12px;bottom:220px;width:280px;max-height:220px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:8px 10px;overflow-y:auto;font-size:13px;line-height:1.5;color:#e8f2ff;pointer-events:none;z-index:11;display:none}
 #chatPanel.show{display:block}
@@ -167,7 +170,7 @@
 #settingsPanel input[type=range]{width:100%;accent-color:#7ff5e8}
 #settingsPanel .set-val{float:right;color:#ffd966}
 #settingsPanel .set-hint{margin-top:10px;font-size:10px;color:#5f7099;line-height:1.5}
-#touchControls{display:none;position:fixed;inset:0;z-index:60;pointer-events:none}
+#touchControls{display:none;position:fixed;top:var(--app-top);left:var(--app-left);width:var(--app-vw);height:var(--app-vh);z-index:60;pointer-events:none}
 body.touch #touchControls{display:block}
 body.touch #hotbar{bottom:92px}
 body.touch #healthBar{bottom:150px}
@@ -308,7 +311,7 @@ body.touch #skinPanel button{font-size:9px;padding:5px 9px;letter-spacing:1px;ba
 body.touch #fsBtn{padding:5px 7px}
 #fsBtn.on{background:rgba(127,245,232,.28);border-color:#7ff5e8;color:#7ff5e8}
 body.touch #skinToast{right:auto;left:50%;top:auto;bottom:60px;transform:translateX(-50%);font-size:9px}
-body.touch #settingsPanel{right:8px;bottom:auto;top:8px;width:min(300px,calc(100vw - 16px));max-height:calc(100vh - 16px);overflow-y:auto;z-index:80;font-size:11px;padding:10px 12px}
+body.touch #settingsPanel{right:8px;bottom:auto;top:8px;width:min(300px,calc(var(--app-vw) - 16px));max-height:calc(var(--app-vh) - 16px);overflow-y:auto;z-index:80;font-size:11px;padding:10px 12px;touch-action:pan-y}
 body.touch #settingsPanel h3{font-size:10px;margin-bottom:6px}
 body.touch #settingsPanel label{margin:6px 0 2px}
 body.touch #settingsPanel input[type=range]{height:22px}
@@ -357,6 +360,26 @@ body.touch #shopClose,body.touch #upgradeClose{width:42px;height:42px;line-heigh
   #deadOverlay{padding:18px 30px}
   #countdownOverlay .cd-num{font-size:44px}
 }
+
+/* ==========================================================================
+   v7.6 - VISUAL VIEWPORT + IOS SAFARI
+   iOS reports 100vh as the *largest* viewport while the URL bar is visible,
+   so centred panels opened too low and had their bottom rows clipped. JS
+   mirrors visualViewport into --app-* and every full-screen layer uses it.
+   ========================================================================== */
+#hint,#matchOverlay,#deadOverlay{left:50%;top:50%}
+#respawnOverlay{left:50%;top:12%}
+#countdownOverlay{left:calc(var(--app-left) + var(--app-vw) * 0.5);top:calc(var(--app-top) + var(--app-vh) * 0.5)}
+
+/* If a panel is still taller than the visible area, let the panel itself
+   scroll so no shop row becomes unreachable on small iPhones. */
+body.touch #shop,body.touch #upgradeShop{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+body.touch #shop .gui-head,body.touch #upgradeShop .gui-head{position:sticky;top:0;z-index:5;background:#c6c6c6}
+
+/* Fullscreen / platform notices. */
+#uiToast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:calc(100vw - 28px);padding:9px 14px;background:rgba(10,14,26,.96);border:2px solid #7ff5e8;border-radius:7px;color:#e6f0ff;font-family:'Courier New',monospace;font-size:12px;line-height:1.5;text-align:center;letter-spacing:.3px;box-shadow:0 8px 28px rgba(0,0,0,.65);z-index:900;opacity:0;pointer-events:none;transition:opacity .22s}
+#uiToast.show{opacity:1}
+#uiToast b{color:#7ff5e8}
 </style></head><body>
 <div id="hud">
   <div id="crosshair"></div>
@@ -427,6 +450,7 @@ body.touch #shopClose,body.touch #upgradeClose{width:42px;height:42px;line-heigh
 <div id="hurtOverlay"></div>
 <div id="tooltip"></div>
 <div id="shopTip"></div>
+<div id="uiToast"></div>
 <input id="skinInput" type="file" accept="image/png,image/*">
 
 <div id="chatPanel"></div>
@@ -441,6 +465,7 @@ body.touch #shopClose,body.touch #upgradeClose{width:42px;height:42px;line-heigh
     <div id="lobbyTabs">
       <div class="tab active" data-tab="host">CREATE ROOM</div>
       <div class="tab" data-tab="join">JOIN ROOM</div>
+      <button type="button" id="lobbyFsBtn" title="Toggle fullscreen" aria-label="Toggle fullscreen">FULL</button>
     </div>
     <div class="lobby-panel active" id="panel-host">
       <div class="lobby-row"><label>Your name</label><input type="text" id="hostName" maxlength="16" placeholder="Steve" value=""></div>
@@ -1022,7 +1047,23 @@ function applyRenderScale(scale) {
   renderer.setSize(innerWidth, innerHeight);
 }
 applyRenderScale(renderScale);
+function syncViewportVars() {
+  /* iOS Safari treats 100vh as the largest possible viewport (URL-bar hidden),
+     while the visible area is smaller. Mirror the *visible* viewport into CSS
+     variables so centred panels and the HUD never end up behind browser chrome. */
+  const vv = window.visualViewport;
+  const w = Math.max(1, Math.round(vv ? vv.width : innerWidth));
+  const h = Math.max(1, Math.round(vv ? vv.height : innerHeight));
+  const top = Math.max(0, Math.round(vv ? vv.offsetTop : 0));
+  const left = Math.max(0, Math.round(vv ? vv.offsetLeft : 0));
+  const st = document.documentElement.style;
+  st.setProperty('--app-vw', w + 'px');
+  st.setProperty('--app-vh', h + 'px');
+  st.setProperty('--app-top', top + 'px');
+  st.setProperty('--app-left', left + 'px');
+}
 function resizeViewport() {
+  syncViewportVars();
   const w = Math.max(1, innerWidth), h = Math.max(1, innerHeight);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
@@ -1034,26 +1075,48 @@ addEventListener('orientationchange', () => setTimeout(resizeViewport, 120));
 /* ---- Fullscreen ---------------------------------------------------------
    Landscape phones lose precious height to the browser chrome; a real
    fullscreen element also stops the page from being panned/scrolled away
-   from the game. iOS Safari has no element fullscreen, so the button hides
-   itself there and the "add to home screen" metas take over. */
+   from the game. iPhone Safari has no element fullscreen at all, so the
+   button stays visible there and explains the "Add to Home Screen" route. */
 const fsBtnEl = document.getElementById('fsBtn');
+const lobbyFsBtnEl = document.getElementById('lobbyFsBtn');
+const uiToastEl = document.getElementById('uiToast');
+let uiToastTimer = 0;
+function showUiToast(html, ms = 4200) {
+  if (!uiToastEl) return;
+  uiToastEl.innerHTML = html;
+  uiToastEl.classList.add('show');
+  clearTimeout(uiToastTimer);
+  uiToastTimer = setTimeout(() => uiToastEl.classList.remove('show'), ms);
+}
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IS_IOS_STANDALONE = IS_IOS && (!!navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
 function fsElement() { return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null; }
 function fsSupported() { const el = document.documentElement; return !!(el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen); }
 function updateFsButton() {
   if (!fsBtnEl) return;
-  const active = !!fsElement();
-  fsBtnEl.style.display = fsSupported() ? '' : 'none';
+  const active = !!fsElement() || IS_IOS_STANDALONE;
+  /* Displayed on every device: on iPhone it opens an explanation instead. */
+  fsBtnEl.style.display = '';
   fsBtnEl.classList.toggle('on', active);
   fsBtnEl.textContent = active ? 'EXIT' : 'FULL';
-  fsBtnEl.title = active ? 'Exit fullscreen' : 'Toggle fullscreen';
+  fsBtnEl.title = active ? 'Exit fullscreen' : fsSupported() ? 'Toggle fullscreen' : 'How to play fullscreen';
+  if (lobbyFsBtnEl) lobbyFsBtnEl.classList.toggle('on', active);
 }
-function requestAppFullscreen() {
-  if (!fsSupported() || fsElement()) return;
+function showFullscreenHelp() {
+  if (IS_IOS) {
+    showUiToast('<b>iPhone fullscreen:</b> Safari does not allow web games to go fullscreen. Tap <b>Share</b> &rarr; <b>Add to Home Screen</b>, then open the game from your Home Screen.', 5200);
+  } else {
+    showUiToast('This browser does not support fullscreen.', 3200);
+  }
+}
+function requestAppFullscreen(showHelp) {
+  if (fsElement()) return;
+  if (!fsSupported()) { if (showHelp) showFullscreenHelp(); return; }
   const el = document.documentElement;
   try {
     const p = el.requestFullscreen ? el.requestFullscreen({ navigationUI: 'hide' }) : el.webkitRequestFullscreen();
-    if (p && typeof p.catch === 'function') p.catch(() => { });
-  } catch (e) { }
+    if (p && typeof p.catch === 'function') p.catch(() => { if (showHelp) showFullscreenHelp(); });
+  } catch (e) { if (showHelp) showFullscreenHelp(); }
 }
 function exitAppFullscreen() {
   try {
@@ -1063,14 +1126,23 @@ function exitAppFullscreen() {
     if (p && typeof p.catch === 'function') p.catch(() => { });
   } catch (e) { }
 }
-function toggleAppFullscreen() { if (fsElement()) exitAppFullscreen(); else requestAppFullscreen(); }
+function toggleAppFullscreen() {
+  if (fsElement()) { exitAppFullscreen(); return; }
+  if (IS_IOS_STANDALONE) { showUiToast('This Home Screen app is already running fullscreen.', 2600); return; }
+  requestAppFullscreen(true);
+}
 if (fsBtnEl) fsBtnEl.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); toggleAppFullscreen(); });
+if (lobbyFsBtnEl) lobbyFsBtnEl.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); toggleAppFullscreen(); });
 ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(ev => document.addEventListener(ev, () => {
   updateFsButton();
   resizeViewport();
   setTimeout(resizeViewport, 120);
 }));
-if (window.visualViewport) window.visualViewport.addEventListener('resize', resizeViewport);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', resizeViewport);
+  window.visualViewport.addEventListener('scroll', syncViewportVars);
+}
+syncViewportVars();
 updateFsButton();
 
 /* ============================================================================
@@ -4626,7 +4698,7 @@ document.addEventListener('pointerlockchange', () => {
    Scrolling is only allowed inside the lobby and inside GUI panels. */
 (function initPageLock() {
   const touchMode = () => document.body.classList.contains('touch');
-  const scrollable = t => !!(t && t.closest && t.closest('#lobby, .gui-grid, #settingsPanel, #chatPanel, #chatInputWrap, input, textarea, select'));
+  const scrollable = t => !!(t && t.closest && t.closest('#lobby, .gui-grid, #settingsPanel, #chatPanel, #chatInputWrap, #shop, #upgradeShop, input, textarea, select'));
   document.addEventListener('touchmove', e => {
     if (!touchMode()) return;
     if (e.touches && e.touches.length > 1) { e.preventDefault(); return; }
@@ -7372,7 +7444,7 @@ function buyItem(entry) {
   updateShopUI();
 }
 function rebuildShopForTeam() { if (_shopBuilt) buildShopUI(); }
-function openShop() { if (chestOpen) closeChest(); shopOpen = true; shopOpenedAt = performance.now(); shopEl.classList.add('open'); document.exitPointerLock(); if (!_shopBuilt) { _shopBuilt = true; buildShopUI(); } updateShopUI(); updateInstructionVisibility(); }
+function openShop() { if (chestOpen) closeChest(); shopOpen = true; shopOpenedAt = performance.now(); shopEl.classList.add('open'); shopEl.scrollTop = 0; document.exitPointerLock(); if (!_shopBuilt) { _shopBuilt = true; buildShopUI(); } updateShopUI(); updateInstructionVisibility(); }
 function closeShop() { shopOpen = false; shopEl.classList.remove('open'); hideShopTip(); if (!player.eliminated && !player.spectator && NET.started) requestGamePointerLock(); updateInstructionVisibility(); }
 document.getElementById('shopClose').addEventListener('click', () => { if (performance.now() - shopOpenedAt < GUI_TAP_GUARD_MS) return; closeShop(); });
 
