@@ -388,6 +388,311 @@ body.touch #shop .gui-head,body.touch #upgradeShop .gui-head{position:sticky;top
 #uiToast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:calc(100vw - 28px);padding:9px 14px;background:rgba(10,14,26,.96);border:2px solid #7ff5e8;border-radius:7px;color:#e6f0ff;font-family:'Courier New',monospace;font-size:12px;line-height:1.5;text-align:center;letter-spacing:.3px;box-shadow:0 8px 28px rgba(0,0,0,.65);z-index:900;opacity:0;pointer-events:none;transition:opacity .22s}
 #uiToast.show{opacity:1}
 #uiToast b{color:#7ff5e8}
+</style>
+<style id="mc-options-style">
+
+/* ============================================================================
+   VANILLA-STYLE GAME OPTIONS  (isolated: #mc-options-style)
+   Layers: 100 backdrop · 101 menu/viewport · 102 header/footer dividers
+           104 tooltip · 105 keybinding modal
+   ========================================================================== */
+#mc-options-root{
+  position:fixed;inset:0;z-index:900;display:none;pointer-events:none;
+  --mc-gui:2;
+  --mc-fs:calc(6px * var(--mc-gui));
+  --mc-w:calc(310px * var(--mc-gui));
+  --mc-h:calc(242px * var(--mc-gui));
+  --mc-btn-h:calc(20px * var(--mc-gui));
+  --mc-blur:6px;
+  --mc-tint:.55;
+  --mc-stone:none;
+  --mc-divider:none;
+  font-family:'Press Start 2P','Courier New',monospace;
+  font-size:var(--mc-fs);
+  line-height:1.4;
+  color:#fff;
+  text-shadow:calc(1px * var(--mc-gui)) calc(1px * var(--mc-gui)) 0 rgba(0,0,0,.75);
+  -webkit-font-smoothing:none;
+  font-smooth:never;
+  image-rendering:pixelated;
+  -webkit-user-select:none;user-select:none;
+}
+#mc-options-root.mc-open{display:block;pointer-events:auto}
+#mc-options-root *,#mc-options-root *:before,#mc-options-root *:after{box-sizing:border-box;image-rendering:pixelated}
+#mc-options-root button{font:inherit;color:inherit;text-shadow:inherit;letter-spacing:0}
+#mc-options-root :focus{outline:none}
+#mc-options-root :focus-visible{outline:calc(2px * var(--mc-gui)) solid #fff;outline-offset:calc(2px * var(--mc-gui))}
+
+/* ---- layer 100: dynamic blur + dark tint over the canvas ---------------- */
+#mc-options-root .mc-backdrop{
+  position:absolute;inset:0;z-index:100;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% 38%,rgba(20,22,34,.10),rgba(0,0,0,.38) 78%),
+    rgba(4,4,8,var(--mc-tint));
+  -webkit-backdrop-filter:blur(var(--mc-blur)) saturate(.72) brightness(.82);
+  backdrop-filter:blur(var(--mc-blur)) saturate(.72) brightness(.82);
+  transition:backdrop-filter .22s ease,-webkit-backdrop-filter .22s ease,background-color .22s ease;
+}
+
+/* ---- layer 101: the options window -------------------------------------- */
+#mc-options-root .mc-menu{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:101;display:flex;flex-direction:column;
+  width:min(var(--mc-w),calc(100vw - 12px));
+  height:min(var(--mc-h),calc(100vh - 12px));
+  background:rgba(12,12,17,.965);
+  border:calc(2px * var(--mc-gui)) solid #000;
+  box-shadow:
+    0 0 0 calc(2px * var(--mc-gui)) #3b3b47,
+    0 0 0 calc(4px * var(--mc-gui)) #0b0b10,
+    0 calc(16px * var(--mc-gui)) calc(44px * var(--mc-gui)) rgba(0,0,0,.72);
+  animation:mc-menu-in .13s steps(3) both;
+  overflow:hidden;
+}
+@keyframes mc-menu-in{from{opacity:.2;transform:translate(-50%,-50%) scale(.985)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+
+/* ---- layer 102: stone header/footer bars + procedural canvas dividers ---- */
+#mc-options-root .mc-header,
+#mc-options-root .mc-footer{
+  position:relative;z-index:102;flex:0 0 auto;
+  background-color:#17171d;background-image:var(--mc-stone);
+  background-repeat:repeat;background-size:calc(64px * var(--mc-gui)) auto;
+}
+#mc-options-root .mc-header{
+  height:calc(30px * var(--mc-gui));
+  display:flex;align-items:center;justify-content:center;
+  border-bottom:calc(1px * var(--mc-gui)) solid #050508;
+  box-shadow:inset 0 calc(2px * var(--mc-gui)) 0 rgba(255,255,255,.07);
+}
+#mc-options-root .mc-footer{
+  min-height:calc(30px * var(--mc-gui));
+  display:flex;align-items:center;
+  padding:calc(3px * var(--mc-gui)) calc(6px * var(--mc-gui));
+  border-top:calc(1px * var(--mc-gui)) solid #050508;
+  box-shadow:inset 0 calc(-2px * var(--mc-gui)) 0 rgba(0,0,0,.35);
+}
+#mc-options-root .mc-divider{
+  position:relative;z-index:102;flex:0 0 auto;height:calc(5px * var(--mc-gui));
+  background-image:var(--mc-divider);background-repeat:repeat-x;
+  background-size:calc(32px * var(--mc-gui)) 100%;
+  box-shadow:0 calc(1px * var(--mc-gui)) 0 rgba(0,0,0,.85);
+}
+#mc-options-root #mc-options-title{
+  margin:0;padding:0 calc(24px * var(--mc-gui)) 0 calc(30px * var(--mc-gui));
+  font-size:1.25em;font-weight:normal;letter-spacing:0;color:#fff;
+  text-shadow:calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #2a2a2a;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#mc-options-root .mc-back{
+  position:absolute;left:calc(6px * var(--mc-gui));top:50%;transform:translateY(-50%);
+  width:calc(18px * var(--mc-gui));height:calc(18px * var(--mc-gui));
+  display:flex;align-items:center;justify-content:center;
+  border:calc(1px * var(--mc-gui)) solid #000;background:#6f6f6f;color:#fff;
+  box-shadow:inset calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #aaa,
+             inset calc(-2px * var(--mc-gui)) calc(-2px * var(--mc-gui)) 0 #444;
+  cursor:pointer;padding:0;font-size:.95em;
+}
+#mc-options-root .mc-back:hover{background:#8496ab}
+#mc-options-root .mc-back[hidden]{display:none}
+
+/* ---- 101: clipped two-column scrollable viewport ------------------------ */
+#mc-options-root #mc-options-viewport{
+  position:relative;z-index:101;flex:1 1 auto;min-height:0;
+  overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
+  padding:calc(5px * var(--mc-gui)) calc(7px * var(--mc-gui)) calc(7px * var(--mc-gui));
+  background:
+    linear-gradient(rgba(0,0,0,.30),rgba(0,0,0,.12) 28%,rgba(0,0,0,.18)),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.017) 0,rgba(255,255,255,.017) 1px,transparent 1px,transparent calc(4px * var(--mc-gui)));
+  scrollbar-width:thin;scrollbar-color:#62626f #15151b;
+  touch-action:pan-y;-webkit-overflow-scrolling:touch;
+}
+#mc-options-root #mc-options-viewport::-webkit-scrollbar{width:calc(6px * var(--mc-gui))}
+#mc-options-root #mc-options-viewport::-webkit-scrollbar-track{background:#111116}
+#mc-options-root #mc-options-viewport::-webkit-scrollbar-thumb{background:#5c5c68;border:calc(1px * var(--mc-gui)) solid #262630}
+
+#mc-options-root #mc-options-content{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:calc(4px * var(--mc-gui));
+  align-items:stretch;
+}
+#mc-options-root .mc-widget{grid-column:span 1;min-width:0}
+#mc-options-root .mc-full,
+#mc-options-root .mc-section,
+#mc-options-root .mc-row,
+#mc-options-root .mc-hints,
+#mc-options-root .mc-note{grid-column:1 / -1}
+
+/* ---- beveled pixel buttons ---------------------------------------------- */
+#mc-options-root .mc-btn{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  width:100%;min-height:var(--mc-btn-h);height:var(--mc-btn-h);
+  padding:0 calc(3px * var(--mc-gui));
+  border:calc(1px * var(--mc-gui)) solid #000;
+  background:#6f6f6f;
+  box-shadow:
+    inset calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #a9a9a9,
+    inset calc(-2px * var(--mc-gui)) calc(-2px * var(--mc-gui)) 0 #474747;
+  cursor:pointer;overflow:hidden;white-space:nowrap;
+  font-size:.92em;line-height:1;
+  text-shadow:calc(1px * var(--mc-gui)) calc(1px * var(--mc-gui)) 0 #343434;
+}
+#mc-options-root .mc-btn:hover{background:#8798ac;box-shadow:inset calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #c3d0de,inset calc(-2px * var(--mc-gui)) calc(-2px * var(--mc-gui)) 0 #4f5b6c}
+#mc-options-root .mc-btn:active,
+#mc-options-root .mc-btn.mc-clicked{
+  background:#5d5d5d;
+  box-shadow:inset calc(-2px * var(--mc-gui)) calc(-2px * var(--mc-gui)) 0 #9a9a9a,
+             inset calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #3d3d3d;
+}
+#mc-options-root .mc-btn.mc-btn-value{padding-right:0}
+#mc-options-root .mc-btn .mc-value{opacity:.92}
+#mc-options-root .mc-btn.mc-selected{background:#3f7b3f;box-shadow:inset calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #71c071,inset calc(-2px * var(--mc-gui)) calc(-2px * var(--mc-gui)) 0 #245024}
+#mc-options-root .mc-btn[disabled]{opacity:.55;cursor:default}
+#mc-options-root .mc-btn[disabled]:hover{background:#6f6f6f}
+
+/* ---- beveled pixel sliders ---------------------------------------------- */
+#mc-options-root .mc-slider{
+  position:relative;display:block;width:100%;height:var(--mc-btn-h);
+  border:calc(1px * var(--mc-gui)) solid #000;background:#6f6f6f;
+  box-shadow:
+    inset calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #a9a9a9,
+    inset calc(-2px * var(--mc-gui)) calc(-2px * var(--mc-gui)) 0 #474747;
+  cursor:pointer;overflow:hidden;touch-action:none;
+}
+#mc-options-root .mc-slider:hover{background:#7d7d7d}
+#mc-options-root .mc-slider-fill{
+  position:absolute;left:0;top:0;bottom:0;width:0%;
+  background:rgba(20,24,38,.26);
+  box-shadow:inset calc(-1px * var(--mc-gui)) 0 0 rgba(0,0,0,.22);
+  pointer-events:none;
+}
+#mc-options-root .mc-slider-handle{
+  position:absolute;top:0;bottom:0;width:calc(8px * var(--mc-gui));
+  left:calc((100% - 8px * var(--mc-gui)) * var(--p,0));
+  background:#8d8d8d;
+  border:calc(1px * var(--mc-gui)) solid #000;
+  box-shadow:
+    inset calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #d0d0d0,
+    inset calc(-2px * var(--mc-gui)) calc(-2px * var(--mc-gui)) 0 #474747;
+  pointer-events:none;
+}
+#mc-options-root .mc-slider .mc-slider-text{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:0 calc(10px * var(--mc-gui));
+  font-size:.92em;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:calc(1px * var(--mc-gui)) calc(1px * var(--mc-gui)) 0 #333;
+  pointer-events:none;
+}
+#mc-options-root .mc-slider:focus-visible{outline:calc(2px * var(--mc-gui)) solid #fff;outline-offset:calc(2px * var(--mc-gui))}
+#mc-options-root .mc-hints{
+  display:flex;justify-content:space-between;align-items:center;
+  margin:calc(-1px * var(--mc-gui)) 0 calc(1px * var(--mc-gui));
+  padding:0 calc(3px * var(--mc-gui));
+  font-size:.72em;color:#c8c8d4;text-shadow:calc(1px * var(--mc-gui)) calc(1px * var(--mc-gui)) 0 #000;
+  position:relative;height:1.05em;
+}
+#mc-options-root .mc-hints .mc-hint-center{position:absolute;left:50%;transform:translateX(-50%)}
+#mc-options-root .mc-hints .mc-hint-right{margin-left:auto}
+
+/* ---- section headings, notes, key rows ---------------------------------- */
+#mc-options-root .mc-section{
+  display:flex;align-items:center;gap:calc(5px * var(--mc-gui));
+  margin:calc(4px * var(--mc-gui)) 0 calc(1px * var(--mc-gui));
+  font-size:.88em;color:#ffff55;
+  text-shadow:calc(1px * var(--mc-gui)) calc(1px * var(--mc-gui)) 0 #3f3f00;
+  white-space:nowrap;
+}
+#mc-options-root .mc-section:after{
+  content:'';flex:1 1 auto;height:calc(2px * var(--mc-gui));
+  background:linear-gradient(90deg,rgba(255,255,85,.55),rgba(255,255,85,.06));
+}
+#mc-options-root .mc-note{
+  font-size:.74em;line-height:1.7;color:#a8a8b8;
+  padding:calc(2px * var(--mc-gui)) calc(3px * var(--mc-gui));
+}
+#mc-options-root .mc-note.mc-warn{color:#ff7070;text-shadow:calc(1px * var(--mc-gui)) calc(1px * var(--mc-gui)) 0 #3a0000}
+#mc-options-root .mc-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;
+  gap:calc(4px * var(--mc-gui));align-items:center;
+}
+#mc-options-root .mc-row-label{
+  font-size:.82em;line-height:1.4;color:#e8e8f0;
+  text-shadow:calc(1px * var(--mc-gui)) calc(1px * var(--mc-gui)) 0 #000;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  padding-left:calc(2px * var(--mc-gui));
+}
+#mc-options-root .mc-row .mc-btn{width:calc(86px * var(--mc-gui))}
+#mc-options-root .mc-mini{
+  width:var(--mc-btn-h);height:var(--mc-btn-h);padding:0;
+  display:flex;align-items:center;justify-content:center;
+  border:calc(1px * var(--mc-gui)) solid #000;background:#6f6f6f;cursor:pointer;
+  box-shadow:inset calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #a9a9a9,inset calc(-2px * var(--mc-gui)) calc(-2px * var(--mc-gui)) 0 #474747;
+  font-size:.8em;line-height:1;
+}
+#mc-options-root .mc-mini:hover{background:#8798ac}
+#mc-options-root .mc-mini:active{box-shadow:inset calc(-2px * var(--mc-gui)) calc(-2px * var(--mc-gui)) 0 #9a9a9a,inset calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #3d3d3d}
+
+/* duplicate key bindings turn the whole key button red, like vanilla's alert */
+#mc-options-root .mc-key.mc-conflict{
+  color:#ff6666;background:#5c2323;
+  border-color:#c04040;
+  box-shadow:inset calc(2px * var(--mc-gui)) calc(2px * var(--mc-gui)) 0 #ff9a9a,inset calc(-2px * var(--mc-gui)) calc(-2px * var(--mc-gui)) 0 #3a0c0c;
+  animation:mc-conflict-blink 1.1s steps(2,end) infinite;
+}
+#mc-options-root .mc-key.mc-conflict:hover{background:#773030}
+@keyframes mc-conflict-blink{0%,60%{filter:brightness(1)}61%,100%{filter:brightness(1.28)}}
+
+/* ---- footer buttons ----------------------------------------------------- */
+#mc-options-root .mc-footer-row{display:grid;grid-template-columns:1fr 1fr;gap:calc(4px * var(--mc-gui));width:100%}
+#mc-options-root .mc-footer-row .mc-btn{height:calc(20px * var(--mc-gui))}
+#mc-options-root .mc-footer-row .mc-full-btn{grid-column:1 / -1;width:calc(50% + 2px);justify-self:center}
+
+/* ---- layer 104: delayed vanilla tooltip --------------------------------- */
+#mc-options-tooltip{
+  position:fixed;left:0;top:0;z-index:104;display:none;pointer-events:none;
+  max-width:calc(170px * var(--mc-gui));
+  padding:calc(4px * var(--mc-gui)) calc(6px * var(--mc-gui));
+  background:#100010;border:calc(1px * var(--mc-gui)) solid #5000ff;
+  box-shadow:inset 0 0 0 calc(1px * var(--mc-gui)) #1b003a,0 calc(4px * var(--mc-gui)) calc(10px * var(--mc-gui)) rgba(0,0,0,.55);
+  color:#fff;font-size:.82em;line-height:1.7;
+  text-shadow:calc(1px * var(--mc-gui)) calc(1px * var(--mc-gui)) 0 #000;
+  white-space:normal;word-break:break-word;
+}
+#mc-options-tooltip.mc-show{display:block}
+
+/* ---- layer 105: key binding capture modal ------------------------------- */
+#mc-options-root .mc-modal{
+  position:absolute;inset:0;z-index:105;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.58);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+}
+#mc-options-root .mc-modal.mc-show{display:flex}
+#mc-options-root .mc-modal-panel{
+  width:min(calc(230px * var(--mc-gui)),calc(100vw - 24px));
+  background:#1b1b22;border:calc(2px * var(--mc-gui)) solid #000;
+  box-shadow:0 0 0 calc(2px * var(--mc-gui)) #484856,0 calc(12px * var(--mc-gui)) calc(30px * var(--mc-gui)) rgba(0,0,0,.7);
+  padding:calc(11px * var(--mc-gui)) calc(10px * var(--mc-gui));
+  text-align:center;
+}
+#mc-options-root .mc-modal-panel h2{
+  margin:0 0 calc(7px * var(--mc-gui));font-size:1em;font-weight:normal;color:#ffff55;
+  text-shadow:calc(1px * var(--mc-gui)) calc(1px * var(--mc-gui)) 0 #3f3f00;
+}
+#mc-options-root .mc-modal-panel p{
+  margin:0 0 calc(9px * var(--mc-gui));font-size:.78em;line-height:1.7;color:#c8c8d4;
+}
+#mc-options-root .mc-modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:calc(4px * var(--mc-gui))}
+
+/* ---- high-contrast accessibility flavour -------------------------------- */
+#mc-options-root.mc-high-contrast .mc-btn,
+#mc-options-root.mc-high-contrast .mc-slider,
+#mc-options-root.mc-high-contrast .mc-mini{background:#4c4c4c}
+#mc-options-root.mc-high-contrast .mc-btn:hover{background:#a6bbd6}
+#mc-options-root.mc-high-contrast .mc-slider .mc-slider-text,
+#mc-options-root.mc-high-contrast .mc-btn,
+#mc-options-root.mc-high-contrast .mc-row-label{text-shadow:none;color:#fff}
+
+/* chat settings are applied to the existing HUD chat, not a second widget */
+body.mc-chat-hidden #chatPanel{display:none!important}
+
 </style></head><body>
 <div id="hud">
   <div id="crosshair"></div>
@@ -432,14 +737,6 @@ body.touch #shop .gui-head,body.touch #upgradeShop .gui-head{position:sticky;top
   <div id="deadOverlay"><h2>DEFEATED</h2><p>Your bed has been destroyed.</p><p id="deadTeamInfo"></p><button id="respawnBtn">RETURN TO LOBBY</button></div>
   <div id="respawnOverlay"><h2>SPECTATING</h2><p id="respawnTimer">5.0</p><p style="font-size:11px;opacity:.7;margin-top:8px;letter-spacing:1px;color:#aaa;font-weight:normal">WASD · SPACE / SHIFT · MOUSE</p></div>
   <div id="matchOverlay"><h2 id="matchTitle">VICTORY</h2><p id="matchSub"></p><div class="mo-stats" id="matchStats"></div><button id="matchBtn">RETURN TO LOBBY</button></div>
-  <div id="settingsPanel">
-    <h3>SETTINGS</h3>
-    <label>Look sensitivity <span class="set-val" id="sensVal">1.00</span></label>
-    <input type="range" id="sensRange" min="0.35" max="2.5" step="0.05" value="1">
-    <label>Master volume <span class="set-val" id="volVal">50%</span></label>
-    <input type="range" id="volRange" min="0" max="1" step="0.05" value="0.5">
-    <div class="set-hint">Sensitivity also applies to touch look. Sound is generated live with WebAudio.</div>
-  </div>
   <div id="touchControls">
     <div id="touchLookZone"></div>
     <div id="touchStickZone"><div id="touchStickBase"><div id="touchStickKnob"></div></div></div>
@@ -550,6 +847,36 @@ body.touch #shop .gui-head,body.touch #upgradeShop .gui-head{position:sticky;top
   <div id="lobbyHint">Rooms are relayed by a free public server · no port forwarding needed<br>Share the code with friends · up to 4 players (one per team)</div>
   </div>
 </div>
+
+<div id="mc-options-root" aria-hidden="true">
+  <div class="mc-backdrop"></div>
+  <div class="mc-menu" role="dialog" aria-modal="true" aria-labelledby="mc-options-title" aria-describedby="mc-options-hint">
+    <div class="mc-header">
+      <button id="mc-options-back" class="mc-back" type="button" aria-label="Back" data-screen="" data-option-key="back" data-tooltip="Go back">&#9664;</button>
+      <h1 id="mc-options-title">Options</h1>
+    </div>
+    <div class="mc-divider"></div>
+    <div id="mc-options-viewport">
+      <div id="mc-options-content"></div>
+    </div>
+    <div class="mc-divider"></div>
+    <div class="mc-footer">
+      <div class="mc-footer-row" id="mc-options-footer"></div>
+    </div>
+  </div>
+  <div id="mc-options-tooltip" role="tooltip" aria-hidden="true"></div>
+  <div id="mc-options-modal" class="mc-modal" aria-hidden="true">
+    <div class="mc-modal-panel" role="dialog" aria-modal="true" aria-labelledby="mc-modal-title" aria-describedby="mc-modal-desc">
+      <h2 id="mc-modal-title">Press a key</h2>
+      <p id="mc-modal-desc">Binding</p>
+      <div class="mc-modal-actions">
+        <button id="mc-modal-reset" class="mc-btn" type="button">Reset</button>
+        <button id="mc-modal-cancel" class="mc-btn" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<span id="mc-options-hint" hidden>Vanilla-style game options. Escape goes back, and the game pauses while this menu is open.</span>
 
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
@@ -733,34 +1060,15 @@ const SFX = (() => {
 })();
 document.addEventListener('pointerdown', () => { try { SFX.ensure(); } catch (e) { } }, { passive: true });
 
-/* ---- Settings panel ---- */
+/* ---- Settings button: opens the vanilla-style options screen ------------- */
 (function initSettingsUI() {
-  const panel = document.getElementById('settingsPanel');
   const btn = document.getElementById('settingsBtn');
-  const sens = document.getElementById('sensRange');
-  const vol = document.getElementById('volRange');
-  const sensVal = document.getElementById('sensVal');
-  const volVal = document.getElementById('volVal');
-  if (!panel || !btn || !sens || !vol) return;
-  sens.value = String(SETTINGS.sensitivity);
-  vol.value = String(SETTINGS.volume);
-  sensVal.textContent = SETTINGS.sensitivity.toFixed(2);
-  volVal.textContent = Math.round(SETTINGS.volume * 100) + '%';
-  btn.addEventListener('click', e => { e.stopPropagation(); panel.classList.toggle('open'); SFX.click(); });
-  sens.addEventListener('input', () => {
-    SETTINGS.sensitivity = clamp(parseFloat(sens.value) || 1, 0.35, 2.5);
-    sensVal.textContent = SETTINGS.sensitivity.toFixed(2);
-    saveSettings();
+  if (!btn) return;
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    try { window.MCOptions && window.MCOptions.open('main'); } catch (err) { }
+    try { SFX.click(); } catch (err) { }
   });
-  vol.addEventListener('input', () => {
-    SFX.setVolume(parseFloat(vol.value) || 0);
-    volVal.textContent = Math.round(SETTINGS.volume * 100) + '%';
-  });
-  document.addEventListener('pointerdown', e => {
-    if (!panel.classList.contains('open')) return;
-    if (panel.contains(e.target) || btn.contains(e.target)) return;
-    panel.classList.remove('open');
-  }, true);
 })();
 
 /* ============================================================================
@@ -6880,22 +7188,34 @@ function requestGamePointerLock() {
 let lastW = 0;
 let invOpen = false, shopOpen = false, upgradeOpen = false, chestOpen = false, camMode = 0;
 let camYaw = 0, camPitch = 0;
+/* Set by the options bridge while the vanilla-style menu is open. The world
+   keeps rendering but the simulation stops, like a paused singleplayer game. */
+let optionsPaused = false;
+let viewBobbingOn = true;
 
 function isTypingInField(e) { const t = e.target; if (!t) return false; const tag = t.tagName; return tag === 'INPUT' || tag === 'TEXTAREA' || t.isContentEditable; }
+/* Rebindable controls: the physical key is translated to the canonical code
+   the rest of the game already uses. Unbound keys pass through unchanged. */
+function mappedKeyCode(e) {
+  try { return (window.MCOptions && window.MCOptions.mapCode) ? window.MCOptions.mapCode(e.code) : e.code; }
+  catch (err) { return e.code; }
+}
 addEventListener('keydown', e => {
   if (isTypingInField(e)) return;
+  if (window.MCOptions && window.MCOptions.isOpen()) return;
   if (!NET.started) return;
-  if (e.repeat && e.code !== 'Space') { keys[e.code] = true; return; }
-  keys[e.code] = true;
-  if (player.spectator) { if (e.code === 'Space') e.preventDefault(); return; }
-  if (e.code === 'KeyE') { if (shopOpen) closeShop(); else if (upgradeOpen) closeUpgradeShop(); else if (chestOpen) closeChest(); else toggleInventory(); e.preventDefault(); }
-  if (e.code === 'F5') { camMode = (camMode + 1) % 3; camYaw = player.yaw; camPitch = player.pitch; e.preventDefault(); }
-  if (e.code === 'KeyW') { const now = performance.now(); if (now - lastW < 320) player.sprint = true; lastW = now; }
-  if (e.code === 'KeyQ') { dropHeldItem(); e.preventDefault(); }
-  if (e.code === 'KeyT') { openChat(); e.preventDefault(); return; }
-  if (e.code === 'KeyP') { openSkinPicker(); e.preventDefault(); }
-  if (e.code.startsWith('Digit')) {
-    const n = parseInt(e.code.slice(5));
+  const code = mappedKeyCode(e);
+  if (e.repeat && code !== 'Space') { keys[code] = true; return; }
+  keys[code] = true;
+  if (player.spectator) { if (code === 'Space') e.preventDefault(); return; }
+  if (code === 'KeyE') { if (shopOpen) closeShop(); else if (upgradeOpen) closeUpgradeShop(); else if (chestOpen) closeChest(); else toggleInventory(); e.preventDefault(); }
+  if (code === 'F5') { camMode = (camMode + 1) % 3; camYaw = player.yaw; camPitch = player.pitch; e.preventDefault(); }
+  if (code === 'KeyW') { const now = performance.now(); if (now - lastW < 320) player.sprint = true; lastW = now; }
+  if (code === 'KeyQ') { dropHeldItem(); e.preventDefault(); }
+  if (code === 'KeyT') { openChat(); e.preventDefault(); return; }
+  if (code === 'KeyP') { openSkinPicker(); e.preventDefault(); }
+  if (code.startsWith('Digit')) {
+    const n = parseInt(code.slice(5));
     if (n >= 1 && n <= 9) {
       if (selectedSlot !== n - 1) {
         player.eating = false;
@@ -6905,10 +7225,20 @@ addEventListener('keydown', e => {
       updateUI();
     }
   }
-  if (e.code === 'Escape') { if (shopOpen) closeShop(); else if (upgradeOpen) closeUpgradeShop(); else if (chestOpen) closeChest(); else if (invOpen) toggleInventory(); }
-  if (e.code === 'Space') e.preventDefault();
+  if (code === 'Escape') {
+    if (shopOpen) closeShop();
+    else if (upgradeOpen) closeUpgradeShop();
+    else if (chestOpen) closeChest();
+    else if (invOpen) toggleInventory();
+    else if (window.MCOptions) window.MCOptions.open('main');
+  }
+  if (code === 'Space') e.preventDefault();
 });
-addEventListener('keyup', e => { keys[e.code] = false; if (e.code === 'KeyW') player.sprint = false; });
+addEventListener('keyup', e => {
+  const code = mappedKeyCode(e);
+  keys[code] = false;
+  if (code === 'KeyW') player.sprint = false;
+});
 addEventListener('mousemove', e => {
   if (document.pointerLockElement !== renderer.domElement) return;
   if (!NET.started) return;
@@ -8606,7 +8936,7 @@ function sendLocalState() {
   const ry = +player.yaw.toFixed(3); const rp = +player.pitch.toFixed(3);
   const hp = Math.round(player.health * 10) / 10;
   const item = inv[selectedSlot] ? inv[selectedSlot].id : null;
-  const sw = swinging && swingT < 0.2;
+  const sw = swinging && swingT < 0.22;
   const arKey = (player.armor.helmet || '') + '|' + (player.armor.chest || '') + '|' + (player.armor.legs || '') + '|' + (player.armor.boots || '');
   const mg = !!(mining && mineTarget);
   const rs = !!player.respawning;
@@ -9500,8 +9830,46 @@ const ARM_BASE_POS = new THREE.Vector3(0.34, -0.30, -0.42);
 const ARM_BASE_ROT = new THREE.Euler(0.10, -0.35, 0.45);
 armGroup.position.copy(ARM_BASE_POS);
 armGroup.rotation.copy(ARM_BASE_ROT);
-let swingT = 0, swinging = false;
-function startSwing() { swinging = true; swingT = 0; }
+/* ---------------------------------------------------------------------------
+   Hand swing
+   One shared, continuous phase drives both the first-person arm and the
+   third-person model. Vanilla's curve peaks early (25% of the cycle) and then
+   eases back over the remaining 75%, which is what makes the downstroke feel
+   snappy while the return still reads as a full "up" motion instead of a cut.
+   A swing requested mid-animation is queued instead of snapping the phase back
+   to zero, so attacking or mining produces a smooth looping cycle.
+   --------------------------------------------------------------------------- */
+const SWING_DURATION = 0.34;                 // seconds for one full swing
+let swingT = 1;                              // 0..1 normalized progress
+let swinging = false;
+let swingQueued = false;
+function swingCurve(p) {
+  p = p < 0 ? 0 : p > 1 ? 1 : p;
+  return Math.sin(Math.sqrt(p) * Math.PI);
+}
+function startSwing(restart) {
+  if (swinging && swingT < 0.97) {
+    if (restart !== true) swingQueued = true;
+    return;
+  }
+  swinging = true;
+  swingQueued = false;
+  swingT = 0;
+}
+function stepSwing(dt, miningLoop) {
+  if (miningLoop) {
+    if (!swinging) { swinging = true; swingT = 0; swingQueued = false; }
+    swingT += dt / SWING_DURATION;
+    if (swingT >= 1) { swingT -= Math.floor(swingT); swingQueued = false; }
+    return;
+  }
+  if (!swinging) return;
+  swingT += dt / SWING_DURATION;
+  if (swingT >= 1) {
+    if (swingQueued) { swingT = 0; swingQueued = false; }
+    else { swingT = 1; swinging = false; }
+  }
+}
 
 const skinInputEl = document.getElementById('skinInput');
 const skinToastEl = document.getElementById('skinToast');
@@ -9561,14 +9929,19 @@ if (skinResetEl) skinResetEl.addEventListener('click', () => { try { localStorag
 function updateArm(dt) {
   updateItemMesh();
   if (player.spectator) { armGroup.visible = false; return; }
+  /* Advance the swing in every camera mode; the third-person model reads the
+     same phase in animateModel(). Mining keeps the loop running continuously. */
+  const miningLoop = !!(mining && mineTarget && !invOpen && !shopOpen && !upgradeOpen && !chestOpen &&
+    !player.eliminated && player.respawnCooldown <= 0);
+  stepSwing(dt, miningLoop);
   if (player.eating && camMode === 0) { const t = performance.now() * 0.018; const bite = (Math.sin(t) * 0.5 + 0.5) * 0.12; armGroup.position.set(ARM_BASE_POS.x - 0.18, ARM_BASE_POS.y + 0.05 + bite, ARM_BASE_POS.z + 0.14); armGroup.rotation.set(-0.85, -0.15, 0.35); return; }
   if (player.bowCharging && camMode === 0) { const pull = player.bowCharge * 0.25; armGroup.position.set(ARM_BASE_POS.x - 0.25 - pull * 0.2, ARM_BASE_POS.y + 0.05, ARM_BASE_POS.z + 0.25 + pull); armGroup.rotation.set(-0.3, -1.3, 0.2); return; }
-  if (mining && mineTarget && camMode === 0) { swingT += dt * 4.5; if (swingT >= 1) swingT -= 1; swinging = true; }
-  else if (swinging) { swingT += dt * 3.6; if (swingT >= 1) { swingT = 0; swinging = false; } }
-  const s = Math.sin(swingT * Math.PI);
-  const bob = (Math.hypot(player.vel.x, player.vel.z) > 0.6 && player.onGround) ? Math.sin(performance.now() * 0.011) * 0.012 : 0;
-  armGroup.position.set(ARM_BASE_POS.x - s * 0.12, ARM_BASE_POS.y - s * 0.16 + bob, ARM_BASE_POS.z + s * 0.20);
-  armGroup.rotation.set(ARM_BASE_ROT.x + s * 0.9, ARM_BASE_ROT.y + s * 0.25, ARM_BASE_ROT.z - s * 0.35);
+  if (camMode !== 0) return;
+  const s = swingCurve(swingT);
+  const bob = (viewBobbingOn && Math.hypot(player.vel.x, player.vel.z) > 0.6 && player.onGround) ? Math.sin(performance.now() * 0.011) * 0.012 : 0;
+  /* Diagonal vanilla swipe: down + inward + forward, then a slower return. */
+  armGroup.position.set(ARM_BASE_POS.x - s * 0.10, ARM_BASE_POS.y - s * 0.20 + bob, ARM_BASE_POS.z + s * 0.24);
+  armGroup.rotation.set(ARM_BASE_ROT.x + s * 1.02, ARM_BASE_ROT.y + s * 0.34, ARM_BASE_ROT.z - s * 0.52);
 }
 
 let shakeTime = 0;
@@ -9602,7 +9975,7 @@ function updateCamera(dt) {
   armGroup.visible = (camMode === 0);
   playerModel.visible = (camMode !== 0 && player.effects.invis <= 0);
   let shakeX = 0, shakeY = 0;
-  if (player.onGround && Math.hypot(player.vel.x, player.vel.z) > 0.5) {
+  if (viewBobbingOn && player.onGround && Math.hypot(player.vel.x, player.vel.z) > 0.5) {
     shakeTime += dt * 12;
     const intensity = clamp(Math.hypot(player.vel.x, player.vel.z) / 5, 0, 1) * 0.009;
     shakeX = Math.cos(shakeTime * 0.8) * intensity * 0.5; shakeY = Math.sin(shakeTime) * intensity * 0.5;
@@ -9625,7 +9998,7 @@ function updateCamera(dt) {
 }
 function animateModel(model, dt, e, isPlayer) {
   const P = e.renderPos || e.pos;
-  if (!e._lastAnimPos) { e._lastAnimPos = new THREE.Vector3(P.x, P.y, P.z); e._animSpeed = 0; e._walkPhase = Math.random() * Math.PI * 2; }
+  if (!e._lastAnimPos) { e._lastAnimPos = new THREE.Vector3(P.x, P.y, P.z); e._animSpeed = 0; e._walkPhase = Math.random() * Math.PI * 2; e._swingSeed = Math.random(); }
   const dxA = P.x - e._lastAnimPos.x; const dzA = P.z - e._lastAnimPos.z;
   e._lastAnimPos.set(P.x, P.y, P.z);
   const realSpeed = Math.min(10, Math.hypot(dxA, dzA) / Math.max(dt, 1e-4));
@@ -9655,10 +10028,16 @@ function animateModel(model, dt, e, isPlayer) {
   if (isPlayer) {
     if (player.eating) { armR.rotation.x = -1.1 + Math.sin(performance.now() * 0.02) * 0.15; armR.rotation.z = -0.3; }
     else if (player.bowCharging) { armR.rotation.x = -0.3; armR.rotation.z = -0.4; armL.rotation.x = -0.3; armL.rotation.z = 0.4; }
-    else if ((mining && mineTarget) || swinging) { const ms = Math.sin(swingT * Math.PI); armR.rotation.x = -0.2 + ms * 1.15; armR.rotation.z = 0; armL.rotation.x = -0.15; armL.rotation.z = 0; }
+    else if (swinging || (mining && mineTarget)) { const ms = swingCurve(swingT); armR.rotation.x = -0.2 + ms * 1.15; armR.rotation.z = -ms * 0.14; armL.rotation.x = -0.15; armL.rotation.z = 0; }
   } else {
-    if (e.miningActive) { const phase = (performance.now() / 1000 * 4.5) % 1; const ms = Math.sin(phase * Math.PI * 2) * 0.5 + 0.5; armR.rotation.x = -0.2 + ms * 1.15; armR.rotation.z = -0.05; armL.rotation.x = -0.15; armL.rotation.z = 0.05; }
-    else if (e.timers && e.timers.swing > 0) { const ms = Math.sin((1 - e.timers.swing / 0.35) * Math.PI); armR.rotation.x = -0.2 + ms * 1.15; armR.rotation.z = -0.05; armL.rotation.x = -0.15; armL.rotation.z = 0.05; }
+    if (e.miningActive) {
+      const phase = ((performance.now() * 0.001 / SWING_DURATION) + (e._swingSeed || 0)) % 1;
+      const ms = swingCurve(phase);
+      armR.rotation.x = -0.2 + ms * 1.15; armR.rotation.z = -0.06 - ms * 0.10; armL.rotation.x = -0.15; armL.rotation.z = 0.05;
+    } else if (e.timers && e.timers.swing > 0) {
+      const ms = swingCurve(1 - e.timers.swing / 0.35);
+      armR.rotation.x = -0.2 + ms * 1.15; armR.rotation.z = -0.05; armL.rotation.x = -0.15; armL.rotation.z = 0.05;
+    }
   }
 }
 function updateModel(dt) {
@@ -10107,6 +10486,10 @@ let _lastSunX = -99999, _lastSunY = -99999, _lastSunZ = -99999;
 /* Gameplay simulation, split out from the render loop so it can keep running
    (at a reduced rate) while the tab is in the background. */
 function stepWorld(dt, now) {
+  /* The vanilla-style options menu pauses the local simulation while it is
+     open. Rendering continues in animate(), so the frozen world stays visible
+     behind the blurred backdrop. */
+  if (optionsPaused) return;
   if (NET.started) {
     if (!invOpen && !shopOpen && !upgradeOpen && !chestOpen && !chatInputWrap.classList.contains('show')) updatePlayer(dt);
     updateEating(dt); updateMining(dt); updateAutoAttack(dt); updateGenerators(dt);
@@ -10275,5 +10658,1218 @@ window.vbwNetStats = () => ({
     ping: peerPingMs(r.id), stalledMs: Math.round(remoteStallMs(r)), buffered: r.stateBuffer.length
   }))
 });
+/* ============================================================================
+   GAME OPTIONS BRIDGE
+   The vanilla-style options UI lives in its own isolated script block below
+   and owns the GameOptions registry. This bridge applies the values that
+   actually affect the 3D game and exposes pause / pointer-lock hooks.
+   ========================================================================== */
+function applyGameOptions(o) {
+  try {
+    const fov = clamp(Number(o.fov) || 70, 30, 110);
+    if (camera.fov !== fov) { camera.fov = fov; camera.updateProjectionMatrix(); }
+    SETTINGS.sensitivity = clamp(Number(o.sensitivity) || 1, 0.35, 2.5);
+    SETTINGS.volume = clamp(Number(o.masterVolume) / 100 || 0, 0, 1);
+    try { SFX.setVolume(SETTINGS.volume); } catch (e) { }
+    viewBobbingOn = o.viewBobbing !== false;
+    const rd = clamp(Number(o.renderDistance) || 16, 2, 32);
+    if (scene.fog) {
+      scene.fog.near = 20 + rd * 3.1;
+      scene.fog.far = 60 + rd * 7.2;
+    }
+    camera.far = Math.max(600, (scene.fog ? scene.fog.far : 175) + 160);
+    camera.updateProjectionMatrix();
+    renderer.toneMappingExposure = 0.72 + clamp(Number(o.brightness) || 0, 0, 100) / 100 * 0.6;
+    renderer.shadowMap.enabled = o.entityShadows !== false;
+  } catch (e) { }
+}
+
+const MC_GAME_API = {
+  apply: applyGameOptions,
+  setPaused(v) {
+    optionsPaused = !!v;
+    if (optionsPaused) {
+      /* Never keep walking/mining because the menu stole the keyboard. */
+      releaseInputs();
+      try { if (document.pointerLockElement) document.exitPointerLock(); } catch (e) { }
+    }
+  },
+  isPaused() { return optionsPaused; },
+  isPlaying() { return !!(NET.started && !isTouchMode() && !player.eliminated && !player.spectator); },
+  exitLock() { try { if (document.pointerLockElement) document.exitPointerLock(); } catch (e) { } },
+  requestLock() { if (MC_GAME_API.isPlaying()) requestGamePointerLock(); },
+  closeMenus() {
+    if (shopOpen) closeShop();
+    if (upgradeOpen) closeUpgradeShop();
+    if (chestOpen) closeChest();
+    if (invOpen) toggleInventory();
+  },
+  toggleFullscreen() { toggleAppFullscreen(); },
+  isFullscreen() { return !!fsElement(); },
+  openSkinPicker() { openSkinPicker(); },
+  resetSkin() {
+    try { localStorage.removeItem('vbw_skin'); } catch (e) { }
+    setPlayerSkin(null, false, null);
+    NET.mySkin = null; NET.mySlim = false; publishMySkin();
+    showMessage('Skin reset', '#ffcc44');
+  }
+};
+if (window.MCOptions && window.MCOptions.registerGame) window.MCOptions.registerGame(MC_GAME_API);
+if (window.GameOptions) applyGameOptions(window.GameOptions.all());
 requestAnimationFrame(animate);
-</script></body></html>
+</script><script id="mc-options-script">
+/* ============================================================================
+   VANILLA-STYLE GAME OPTIONS  (isolated: #mc-options-script)
+   Owns the GameOptions registry, every options screen, persistence, the
+   Escape/back stack and the key-binding capture modal. The 3D game registers
+   itself through MCOptions.registerGame(...) and receives apply(state).
+   ========================================================================== */
+(function () {
+  'use strict';
+  if (window.MCOptions && window.MCOptions.__installed) return;
+
+  var STORAGE_KEY = 'vbw_options_v1';
+  var STORE_VERSION = 1;
+  var TOOLTIP_DELAY = 500;
+
+  /* ---------------------------------------------------------------- defaults */
+  var DEFAULTS = {
+    fov: 70,
+    fovEffects: 100,
+    sensitivity: 1,
+    invertMouse: false,
+    autoJump: false,
+    masterVolume: 50,
+    musicVolume: 30,
+    blocksVolume: 100,
+    hostileVolume: 80,
+    friendlyVolume: 100,
+    playersVolume: 100,
+    ambientVolume: 100,
+    weatherVolume: 100,
+    uiVolume: 100,
+    guiScale: 2,
+    graphics: 'fancy',
+    renderDistance: 16,
+    smoothLighting: true,
+    brightness: 50,
+    particles: 'all',
+    viewBobbing: true,
+    entityShadows: true,
+    fullscreen: false,
+    chatVisibility: 'shown',
+    chatOpacity: 100,
+    chatBackground: 50,
+    chatScale: 100,
+    chatLineSpacing: 100,
+    chatWidth: 100,
+    darknessPulse: 100,
+    damageTilt: 100,
+    highContrast: false,
+    showSubtitles: false,
+    narrator: 'off',
+    menuBlur: 6,
+    skinCape: false,
+    skinJacket: true,
+    skinLeftSleeve: true,
+    skinRightSleeve: true,
+    skinLeftPants: true,
+    skinRightPants: true,
+    skinHat: true,
+    language: 'en_us',
+    resourcePacks: ['vanilla'],
+    'key.forward': 'KeyW',
+    'key.left': 'KeyA',
+    'key.back': 'KeyS',
+    'key.right': 'KeyD',
+    'key.jump': 'Space',
+    'key.sneak': 'ShiftLeft',
+    'key.sprint': 'ControlLeft',
+    'key.inventory': 'KeyE',
+    'key.drop': 'KeyQ',
+    'key.chat': 'KeyT',
+    'key.perspective': 'F5',
+    'key.skin': 'KeyP'
+  };
+
+  var NUM = {
+    fov: [30, 110, 1],
+    fovEffects: [0, 100, 1],
+    sensitivity: [0.35, 2.5, 0.05],
+    masterVolume: [0, 100, 1],
+    musicVolume: [0, 100, 1],
+    blocksVolume: [0, 100, 1],
+    hostileVolume: [0, 100, 1],
+    friendlyVolume: [0, 100, 1],
+    playersVolume: [0, 100, 1],
+    ambientVolume: [0, 100, 1],
+    weatherVolume: [0, 100, 1],
+    uiVolume: [0, 100, 1],
+    guiScale: [1, 4, 1],
+    renderDistance: [2, 32, 1],
+    brightness: [0, 100, 1],
+    chatOpacity: [0, 100, 1],
+    chatBackground: [0, 100, 1],
+    chatScale: [50, 100, 1],
+    chatWidth: [50, 100, 1],
+    chatLineSpacing: [0, 100, 1],
+    darknessPulse: [0, 100, 1],
+    damageTilt: [0, 100, 1],
+    menuBlur: [0, 16, 1]
+  };
+
+  var ENUM = {
+    graphics: ['fancy', 'fast'],
+    particles: ['all', 'decreased', 'minimal'],
+    chatVisibility: ['shown', 'commands', 'hidden'],
+    narrator: ['off', 'all', 'chat', 'system'],
+    language: ['en_us', 'en_gb', 'de_de', 'es_es', 'fr_fr', 'ja_jp', 'ko_kr', 'zh_cn']
+  };
+
+  var BOOL = [
+    'invertMouse', 'autoJump', 'smoothLighting', 'viewBobbing', 'entityShadows',
+    'fullscreen', 'highContrast', 'showSubtitles', 'skinCape', 'skinJacket',
+    'skinLeftSleeve', 'skinRightSleeve', 'skinLeftPants', 'skinRightPants', 'skinHat'
+  ];
+
+  var ENUM_LABELS = {
+    graphics: { fancy: 'Fancy', fast: 'Fast' },
+    particles: { all: 'All', decreased: 'Decreased', minimal: 'Minimal' },
+    chatVisibility: { shown: 'Shown', commands: 'Commands Only', hidden: 'Hidden' },
+    narrator: { off: 'Off', all: 'All', chat: 'Chat', system: 'System' },
+    language: {
+      en_us: 'English (US)', en_gb: 'English (UK)', de_de: 'Deutsch',
+      es_es: 'Español', fr_fr: 'Français', ja_jp: '日本語',
+      ko_kr: '한국어', zh_cn: '简体中文'
+    }
+  };
+
+  var KEY_ACTIONS = {
+    forward: { label: 'Walk Forward', def: 'KeyW' },
+    left: { label: 'Strafe Left', def: 'KeyA' },
+    back: { label: 'Walk Backward', def: 'KeyS' },
+    right: { label: 'Strafe Right', def: 'KeyD' },
+    jump: { label: 'Jump', def: 'Space' },
+    sneak: { label: 'Sneak', def: 'ShiftLeft' },
+    sprint: { label: 'Sprint', def: 'ControlLeft' },
+    inventory: { label: 'Inventory', def: 'KeyE' },
+    drop: { label: 'Drop Selected Item', def: 'KeyQ' },
+    chat: { label: 'Open Chat', def: 'KeyT' },
+    perspective: { label: 'Toggle Perspective', def: 'F5' },
+    skin: { label: 'Change Skin', def: 'KeyP' }
+  };
+
+  var PACKS = [
+    { id: 'vanilla', name: 'Default' },
+    { id: 'programmer', name: 'Programmer Art' },
+    { id: 'contrast', name: 'High Contrast' },
+    { id: 'bedwars', name: 'Bed Wars Enhanced' }
+  ];
+
+  /* ------------------------------------------------------------- validation */
+  function clampNum(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+  function coerce(key, value) {
+    var n = NUM[key];
+    if (n) {
+      var x = Number(value);
+      if (!isFinite(x)) x = DEFAULTS[key];
+      x = clampNum(x, n[0], n[1]);
+      x = Math.round(x / n[2]) * n[2];
+      return Math.round(x * 1000) / 1000;
+    }
+    if (ENUM[key]) return ENUM[key].indexOf(value) >= 0 ? value : DEFAULTS[key];
+    if (BOOL.indexOf(key) >= 0) return !!value;
+    if (key === 'resourcePacks') {
+      if (!Array.isArray(value)) return DEFAULTS.resourcePacks.slice();
+      var allowed = PACKS.map(function (p) { return p.id; });
+      var out = [];
+      for (var i = 0; i < value.length; i++) {
+        if (allowed.indexOf(value[i]) >= 0 && out.indexOf(value[i]) < 0) out.push(value[i]);
+      }
+      if (out.indexOf('vanilla') < 0) out.unshift('vanilla');
+      return out;
+    }
+    if (key.indexOf('key.') === 0) {
+      return typeof value === 'string' && /^[A-Za-z0-9]{1,24}$/.test(value) ? value : DEFAULTS[key];
+    }
+    return DEFAULTS[key];
+  }
+
+  function loadState() {
+    var s = {};
+    for (var k in DEFAULTS) s[k] = Array.isArray(DEFAULTS[k]) ? DEFAULTS[k].slice() : DEFAULTS[k];
+    var raw = null;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { }
+    if (raw) {
+      try {
+        var parsed = JSON.parse(raw);
+        for (var key in DEFAULTS) {
+          if (Object.prototype.hasOwnProperty.call(parsed, key)) s[key] = coerce(key, parsed[key]);
+        }
+      } catch (e) { }
+      return s;
+    }
+    /* One-time migration from the old small settings panel. */
+    try {
+      var oldRaw = localStorage.getItem('vbw_settings');
+      if (oldRaw) {
+        var old = JSON.parse(oldRaw);
+        if (typeof old.volume === 'number') s.masterVolume = coerce('masterVolume', Math.round(old.volume * 100));
+        if (typeof old.sensitivity === 'number') s.sensitivity = coerce('sensitivity', old.sensitivity);
+      }
+    } catch (e) { }
+    return s;
+  }
+
+  var state = loadState();
+  var subscribers = [];
+
+  function save() {
+    try {
+      var out = { __v: STORE_VERSION };
+      for (var k in DEFAULTS) out[k] = state[k];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(out));
+    } catch (e) { }
+  }
+
+  function subscribe(fn) {
+    subscribers.push(fn);
+    return function () {
+      var i = subscribers.indexOf(fn);
+      if (i >= 0) subscribers.splice(i, 1);
+    };
+  }
+
+  function emit(key) {
+    for (var i = 0; i < subscribers.length; i++) {
+      try { subscribers[i](key, state[key], getAll()); } catch (e) { }
+    }
+  }
+
+  function getAll() {
+    var out = {};
+    for (var k in DEFAULTS) out[k] = Array.isArray(state[k]) ? state[k].slice() : state[k];
+    return out;
+  }
+
+  function getOption(key) { return state[key]; }
+
+  function setOption(key, value, quiet) {
+    if (!Object.prototype.hasOwnProperty.call(DEFAULTS, key)) return null;
+    var next = coerce(key, value);
+    var old = state[key];
+    var same = Array.isArray(next) ? JSON.stringify(next) === JSON.stringify(old) : next === old;
+    if (same) return next;
+    state[key] = next;
+    save();
+    applyUi();
+    applyGame();
+    if (!quiet) emit(key);
+    return next;
+  }
+
+  function resetOption(key) {
+    if (!Object.prototype.hasOwnProperty.call(DEFAULTS, key)) return;
+    setOption(key, DEFAULTS[key]);
+  }
+
+  function resetAll() {
+    for (var k in DEFAULTS) {
+      state[k] = Array.isArray(DEFAULTS[k]) ? DEFAULTS[k].slice() : DEFAULTS[k];
+    }
+    save();
+    applyUi();
+    applyGame();
+    emit('*');
+  }
+
+  window.GameOptions = {
+    get: getOption,
+    set: setOption,
+    reset: resetOption,
+    resetAll: resetAll,
+    all: getAll,
+    subscribe: subscribe,
+    defaults: DEFAULTS,
+    storageKey: STORAGE_KEY
+  };
+
+  /* ------------------------------------------------------------ game bridge */
+  var gameApi = null;
+  var pausedByUs = false;
+  var viewBobbingOn = true;
+  var lastApplied = '';
+
+  function applyGame() {
+    viewBobbingOn = !!state.viewBobbing;
+    if (!gameApi || typeof gameApi.apply !== 'function') return;
+    var snapshot = getAll();
+    var stamp = JSON.stringify(snapshot);
+    if (stamp === lastApplied) return;
+    lastApplied = stamp;
+    try { gameApi.apply(snapshot); } catch (e) { }
+  }
+
+  function registerGame(api) {
+    gameApi = api || null;
+    lastApplied = '';
+    applyGame();
+    if (isOpen() && gameApi && gameApi.setPaused) {
+      gameApi.setPaused(true);
+      pausedByUs = true;
+    }
+  }
+
+  /* --------------------------------------------------------------- elements */
+  var root = document.getElementById('mc-options-root');
+  if (!root) { window.MCOptions = { __installed: true, open: function () { }, close: function () { }, isOpen: function () { return false; }, registerGame: registerGame, mapCode: function (c) { return c; } }; return; }
+  var menu = root.querySelector('.mc-menu');
+  var headerEl = root.querySelector('.mc-header');
+  var footerBarEl = root.querySelector('.mc-footer');
+  var titleEl = document.getElementById('mc-options-title');
+  var backBtn = document.getElementById('mc-options-back');
+  var viewport = document.getElementById('mc-options-viewport');
+  var content = document.getElementById('mc-options-content');
+  var footer = document.getElementById('mc-options-footer');
+  var tipEl = document.getElementById('mc-options-tooltip');
+  var modal = document.getElementById('mc-options-modal');
+  var modalTitle = document.getElementById('mc-modal-title');
+  var modalDesc = document.getElementById('mc-modal-desc');
+  var modalReset = document.getElementById('mc-modal-reset');
+  var modalCancel = document.getElementById('mc-modal-cancel');
+
+  /* ---------------------------------------------- procedural stone textures */
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function stoneTexture() {
+    var w = 64, h = 48;
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    var x = c.getContext('2d');
+    var r = rng(0xBED0);
+    x.fillStyle = '#17171d'; x.fillRect(0, 0, w, h);
+    for (var yy = 0; yy < h; yy++) {
+      for (var xx = 0; xx < w; xx++) {
+        var n = r();
+        x.fillStyle = n < 0.10 ? '#0d0d12' : n < 0.28 ? '#21212a' : n < 0.50 ? '#1b1b22' : n < 0.72 ? '#25252f' : '#15151b';
+        x.fillRect(xx, yy, 1, 1);
+      }
+    }
+    for (var i = 0; i < 180; i++) {
+      x.fillStyle = r() < 0.5 ? '#30303b' : '#09090d';
+      x.fillRect((r() * w) | 0, (r() * h) | 0, 1, 1);
+    }
+    x.fillStyle = 'rgba(255,255,255,.055)'; x.fillRect(0, 0, w, 1);
+    x.fillStyle = 'rgba(0,0,0,.5)'; x.fillRect(0, h - 1, w, 1);
+    return 'url("' + c.toDataURL('image/png') + '")';
+  }
+  function dividerTexture() {
+    var w = 32, h = 8;
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    var x = c.getContext('2d');
+    var r = rng(0xD1A1D3);
+    var rows = ['#050508', '#3a3a46', '#4c4c5a', '#2a2a34', '#191920', '#24242d', '#111116', '#020204'];
+    for (var yy = 0; yy < h; yy++) {
+      for (var xx = 0; xx < w; xx++) {
+        var n = r();
+        x.fillStyle = (n < 0.16 ? (yy < 3 ? '#5a5a6a' : '#111116') : rows[yy]);
+        x.fillRect(xx, yy, 1, 1);
+      }
+    }
+    return 'url("' + c.toDataURL('image/png') + '")';
+  }
+  root.style.setProperty('--mc-stone', stoneTexture());
+  root.style.setProperty('--mc-divider', dividerTexture());
+
+  /* ---------------------------------------------------------- dynamic scale */
+  function effectiveGuiScale() {
+    var maxW = Math.max(0.65, (window.innerWidth - 14) / 310);
+    var maxH = Math.max(0.65, (window.innerHeight - 14) / 242);
+    var s = Math.min(state.guiScale, maxW, maxH);
+    return Math.round(Math.max(0.65, Math.min(4, s)) * 100) / 100;
+  }
+
+  function applyUi() {
+    var s = effectiveGuiScale();
+    root.style.setProperty('--mc-gui', String(s));
+    var depth = Math.max(0, stack.length - 1);
+    root.style.setProperty('--mc-blur', (state.menuBlur + depth * 1.5) + 'px');
+    root.style.setProperty('--mc-tint', String(Math.min(0.72, 0.46 + depth * 0.05)));
+    root.classList.toggle('mc-high-contrast', !!state.highContrast);
+    document.body.classList.toggle('mc-chat-hidden', state.chatVisibility === 'hidden');
+
+    var chat = document.getElementById('chatPanel');
+    if (chat) {
+      chat.style.fontSize = (13 * state.chatScale / 100).toFixed(2) + 'px';
+      chat.style.lineHeight = (1.5 * state.chatLineSpacing / 100).toFixed(2);
+      chat.style.opacity = (0.3 + 0.7 * state.chatOpacity / 100).toFixed(2);
+      chat.style.background = 'rgba(0,0,0,' + (0.18 + 0.62 * state.chatBackground / 100).toFixed(2) + ')';
+      chat.style.width = Math.max(150, 280 * state.chatWidth / 100).toFixed(0) + 'px';
+    }
+    var chatInput = document.getElementById('chatInputWrap');
+    if (chatInput && state.chatVisibility === 'hidden' && !chatInput.classList.contains('show')) {
+      /* Chat input still opens on demand; visibility only controls the log. */
+    }
+  }
+
+  /* -------------------------------------------------------------- key binds */
+  function conflictActions() {
+    var byCode = {}, out = new Set();
+    for (var a in KEY_ACTIONS) {
+      var code = state['key.' + a];
+      (byCode[code] || (byCode[code] = [])).push(a);
+    }
+    for (var c in byCode) {
+      if (byCode[c].length > 1) for (var i = 0; i < byCode[c].length; i++) out.add(byCode[c][i]);
+    }
+    return out;
+  }
+
+  var CODE_LABELS = {
+    Space: 'Space', ShiftLeft: 'Left Shift', ShiftRight: 'Right Shift',
+    ControlLeft: 'Left Ctrl', ControlRight: 'Right Ctrl', AltLeft: 'Left Alt',
+    AltRight: 'Right Alt', Enter: 'Enter', Backspace: 'Backspace', Tab: 'Tab',
+    ArrowUp: 'Up Arrow', ArrowDown: 'Down Arrow', ArrowLeft: 'Left Arrow',
+    ArrowRight: 'Right Arrow', CapsLock: 'Caps Lock', Escape: 'Escape',
+    Backquote: '`', Minus: '-', Equal: '=', BracketLeft: '[', BracketRight: ']',
+    Backslash: '\\', Semicolon: ';', Quote: "'", Comma: ',', Period: '.', Slash: '/'
+  };
+  function codeLabel(code) {
+    if (!code) return '?';
+    if (CODE_LABELS[code]) return CODE_LABELS[code];
+    if (/^Key[A-Z]$/.test(code)) return code.slice(3);
+    if (/^Digit[0-9]$/.test(code)) return code.slice(5);
+    if (/^Numpad[0-9]$/.test(code)) return 'Num ' + code.slice(6);
+    if (/^F[0-9]{1,2}$/.test(code)) return code;
+    return code;
+  }
+
+  /* The physical key the player presses is translated to the canonical key
+     code the game already understands, so rebinding really changes controls. */
+  function mapCode(physical) {
+    for (var a in KEY_ACTIONS) {
+      if (state['key.' + a] === physical) return KEY_ACTIONS[a].def;
+    }
+    return physical;
+  }
+
+  /* --------------------------------------------------------------- formatting */
+  function fmt(key, v) {
+    if (key === 'sensitivity') return Math.round(v * 100) + '%';
+    if (key === 'renderDistance') return v + (v === 1 ? ' chunk' : ' chunks');
+    if (key === 'guiScale') return ({ 1: 'Small', 2: 'Normal', 3: 'Large', 4: 'Very Large' })[v] || String(v);
+    if (key === 'menuBlur') return v + ' px';
+    if (key === 'fov') return String(v);
+    if (/Volume$/.test(key)) return v + '%';
+    if (key === 'chatScale' || key === 'chatWidth') return v + '%';
+    if (key === 'chatOpacity' || key === 'chatBackground' || key === 'chatLineSpacing' ||
+      key === 'brightness' || key === 'darknessPulse' || key === 'damageTilt' || key === 'fovEffects') return v + '%';
+    return String(v);
+  }
+
+  function esc(v) {
+    return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function optionValueText(key) {
+    if (BOOL.indexOf(key) >= 0) return state[key] ? 'ON' : 'OFF';
+    if (ENUM[key]) {
+      var group = ENUM_LABELS[key];
+      return group && group[state[key]] ? group[state[key]] : String(state[key]);
+    }
+    return String(state[key]);
+  }
+
+  /* -------------------------------------------------------------- navigation */
+  var stack = [];
+  var screenId = 'main';
+  var scrollMemo = {};
+  var prevFocus = null;
+  var captureAction = null;
+
+  function isOpen() { return root.classList.contains('mc-open'); }
+  function currentScreen() { return screenId; }
+  function isPaused() { return pausedByUs; }
+
+  function saveScroll() {
+    if (viewport && isOpen()) scrollMemo[screenId] = viewport.scrollTop;
+  }
+
+  function open(id, opts) {
+    if (!root) return;
+    var wasOpen = isOpen();
+    if (!wasOpen) {
+      prevFocus = document.activeElement;
+      if (gameApi) {
+        if (gameApi.closeMenus) { try { gameApi.closeMenus(); } catch (e) { } }
+        if (gameApi.exitLock) { try { gameApi.exitLock(); } catch (e) { } }
+        if (gameApi.setPaused) { try { gameApi.setPaused(true); pausedByUs = true; } catch (e) { } }
+      }
+      stack.length = 0;
+    }
+    var target = (typeof id === 'string' && SCREENS[id]) ? id : 'main';
+    if (opts && opts.reset) stack.length = 0;
+    if (!wasOpen || stack.length === 0) stack.push(target);
+    else if (stack[stack.length - 1] !== target) stack.push(target);
+    screenId = stack[stack.length - 1];
+
+    root.classList.add('mc-open');
+    root.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('mc-options-open');
+    applyUi();
+    render();
+    hideTip();
+  }
+
+  function close() {
+    if (!isOpen()) return;
+    captureAction = null;
+    modal.classList.remove('mc-show');
+    modal.setAttribute('aria-hidden', 'true');
+    root.classList.remove('mc-open');
+    root.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('mc-options-open');
+    stack.length = 0;
+    screenId = 'main';
+    hideTip();
+    if (pausedByUs && gameApi && gameApi.setPaused) {
+      try { gameApi.setPaused(false); } catch (e) { }
+    }
+    pausedByUs = false;
+    if (gameApi && gameApi.requestLock) {
+      try { gameApi.requestLock(); } catch (e) { }
+    }
+    if (prevFocus && prevFocus.focus) {
+      try { prevFocus.focus({ preventScroll: true }); } catch (e) { }
+    }
+    prevFocus = null;
+  }
+
+  function navigate(id) {
+    if (!SCREENS[id] || id === screenId) return;
+    saveScroll();
+    stack.push(id);
+    screenId = id;
+    render();
+    hideTip();
+    focusFirst();
+  }
+
+  function goBack() {
+    saveScroll();
+    if (stack.length > 1) {
+      stack.pop();
+      screenId = stack[stack.length - 1];
+      render();
+      hideTip();
+      focusFirst();
+    } else {
+      close();
+    }
+  }
+
+  function focusFirst() {
+    window.setTimeout(function () {
+      if (!isOpen() || !content) return;
+      if (menu && menu.contains(document.activeElement) && document.activeElement !== backBtn) return;
+      var first = content.querySelector('.mc-btn,.mc-slider');
+      if (first) { try { first.focus({ preventScroll: true }); } catch (e) { } }
+    }, 0);
+  }
+
+  function focusOption(key) {
+    window.setTimeout(function () {
+      if (!isOpen()) return;
+      var el = content.querySelector('[data-option-key="' + key + '"]');
+      if (el && el.focus) { try { el.focus({ preventScroll: true }); } catch (e) { } }
+    }, 0);
+  }
+
+  /* ------------------------------------------------------------ widget markup */
+  function section(label) {
+    return '<div class="mc-section mc-full" data-screen="' + esc(screenId) + '" data-option-key="section:' + esc(label) + '">' + esc(label) + '</div>';
+  }
+  function note(label, warn) {
+    return '<div class="mc-note mc-full' + (warn ? ' mc-warn' : '') + '" data-screen="' + esc(screenId) + '" data-option-key="note">' + esc(label) + '</div>';
+  }
+  function navBtn(target, label, tip) {
+    return '<button class="mc-widget mc-btn" type="button" data-screen="' + esc(screenId) + '" data-option-key="screen:' + esc(target) + '" data-mc-action="nav" data-target="' + esc(target) + '" data-tooltip="' + esc(tip || label) + '">' + esc(label) + '</button>';
+  }
+  function optionBtn(key, label, tip) {
+    return '<button class="mc-widget mc-btn" type="button" data-screen="' + esc(screenId) + '" data-option-key="' + esc(key) + '" data-mc-action="cycle" data-tooltip="' + esc(tip || label) + '">' + esc(label) + ': <span class="mc-value">' + esc(optionValueText(key)) + '</span></button>';
+  }
+  function fullscreenBtn() {
+    var active = false;
+    try { active = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement); } catch (e) { }
+    return '<button class="mc-widget mc-btn mc-full" type="button" data-screen="' + esc(screenId) + '" data-option-key="fullscreen" data-mc-action="toggle-fullscreen" data-tooltip="Toggle browser fullscreen">Fullscreen: <span class="mc-value">' + (active ? 'ON' : 'OFF') + '</span></button>';
+  }
+  function slider(key, label, tip, hint) {
+    var m = NUM[key];
+    var p = (state[key] - m[0]) / (m[1] - m[0]);
+    var html = '<div class="mc-widget mc-full mc-slider" role="slider" tabindex="0"' +
+      ' aria-label="' + esc(label) + '" aria-valuemin="' + m[0] + '" aria-valuemax="' + m[1] + '" aria-valuenow="' + state[key] + '" aria-valuetext="' + esc(fmt(key, state[key])) + '"' +
+      ' data-label="' + esc(label) + '" data-screen="' + esc(screenId) + '" data-option-key="' + esc(key) + '" data-tooltip="' + esc(tip || label) + '"' +
+      ' style="--p:' + p.toFixed(5) + '">' +
+      '<div class="mc-slider-fill" style="width:' + (p * 100).toFixed(2) + '%"></div>' +
+      '<div class="mc-slider-handle"></div>' +
+      '<span class="mc-slider-text">' + esc(label) + ': ' + esc(fmt(key, state[key])) + '</span>' +
+      '</div>';
+    if (hint === 'fov') {
+      html += '<div class="mc-hints mc-full" data-screen="' + esc(screenId) + '" data-option-key="hint:fov"><span>30</span><span class="mc-hint-center">Normal</span><span class="mc-hint-right">Quake Pro</span></div>';
+    } else if (hint === 'gui') {
+      html += '<div class="mc-hints mc-full" data-screen="' + esc(screenId) + '" data-option-key="hint:gui"><span>Small</span><span class="mc-hint-right">Large</span></div>';
+    }
+    return html;
+  }
+  function keyRow(action) {
+    var meta = KEY_ACTIONS[action];
+    var code = state['key.' + action];
+    var conflict = conflictActions().has(action);
+    return '<div class="mc-row mc-full" data-screen="controls" data-option-key="row:key.' + esc(action) + '">' +
+      '<span class="mc-row-label">' + esc(meta.label) + '</span>' +
+      '<button class="mc-btn mc-key' + (conflict ? ' mc-conflict' : '') + '" type="button" data-screen="controls" data-option-key="key.' + esc(action) + '" data-mc-action="capture" data-key-action="' + esc(action) + '" data-tooltip="Click, then press a key. Red means two actions share it.">' + esc(codeLabel(code)) + '</button>' +
+      '<button class="mc-mini" type="button" data-screen="controls" data-option-key="reset:key.' + esc(action) + '" data-mc-action="reset-key" data-key-action="' + esc(action) + '" data-tooltip="Reset ' + esc(meta.label) + ' to ' + esc(codeLabel(meta.def)) + '">R</button>' +
+      '</div>';
+  }
+
+  /* ------------------------------------------------------------------ screens */
+  var SCREENS = {
+    main: {
+      title: 'Options',
+      footer: 'done',
+      build: function () {
+        return slider('fov', 'FOV', 'Field of view. Normal is 70, Quake Pro is 110.', 'fov') +
+          navBtn('skin', 'Skin Customization', 'Choose skin layers and load a skin file.') +
+          navBtn('music', 'Music & Sounds', 'Adjust every audio channel.') +
+          navBtn('video', 'Video Settings', 'Graphics, render distance and GUI scale.') +
+          navBtn('controls', 'Controls', 'Mouse sensitivity and key bindings.') +
+          navBtn('language', 'Language', 'Select the interface language.') +
+          navBtn('chat', 'Chat Settings', 'Chat visibility, size and opacity.') +
+          navBtn('packs', 'Resource Packs', 'Enable or disable built-in packs.') +
+          navBtn('accessibility', 'Accessibility Settings', 'Motion, contrast, narration and blur.') +
+          note('Settings save automatically on this device.');
+      }
+    },
+    video: {
+      title: 'Video Settings',
+      footer: 'reset',
+      build: function () {
+        return section('Display') +
+          slider('guiScale', 'GUI Scale', 'Scales this options menu like vanilla Minecraft.', 'gui') +
+          slider('brightness', 'Brightness', 'Moody at 0%, Bright at 100%.') +
+          optionBtn('graphics', 'Graphics', 'Fancy uses smooth lighting and shadows.') +
+          fullscreenBtn() +
+          section('Quality') +
+          slider('renderDistance', 'Render Distance', 'Visible chunks before the fog closes in.') +
+          optionBtn('particles', 'Particles', 'All, Decreased or Minimal particle density.') +
+          optionBtn('smoothLighting', 'Smooth Lighting', 'Soften light across block faces.') +
+          optionBtn('entityShadows', 'Entity Shadows', 'Cast real shadows from players and mobs.') +
+          optionBtn('viewBobbing', 'View Bobbing', 'Camera and hand sway while walking.');
+      }
+    },
+    music: {
+      title: 'Music & Sounds',
+      footer: 'reset',
+      build: function () {
+        return slider('masterVolume', 'Master Volume', 'Overall game volume.') +
+          section('Music') +
+          slider('musicVolume', 'Music', 'Background music volume.') +
+          slider('ambientVolume', 'Ambient / Environment', 'Cave, wind and water ambience.') +
+          slider('weatherVolume', 'Weather', 'Rain and thunder.') +
+          section('Blocks & Creatures') +
+          slider('blocksVolume', 'Blocks', 'Breaking, placing and footsteps.') +
+          slider('hostileVolume', 'Hostile Creatures', 'Enemy mob sounds.') +
+          slider('friendlyVolume', 'Friendly Creatures', 'Passive mob sounds.') +
+          slider('playersVolume', 'Players', 'Hits, eating and other player sounds.') +
+          section('Interface') +
+          slider('uiVolume', 'UI', 'Button clicks and menu feedback.');
+      }
+    },
+    controls: {
+      title: 'Controls',
+      footer: 'controls',
+      build: function () {
+        var conflicts = conflictActions();
+        var html = slider('sensitivity', 'Sensitivity', 'Mouse and touch look sensitivity.') +
+          optionBtn('invertMouse', 'Invert Mouse', 'Reverse vertical look.') +
+          optionBtn('autoJump', 'Auto Jump', 'Step up one-block ledges automatically.') +
+          section('Key Binds');
+        if (conflicts.size) {
+          html += note('Duplicate key bindings are highlighted in red. Bind one action per key.', true);
+        }
+        for (var a in KEY_ACTIONS) html += keyRow(a);
+        return html;
+      }
+    },
+    chat: {
+      title: 'Chat Settings',
+      footer: 'reset',
+      build: function () {
+        return optionBtn('chatVisibility', 'Chat', 'Shown, Commands Only or Hidden.') +
+          slider('chatOpacity', 'Chat Opacity', 'How opaque the chat text is.') +
+          slider('chatBackground', 'Text Background', 'Dark backing behind chat lines.') +
+          slider('chatScale', 'Chat Scale', 'Size of chat text.') +
+          slider('chatWidth', 'Chat Width', 'Width of the chat panel.') +
+          slider('chatLineSpacing', 'Line Spacing', 'Vertical spacing between lines.') +
+          section('Preview') +
+          note('The chat log and its backing update live while you drag these sliders.');
+      }
+    },
+    accessibility: {
+      title: 'Accessibility Settings',
+      footer: 'reset',
+      build: function () {
+        return slider('fovEffects', 'FOV Effects', 'Strength of field-of-view changes.') +
+          slider('darknessPulse', 'Darkness Pulsing', 'Pulsing darkness in dark areas.') +
+          slider('damageTilt', 'Damage Tilt', 'Camera shake when you take damage.') +
+          section('Comfort') +
+          optionBtn('viewBobbing', 'View Bobbing', 'Disable all walking camera sway.') +
+          optionBtn('highContrast', 'High Contrast', 'Stronger text and button contrast.') +
+          optionBtn('showSubtitles', 'Show Subtitles', 'Show sound event captions.') +
+          optionBtn('narrator', 'Narrator', 'Off, All, Chat or System narration.') +
+          section('Interface') +
+          slider('guiScale', 'GUI Scale', 'Scale of menus and HUD.') +
+          slider('menuBlur', 'Menu Background Blur', 'Blur strength behind this options menu.');
+      }
+    },
+    skin: {
+      title: 'Skin Customization',
+      footer: 'done',
+      build: function () {
+        return note('Toggle the outer layers of your skin. Slim and classic skins are detected automatically.') +
+          optionBtn('skinCape', 'Cape') +
+          optionBtn('skinJacket', 'Jacket') +
+          optionBtn('skinLeftSleeve', 'Left Sleeve') +
+          optionBtn('skinRightSleeve', 'Right Sleeve') +
+          optionBtn('skinLeftPants', 'Left Pants') +
+          optionBtn('skinRightPants', 'Right Pants') +
+          optionBtn('skinHat', 'Hat') +
+          section('Skin File') +
+          '<button class="mc-widget mc-btn" type="button" data-screen="skin" data-option-key="skin.choose" data-mc-action="choose-skin" data-tooltip="Load a 64x64 PNG skin">Choose Skin File...</button>' +
+          '<button class="mc-widget mc-btn" type="button" data-screen="skin" data-option-key="skin.reset" data-mc-action="reset-skin" data-tooltip="Restore the default skin">Reset Skin</button>';
+      }
+    },
+    language: {
+      title: 'Language',
+      footer: 'done',
+      build: function () {
+        var html = note('The interface language is stored with your other options.');
+        for (var i = 0; i < ENUM.language.length; i++) {
+          var id = ENUM.language[i];
+          var selected = state.language === id;
+          html += '<button class="mc-widget mc-btn mc-full' + (selected ? ' mc-selected' : '') + '" type="button" data-screen="language" data-option-key="language" data-value="' + esc(id) + '" data-mc-action="set-enum" aria-pressed="' + selected + '">' + esc(ENUM_LABELS.language[id]) + (selected ? ' \u2714' : '') + '</button>';
+        }
+        return html;
+      }
+    },
+    packs: {
+      title: 'Resource Packs',
+      footer: 'done',
+      build: function () {
+        var html = note('Built-in packs. The Default pack is always enabled.');
+        for (var i = 0; i < PACKS.length; i++) {
+          var p = PACKS[i];
+          var on = state.resourcePacks.indexOf(p.id) >= 0 || p.id === 'vanilla';
+          html += '<button class="mc-widget mc-btn mc-full' + (on ? ' mc-selected' : '') + '" type="button" data-screen="packs" data-option-key="resourcePacks:' + esc(p.id) + '" data-pack="' + esc(p.id) + '" data-mc-action="toggle-pack" aria-pressed="' + on + '"' + (p.id === 'vanilla' ? ' disabled' : '') + '>' + esc(p.name) + ': <span class="mc-value">' + (on ? 'ON' : 'OFF') + '</span></button>';
+        }
+        return html;
+      }
+    }
+  };
+
+  function footerButton(action, label) {
+    var key = action === 'done' ? 'done' : action === 'reset-keys' ? 'reset-keys' : 'reset-screen';
+    return '<button class="mc-btn" type="button" data-screen="' + esc(screenId) + '" data-option-key="' + esc(key) + '" data-mc-action="' + esc(action) + '">' + esc(label) + '</button>';
+  }
+
+  function render() {
+    var def = SCREENS[screenId] || SCREENS.main;
+    titleEl.textContent = def.title;
+    backBtn.hidden = stack.length <= 1;
+    backBtn.dataset.screen = screenId;
+    content.innerHTML = def.build();
+    var fhtml = '';
+    if (def.footer === 'controls') fhtml += footerButton('reset-keys', 'Reset All Keys');
+    else if (def.footer === 'reset') fhtml += footerButton('reset-screen', 'Reset Options');
+    fhtml += footerButton('done', 'Done');
+    footer.innerHTML = fhtml;
+    var buttons = footer.querySelectorAll('.mc-btn');
+    if (buttons.length === 1) buttons[0].classList.add('mc-full-btn');
+    applyUi();
+    window.requestAnimationFrame(function () {
+      if (!viewport) return;
+      viewport.scrollTop = scrollMemo[screenId] || 0;
+    });
+  }
+
+  /* ------------------------------------------------------------- interaction */
+  function updateSliderEl(el, value) {
+    var key = el.dataset.optionKey;
+    var m = NUM[key];
+    if (!m) return;
+    var p = clampNum((value - m[0]) / (m[1] - m[0]), 0, 1);
+    el.style.setProperty('--p', p.toFixed(5));
+    var fill = el.querySelector('.mc-slider-fill');
+    if (fill) fill.style.width = (p * 100).toFixed(2) + '%';
+    var text = el.querySelector('.mc-slider-text');
+    var label = el.dataset.label || key;
+    if (text) text.textContent = label + ': ' + fmt(key, value);
+    el.setAttribute('aria-valuenow', String(value));
+    el.setAttribute('aria-valuetext', fmt(key, value));
+  }
+
+  function sliderValueFromPointer(el, clientX) {
+    var rect = el.getBoundingClientRect();
+    var p = clampNum((clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+    var m = NUM[el.dataset.optionKey];
+    var raw = m[0] + p * (m[1] - m[0]);
+    return coerce(el.dataset.optionKey, raw);
+  }
+
+  var dragSlider = null;
+  content.addEventListener('pointerdown', function (e) {
+    var el = e.target.closest ? e.target.closest('.mc-slider') : null;
+    if (!el) return;
+    e.preventDefault();
+    dragSlider = el;
+    try { el.focus({ preventScroll: true }); } catch (err) { }
+    hideTip();
+    var v = setOption(el.dataset.optionKey, sliderValueFromPointer(el, e.clientX));
+    updateSliderEl(el, v);
+    if (el.setPointerCapture) { try { el.setPointerCapture(e.pointerId); } catch (err) { } }
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!dragSlider) return;
+    var v = setOption(dragSlider.dataset.optionKey, sliderValueFromPointer(dragSlider, e.clientX));
+    updateSliderEl(dragSlider, v);
+  });
+  window.addEventListener('pointerup', function () { dragSlider = null; });
+  window.addEventListener('pointercancel', function () { dragSlider = null; });
+
+  content.addEventListener('keydown', function (e) {
+    var el = e.target.closest ? e.target.closest('.mc-slider') : null;
+    if (!el) return;
+    var key = el.dataset.optionKey;
+    var m = NUM[key];
+    if (!m) return;
+    var v = state[key];
+    var step = e.shiftKey ? m[2] * 10 : m[2];
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') v -= step;
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') v += step;
+    else if (e.key === 'Home') v = m[0];
+    else if (e.key === 'End') v = m[1];
+    else if (e.key === 'PageDown') v -= step * 10;
+    else if (e.key === 'PageUp') v += step * 10;
+    else return;
+    e.preventDefault();
+    v = setOption(key, v);
+    updateSliderEl(el, v);
+  });
+
+  function cycleOption(key) {
+    if (BOOL.indexOf(key) >= 0) setOption(key, !state[key]);
+    else if (ENUM[key]) {
+      var list = ENUM[key];
+      var i = list.indexOf(state[key]);
+      setOption(key, list[(i + 1) % list.length]);
+    }
+    render();
+    focusOption(key);
+  }
+
+  function resetKeys() {
+    for (var a in KEY_ACTIONS) setOption('key.' + a, KEY_ACTIONS[a].def);
+    render();
+  }
+  function resetScreen() {
+    var keys = RESET_KEYS[screenId] || [];
+    for (var i = 0; i < keys.length; i++) resetOption(keys[i]);
+    render();
+  }
+
+  var RESET_KEYS = {
+    video: ['guiScale', 'brightness', 'graphics', 'renderDistance', 'particles', 'smoothLighting', 'entityShadows', 'viewBobbing'],
+    music: ['masterVolume', 'musicVolume', 'ambientVolume', 'weatherVolume', 'blocksVolume', 'hostileVolume', 'friendlyVolume', 'playersVolume', 'uiVolume'],
+    chat: ['chatVisibility', 'chatOpacity', 'chatBackground', 'chatScale', 'chatWidth', 'chatLineSpacing'],
+    accessibility: ['fovEffects', 'darknessPulse', 'damageTilt', 'viewBobbing', 'highContrast', 'showSubtitles', 'narrator', 'guiScale', 'menuBlur']
+  };
+
+  content.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('[data-mc-action]') : null;
+    if (!el) return;
+    var action = el.dataset.mcAction;
+    if (action === 'nav') navigate(el.dataset.target);
+    else if (action === 'cycle') cycleOption(el.dataset.optionKey);
+    else if (action === 'capture') openCapture(el.dataset.keyAction);
+    else if (action === 'reset-key') {
+      resetOption('key.' + el.dataset.keyAction);
+      render();
+      focusOption('key.' + el.dataset.keyAction);
+    } else if (action === 'set-enum') {
+      setOption(el.dataset.optionKey, el.dataset.value);
+      render();
+      focusOption(el.dataset.optionKey);
+    } else if (action === 'toggle-pack') {
+      var id = el.dataset.pack;
+      if (id === 'vanilla') return;
+      var packs = state.resourcePacks.slice();
+      var idx = packs.indexOf(id);
+      if (idx >= 0) packs.splice(idx, 1); else packs.push(id);
+      setOption('resourcePacks', packs);
+      render();
+    } else if (action === 'choose-skin') {
+      if (gameApi && gameApi.openSkinPicker) gameApi.openSkinPicker();
+    } else if (action === 'reset-skin') {
+      if (gameApi && gameApi.resetSkin) gameApi.resetSkin();
+    } else if (action === 'toggle-fullscreen') {
+      if (gameApi && gameApi.toggleFullscreen) gameApi.toggleFullscreen();
+      setOption('fullscreen', !state.fullscreen);
+      window.setTimeout(render, 180);
+    }
+  });
+
+  footer.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('[data-mc-action]') : null;
+    if (!el) return;
+    var action = el.dataset.mcAction;
+    if (action === 'done') {
+      if (screenId === 'main') close(); else goBack();
+    } else if (action === 'reset-keys') {
+      resetKeys();
+    } else if (action === 'reset-screen') {
+      resetScreen();
+    }
+  });
+
+  backBtn.addEventListener('click', goBack);
+
+  /* ------------------------------------------------------------ key capture */
+  function openCapture(action) {
+    if (!KEY_ACTIONS[action]) return;
+    captureAction = action;
+    modalTitle.textContent = 'Press a key';
+    modalDesc.textContent = 'Binding: ' + KEY_ACTIONS[action].label;
+    modal.classList.add('mc-show');
+    modal.setAttribute('aria-hidden', 'false');
+    hideTip();
+    window.setTimeout(function () { try { modalCancel.focus({ preventScroll: true }); } catch (e) { } }, 0);
+  }
+
+  function closeCapture(restoreFocus) {
+    var action = captureAction;
+    captureAction = null;
+    modal.classList.remove('mc-show');
+    modal.setAttribute('aria-hidden', 'true');
+    if (restoreFocus && action) focusOption('key.' + action);
+  }
+
+  modalReset.addEventListener('click', function () {
+    if (!captureAction) return;
+    var action = captureAction;
+    setOption('key.' + action, KEY_ACTIONS[action].def);
+    closeCapture(false);
+    render();
+    focusOption('key.' + action);
+  });
+  modalCancel.addEventListener('click', function () { closeCapture(true); });
+
+  /* --------------------------------------------------------------- tooltips */
+  var tipTimer = 0;
+  var tipOwner = null;
+  var mouseX = 0, mouseY = 0;
+
+  document.addEventListener('pointermove', function (e) {
+    mouseX = e.clientX; mouseY = e.clientY;
+  }, { passive: true });
+
+  function hideTip() {
+    window.clearTimeout(tipTimer);
+    tipOwner = null;
+    if (tipEl) {
+      tipEl.classList.remove('mc-show');
+      tipEl.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function showTip(el) {
+    if (!isOpen() || captureAction || !tipEl) return;
+    var text = el.getAttribute('data-tooltip');
+    if (!text) return;
+    tipEl.textContent = text;
+    tipEl.classList.add('mc-show');
+    tipEl.setAttribute('aria-hidden', 'false');
+    tipEl.style.visibility = 'hidden';
+    var r = tipEl.getBoundingClientRect();
+    var x = mouseX + 12, y = mouseY + 14;
+    if (x + r.width > window.innerWidth - 6) x = Math.max(6, mouseX - r.width - 10);
+    if (y + r.height > window.innerHeight - 6) y = Math.max(6, mouseY - r.height - 10);
+    tipEl.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px)';
+    tipEl.style.visibility = 'visible';
+  }
+
+  root.addEventListener('pointerover', function (e) {
+    var el = e.target.closest ? e.target.closest('[data-tooltip]') : null;
+    if (!el || el === tipOwner) return;
+    tipOwner = el;
+    window.clearTimeout(tipTimer);
+    tipTimer = window.setTimeout(function () { showTip(el); }, TOOLTIP_DELAY);
+  });
+  root.addEventListener('pointerout', function (e) {
+    var el = e.target.closest ? e.target.closest('[data-tooltip]') : null;
+    if (!el) return;
+    if (e.relatedTarget && el.contains(e.relatedTarget)) return;
+    if (tipOwner === el) hideTip();
+  });
+  root.addEventListener('pointerdown', hideTip, true);
+  viewport.addEventListener('scroll', hideTip, { passive: true });
+
+  /* ------------------------------------------------- Escape + input shielding */
+  function onWindowKeyDown(e) {
+    if (captureAction) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      var code = e.code;
+      if (code === 'Escape') { closeCapture(true); return; }
+      if (/^(Shift|Control|Alt|Meta)(Left|Right)$/.test(code) || code === 'Tab' || code === 'CapsLock' || code === 'ContextMenu') {
+        modalDesc.textContent = 'That key cannot be bound. Press another key.';
+        return;
+      }
+      var action = captureAction;
+      setOption('key.' + action, code);
+      closeCapture(false);
+      render();
+      focusOption('key.' + action);
+      return;
+    }
+    if (!isOpen()) return;
+    if (e.code === 'Escape') {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      goBack();
+      return;
+    }
+    /* The game listens on window as well; the options screen always wins so
+       nobody walks or swings while the menu is up. */
+    e.stopImmediatePropagation();
+  }
+  window.addEventListener('keydown', onWindowKeyDown);
+
+  /* --------------------------------------------------------------- game sync */
+  window.addEventListener('resize', function () {
+    if (isOpen()) applyUi();
+  });
+  document.addEventListener('fullscreenchange', function () {
+    if (isOpen() && screenId === 'video') render();
+  });
+
+  /* --------------------------------------------------------------- public API */
+  function selfTest() {
+    var out = { passed: [], failed: [] };
+    function check(name, cond, detail) {
+      if (cond) out.passed.push(name);
+      else out.failed.push(detail ? name + ': ' + detail : name);
+    }
+    try {
+      resetAll();
+      close();
+      open('main', { reset: true });
+      check('main opens', isOpen() && currentScreen() === 'main');
+      check('main title', titleEl.textContent === 'Options');
+      var widgets = Array.prototype.slice.call(content.querySelectorAll('[data-option-key]'));
+      check('main widgets tagged', widgets.length >= 9 && widgets.every(function (w) { return w.dataset.screen === 'main' && !!w.dataset.optionKey; }));
+      check('fov slider visible', !!content.querySelector('[data-option-key="fov"][role="slider"]'));
+      check('all main submenus', ['skin', 'music', 'video', 'controls', 'language', 'chat', 'packs', 'accessibility'].every(function (s) { return !!content.querySelector('[data-option-key="screen:' + s + '"]'); }));
+
+      navigate('video');
+      check('video navigation', currentScreen() === 'video' && titleEl.textContent === 'Video Settings');
+      widgets = Array.prototype.slice.call(content.querySelectorAll('[data-option-key]'));
+      check('video widgets tagged', widgets.length >= 8 && widgets.every(function (w) { return w.dataset.screen === 'video'; }));
+      check('video has slider + toggles', !!content.querySelector('[role="slider"]') && !!content.querySelector('[data-mc-action="cycle"]'));
+
+      setOption('fov', 5);
+      check('fov clamps low', state.fov === 30, String(state.fov));
+      setOption('fov', 999);
+      check('fov clamps high', state.fov === 110, String(state.fov));
+      setOption('renderDistance', 0);
+      check('render distance clamps low', state.renderDistance === 2, String(state.renderDistance));
+      setOption('renderDistance', 999);
+      check('render distance clamps high', state.renderDistance === 32, String(state.renderDistance));
+      setOption('guiScale', 99);
+      check('gui scale clamps high', state.guiScale === 4, String(state.guiScale));
+      setOption('sensitivity', 0);
+      check('sensitivity clamps low', state.sensitivity === 0.35, String(state.sensitivity));
+      setOption('fov', 70); setOption('renderDistance', 16); setOption('guiScale', 2); setOption('sensitivity', 1);
+
+      open('controls', { reset: true });
+      check('controls navigation', currentScreen() === 'controls');
+      check('keybind rows present', content.querySelectorAll('.mc-key').length === Object.keys(KEY_ACTIONS).length);
+      setOption('key.forward', 'KeyE');
+      setOption('key.inventory', 'KeyE');
+      render();
+      var conflicts = conflictActions();
+      check('duplicate key conflict detected', conflicts.has('forward') && conflicts.has('inventory'));
+      check('conflict highlighted red in DOM', content.querySelectorAll('.mc-key.mc-conflict').length === 2, String(content.querySelectorAll('.mc-key.mc-conflict').length));
+      resetOption('key.forward');
+      render();
+      check('conflict clears after reset', conflictActions().size === 0 && content.querySelectorAll('.mc-key.mc-conflict').length === 0);
+
+      setOption('fov', 92);
+      var stored = null;
+      try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (e) { }
+      check('options persisted to localStorage', !!stored && stored.fov === 92 && stored.__v === STORE_VERSION);
+      setOption('fov', 70);
+
+      open('main', { reset: true });
+      navigate('video');
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape', key: 'Escape', bubbles: true, cancelable: true }));
+      check('Escape pops one screen', isOpen() && currentScreen() === 'main');
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape', key: 'Escape', bubbles: true, cancelable: true }));
+      check('Escape closes at root', !isOpen());
+
+      open('main');
+      check('opening pauses game', isPaused() === true);
+      close();
+      check('closing resumes game', isPaused() === false);
+
+      resetAll();
+      open('main', { reset: true });
+      out.state = getAll();
+    } catch (err) {
+      out.failed.push('exception: ' + (err && err.message ? err.message : String(err)));
+    }
+    return out;
+  }
+
+  window.MCOptions = {
+    __installed: true,
+    open: open,
+    close: close,
+    back: goBack,
+    navigate: navigate,
+    isOpen: isOpen,
+    isPaused: isPaused,
+    currentScreen: currentScreen,
+    stack: function () { return stack.slice(); },
+    refresh: render,
+    setOption: setOption,
+    resetOption: resetOption,
+    resetAll: resetAll,
+    getOption: getOption,
+    getState: getAll,
+    conflicts: conflictActions,
+    mapCode: mapCode,
+    registerGame: registerGame,
+    captureKey: openCapture,
+    _selfTest: selfTest
+  };
+})();
+
+</script>
+</body></html>
