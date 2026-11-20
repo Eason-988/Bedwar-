@@ -4912,1873 +4912,2321 @@ function updateRemoteNametags() {
   }
 }
 
- /* ============================================================================
-   10b. BOTS - host-authoritative AI players (solo + multiplayer)
-   ----------------------------------------------------------------------------
-   Deterministic, layered architecture:
-     1. WorldGridQuery  - Voxel helper layer (solid, adjacency, walkable, bridge)
-     2. VoxelPathfinder - Bounded 3D A* with flat walk, 1-block jump, <=3 drop,
-                          and strictly supported air-bridging (maxNodes = 300)
-     3. BotBrain        - Utility / State Machine running at 4-5 Hz with 750ms
-                          hysteresis lock and emergency damage/void/bed interrupts
-     4. BotMotor        - Per-frame clamped-dt steering, edge-bridging alignment,
-                          1-block auto-jump, ledge safety clamp, combat, and
-                          500ms 3-tier anti-stuck watchdog
-   ========================================================================== */
-const BOT_NAMES = ['Nova', 'Rusty', 'Kai', 'Mira', 'Bolt', 'Sable', 'Frost', 'Jinx', 'Echo', 'Rook', 'Vex', 'Ash', 'Pike', 'Luna', 'Grit', 'Zephyr', 'Onyx', 'Wren', 'Talon', 'Iris'];
-const BOT_SWORD_IDS = ['wood_sword', 'stone_sword', 'iron_sword', 'diamond_sword'];
-const BOT_SWORD_MATS = ['wood', 'stone', 'iron', 'diamond'];
-const BOT_PICK_IDS = [null, 'wood_pickaxe', 'iron_pickaxe', 'gold_pickaxe', 'diamond_pickaxe'];
-const BOT_AXE_IDS = [null, 'wood_axe', 'stone_axe', 'iron_axe', 'diamond_axe'];
-const BOT_ARMOR_SETS = [null, 'chainmail', 'iron', 'diamond'];
-const BOT_ARMOR_PTS = [0, 12, 15, 20];
+  /* ============================================================================
+     10b. BOTS - host-authoritative AI players (solo + multiplayer)
+     ----------------------------------------------------------------------------
+     Deterministic, layered architecture:
+       1. WorldGridQuery  - Voxel helper layer (solid, adjacency, walkable, bridge)
+       2. VoxelPathfinder - Bounded 3D A* with flat walk, 1-block jump, <=3 drop,
+                            and strictly supported air-bridging (maxNodes = 300)
+       3. BotBrain        - Utility / State Machine running at 4-5 Hz with 750ms
+                            hysteresis lock and emergency damage/void/bed interrupts
+       4. BotMotor        - Per-frame clamped-dt steering, edge-bridging alignment,
+                            pillar recovery, ranged offense/evasion, human-paced
+                            combat, and 500ms 3-tier anti-stuck watchdog
+     ========================================================================== */
+  const BOT_NAMES = ['Nova', 'Rusty', 'Kai', 'Mira', 'Bolt', 'Sable', 'Frost', 'Jinx', 'Echo', 'Rook', 'Vex', 'Ash', 'Pike', 'Luna', 'Grit', 'Zephyr', 'Onyx', 'Wren', 'Talon', 'Iris'];
+  const BOT_SWORD_IDS = ['wood_sword', 'stone_sword', 'iron_sword', 'diamond_sword'];
+  const BOT_SWORD_MATS = ['wood', 'stone', 'iron', 'diamond'];
+  const BOT_PICK_IDS = [null, 'wood_pickaxe', 'iron_pickaxe', 'gold_pickaxe', 'diamond_pickaxe'];
+  const BOT_AXE_IDS = [null, 'wood_axe', 'stone_axe', 'iron_axe', 'diamond_axe'];
+  const BOT_ARMOR_SETS = [null, 'chainmail', 'iron', 'diamond'];
+  const BOT_ARMOR_PTS = [0, 12, 15, 20];
 
-const BOT_DIFFICULTY = [
-  { key: 'easy', label: 'Easy', reaction: 0.72, decision: 0.25, aim: 0.65, aggression: 0.76, shop: 0.70, build: 0.60, speed: 0.94, damage: 0.85, placeCd: 0.22, clutch: 0.20, wtap: 0.25 },
-  { key: 'normal', label: 'Normal', reaction: 0.44, decision: 0.22, aim: 0.82, aggression: 0.94, shop: 0.86, build: 0.80, speed: 0.99, damage: 0.96, placeCd: 0.16, clutch: 0.50, wtap: 0.55 },
-  { key: 'hard', label: 'Hard', reaction: 0.24, decision: 0.20, aim: 0.93, aggression: 1.05, shop: 0.96, build: 0.92, speed: 1.03, damage: 1.00, placeCd: 0.12, clutch: 0.78, wtap: 0.82 },
-  { key: 'insane', label: 'Insane', reaction: 0.14, decision: 0.20, aim: 0.98, aggression: 1.12, shop: 1.00, build: 1.00, speed: 1.06, damage: 1.00, placeCd: 0.09, clutch: 0.94, wtap: 0.95 }
-];
+  const BOT_DIFFICULTY = [
+    { key: 'easy', label: 'Easy', reaction: 0.72, decision: 0.25, aim: 0.65, aggression: 0.76, shop: 0.70, build: 0.60, speed: 0.94, damage: 0.85, placeCd: 0.22, clutch: 0.20, wtap: 0.25 },
+    { key: 'normal', label: 'Normal', reaction: 0.44, decision: 0.22, aim: 0.82, aggression: 0.94, shop: 0.86, build: 0.80, speed: 0.99, damage: 0.96, placeCd: 0.16, clutch: 0.50, wtap: 0.55 },
+    { key: 'hard', label: 'Hard', reaction: 0.24, decision: 0.20, aim: 0.93, aggression: 1.05, shop: 0.96, build: 0.92, speed: 1.03, damage: 1.00, placeCd: 0.12, clutch: 0.78, wtap: 0.82 },
+    { key: 'insane', label: 'Insane', reaction: 0.14, decision: 0.20, aim: 0.98, aggression: 1.12, shop: 1.00, build: 1.00, speed: 1.06, damage: 1.00, placeCd: 0.09, clutch: 0.94, wtap: 0.95 }
+  ];
 
-const BOT_BRIDGE_STYLES = {
-  speed: { label: 'speed bridge', sprint: true, speed: 1.05 },
-  safe: { label: 'safe bridge', sprint: false, speed: 0.95 },
-  tower: { label: 'tower bridge', sprint: false, speed: 1.00 },
-  ninja: { label: 'ninja bridge', sprint: true, speed: 1.10 }
-};
+  const BOT_BRIDGE_STYLES = {
+    speed: { label: 'speed bridge', sprint: true, speed: 1.05 },
+    safe: { label: 'safe bridge', sprint: false, speed: 0.95 },
+    tower: { label: 'tower bridge', sprint: false, speed: 1.00 },
+    ninja: { label: 'ninja bridge', sprint: true, speed: 1.10 }
+  };
 
-const BOT_TALENTS = [
-  { key: 'rusher', label: 'Rusher', aggro: 1.24, speed: 1.06, dmg: 1.02, taken: 1.02, defense: 0.55, bridge: 'speed', defenseStyle: 'wool', build: 0.60, minBlocks: 16 },
-  { key: 'defender', label: 'Defender', aggro: 0.82, speed: 0.98, dmg: 0.98, taken: 0.90, defense: 1.35, bridge: 'safe', defenseStyle: 'fortress', build: 1.25, minBlocks: 24 },
-  { key: 'builder', label: 'Builder', aggro: 0.86, speed: 1.00, dmg: 0.97, taken: 0.94, defense: 1.15, bridge: 'safe', defenseStyle: 'glass', build: 1.35, minBlocks: 24 },
-  { key: 'duelist', label: 'Duelist', aggro: 1.16, speed: 1.03, dmg: 1.10, taken: 0.98, defense: 0.65, bridge: 'speed', defenseStyle: 'wool', build: 0.65, minBlocks: 18 },
-  { key: 'scout', label: 'Scout', aggro: 1.00, speed: 1.09, dmg: 0.99, taken: 1.00, defense: 0.60, bridge: 'ninja', defenseStyle: 'wool', build: 0.60, minBlocks: 16 },
-  { key: 'tank', label: 'Tank', aggro: 0.94, speed: 0.96, dmg: 1.04, taken: 0.82, defense: 0.95, bridge: 'safe', defenseStyle: 'fortress', build: 1.00, minBlocks: 20 },
-  { key: 'trickster', label: 'Trickster', aggro: 1.08, speed: 1.04, dmg: 1.05, taken: 0.96, defense: 0.72, bridge: 'ninja', defenseStyle: 'glass', build: 0.80, minBlocks: 18 },
-  { key: 'strategist', label: 'Strategist', aggro: 0.92, speed: 1.01, dmg: 1.01, taken: 0.93, defense: 0.90, bridge: 'tower', defenseStyle: 'fortress', build: 0.98, minBlocks: 20 }
-];
+  const BOT_TALENTS = [
+    { key: 'rusher', label: 'Rusher', aggro: 1.24, speed: 1.06, dmg: 1.02, taken: 1.02, defense: 0.55, bridge: 'speed', defenseStyle: 'wool', build: 0.60, minBlocks: 16 },
+    { key: 'defender', label: 'Defender', aggro: 0.82, speed: 0.98, dmg: 0.98, taken: 0.90, defense: 1.35, bridge: 'safe', defenseStyle: 'fortress', build: 1.25, minBlocks: 24 },
+    { key: 'builder', label: 'Builder', aggro: 0.86, speed: 1.00, dmg: 0.97, taken: 0.94, defense: 1.15, bridge: 'safe', defenseStyle: 'glass', build: 1.35, minBlocks: 24 },
+    { key: 'duelist', label: 'Duelist', aggro: 1.16, speed: 1.03, dmg: 1.10, taken: 0.98, defense: 0.65, bridge: 'speed', defenseStyle: 'wool', build: 0.65, minBlocks: 18 },
+    { key: 'scout', label: 'Scout', aggro: 1.00, speed: 1.09, dmg: 0.99, taken: 1.00, defense: 0.60, bridge: 'ninja', defenseStyle: 'wool', build: 0.60, minBlocks: 16 },
+    { key: 'tank', label: 'Tank', aggro: 0.94, speed: 0.96, dmg: 1.04, taken: 0.82, defense: 0.95, bridge: 'safe', defenseStyle: 'fortress', build: 1.00, minBlocks: 20 },
+    { key: 'trickster', label: 'Trickster', aggro: 1.08, speed: 1.04, dmg: 1.05, taken: 0.96, defense: 0.72, bridge: 'ninja', defenseStyle: 'glass', build: 0.80, minBlocks: 18 },
+    { key: 'strategist', label: 'Strategist', aggro: 0.92, speed: 1.01, dmg: 1.01, taken: 0.93, defense: 0.90, bridge: 'tower', defenseStyle: 'fortress', build: 0.98, minBlocks: 20 }
+  ];
 
-const BOT_BUILDABLE_BLOCK_IDS = new Set([7, 9, 10, 11, 12, 17, 19, 24, 25, 26, 28, 37, 41, 42, 43]);
-const BOT_GRAVITY = 28.0;
-const BOT_JUMP_VELOCITY = 8.4;
-const BOT_BASE_SPEED = 5.4;
-const BOT_STATE_LOCK_MS = 750;
-const BOT_BRAIN_INTERVAL = 0.22; // ~4.5 Hz
-const BOT_REACH = 4.5;          // Java-style interaction range (eye to face)
+  const BOT_BUILDABLE_BLOCK_IDS = new Set([7, 9, 10, 11, 12, 17, 19, 24, 25, 26, 28, 37, 41, 42, 43]);
+  const BOT_GRAVITY = 28.0;
+  const BOT_JUMP_VELOCITY = 8.4;
+  const BOT_BASE_SPEED = 5.4;
+  const BOT_STATE_LOCK_MS = 750;
+  const BOT_BRAIN_INTERVAL = 0.22; // ~4.5 Hz
+  const BOT_REACH = 4.5;          // Java-style interaction range (eye to face)
 
-const bots = [];
-const botPlacedBlockKeys = new Set();
-const botProjectiles = [];
-let botNetAccum = 0;
-let botSpawnSerial = 0;
+  const bots = [];
+  const botPlacedBlockKeys = new Set();
+  const botProjectiles = [];
+  let botNetAccum = 0;
+  let botSpawnSerial = 0;
 
-function botMarkPlacedBlock(x, y, z) {
-  botPlacedBlockKeys.add(x + ',' + y + ',' + z);
-}
-function botUnmarkPlacedBlock(x, y, z) {
-  botPlacedBlockKeys.delete(x + ',' + y + ',' + z);
-}
-function botIsPlayerPlacedBlock(x, y, z, id) {
-  if (!id) return false;
-  if (botPlacedBlockKeys.has(x + ',' + y + ',' + z)) return true;
-  const def = BLOCKS[id];
-  if (!def || def.unbreakable || def.bed || def.chest || def.shop || def.upgrade) return false;
-  if (id === 8 || id === 36 || id === 6 || id === 35 || id === 46) return false;
-  return BOT_BUILDABLE_BLOCK_IDS.has(id);
-}
-
-/* Host-side bots compete with the player for dropped items. Returns true when
-   the bot consumed the drop so the caller can remove and broadcast it. */
-function botCollectDrop(bot, itemId, count) {
-  if (!bot || !bot.alive || bot.eliminated || bot.respawning) return false;
-  if (!itemId) return false;
-  const n = Math.max(1, count | 0);
-
-  // Raw resources from generators
-  if (itemId === 'iron_ingot' || itemId === 'gold_ingot' || itemId === 'diamond' || itemId === 'emerald') {
-    const have = bot.res[itemId] || 0;
-    if (have >= 64) return false;
-    bot.res[itemId] = Math.min(64, have + n);
-    return true;
+  function botMarkPlacedBlock(x, y, z) {
+    botPlacedBlockKeys.add(x + ',' + y + ',' + z);
+  }
+  function botUnmarkPlacedBlock(x, y, z) {
+    botPlacedBlockKeys.delete(x + ',' + y + ',' + z);
+  }
+  function botIsPlayerPlacedBlock(x, y, z, id) {
+    if (!id) return false;
+    if (botPlacedBlockKeys.has(x + ',' + y + ',' + z)) return true;
+    const def = BLOCKS[id];
+    if (!def || def.unbreakable || def.bed || def.chest || def.shop || def.upgrade) return false;
+    if (id === 8 || id === 36 || id === 6 || id === 35 || id === 46) return false;
+    return BOT_BUILDABLE_BLOCK_IDS.has(id);
   }
 
-  // Building blocks are dropped as 'b<blockId>'
-  if (typeof itemId === 'string' && itemId.charAt(0) === 'b') {
-    const blockId = parseInt(itemId.slice(1), 10);
-    if (!BOT_BUILDABLE_BLOCK_IDS.has(blockId)) return false;
-    if (bot.blocks >= 320) return false;
-    bot.blocks = Math.min(320, bot.blocks + n);
-    bot.blockCount = bot.blocks;
-    return true;
-  }
+  /* Host-side bots compete with the player for dropped items. Returns true when
+     the bot consumed the drop so the caller can remove and broadcast it. */
+  function botCollectDrop(bot, itemId, count) {
+    if (!bot || !bot.alive || bot.eliminated || bot.respawning) return false;
+    if (!itemId) return false;
+    const n = Math.max(1, count | 0);
 
-  // Consumables the AI understands
-  if (itemId === 'fireball') {
-    if (bot.fireballs >= 8) return false;
-    bot.fireballs = Math.min(8, bot.fireballs + n);
-    return true;
-  }
-  if (itemId === 'ender_pearl') {
-    if (bot.enderPearls >= 4) return false;
-    bot.enderPearls = Math.min(4, bot.enderPearls + n);
-    return true;
-  }
-  if (itemId === 'knockback_stick') {
-    if (bot.hasKbStick) return false;
-    bot.hasKbStick = true;
-    return true;
-  }
-  if (itemId === 'shears') {
-    if (bot.hasShears) return false;
-    bot.hasShears = true;
-    return true;
-  }
+    // Raw resources from generators
+    if (itemId === 'iron_ingot' || itemId === 'gold_ingot' || itemId === 'diamond' || itemId === 'emerald') {
+      const have = bot.res[itemId] || 0;
+      if (have >= 64) return false;
+      bot.res[itemId] = Math.min(64, have + n);
+      return true;
+    }
 
-  // Tool pickups only when they beat the bot's current tier
-  const swordIdx = BOT_SWORD_IDS.indexOf(itemId);
-  if (swordIdx > bot.swordIdx) { bot.swordIdx = swordIdx; return true; }
-  const pickIdx = BOT_PICK_IDS.indexOf(itemId);
-  if (pickIdx > bot.pickIdx) { bot.pickIdx = pickIdx; return true; }
-  const axeIdx = BOT_AXE_IDS.indexOf(itemId);
-  if (axeIdx > bot.axeIdx) { bot.axeIdx = axeIdx; return true; }
+    // Building blocks are dropped as 'b<blockId>'
+    if (typeof itemId === 'string' && itemId.charAt(0) === 'b') {
+      const blockId = parseInt(itemId.slice(1), 10);
+      if (!BOT_BUILDABLE_BLOCK_IDS.has(blockId)) return false;
+      if (bot.blocks >= 320) return false;
+      bot.blocks = Math.min(320, bot.blocks + n);
+      bot.blockCount = bot.blocks;
+      return true;
+    }
 
-  return false;
-}
+    // Consumables & ranged gear the AI understands
+    if (itemId === 'fireball') {
+      if (bot.fireballs >= 8) return false;
+      bot.fireballs = Math.min(8, bot.fireballs + n);
+      return true;
+    }
+    if (itemId === 'ender_pearl') {
+      if (bot.enderPearls >= 4) return false;
+      bot.enderPearls = Math.min(4, bot.enderPearls + n);
+      return true;
+    }
+    if (itemId === 'bow') {
+      if (bot.hasBow) return false;
+      bot.hasBow = true;
+      bot.arrows = Math.min(32, (bot.arrows || 0) + 8);
+      return true;
+    }
+    if (itemId === 'arrow') {
+      if ((bot.arrows || 0) >= 32) return false;
+      bot.arrows = Math.min(32, (bot.arrows || 0) + n);
+      return true;
+    }
+    if (itemId === 'knockback_stick') {
+      if (bot.hasKbStick) return false;
+      bot.hasKbStick = true;
+      return true;
+    }
+    if (itemId === 'shears') {
+      if (bot.hasShears) return false;
+      bot.hasShears = true;
+      return true;
+    }
 
-/* ============================================================================
-   VOXEL VISIBILITY HELPERS
-   Bots interact with the world the same way a player does: an action needs a
-   clear 3D ray from the eyes to the face/body it is aimed at. This is what
-   stops them hitting through walls and placing blocks on faces they cannot
-   actually see.
-   ========================================================================== */
-function botEyeY(bot) { return bot.pos.y + (bot.sneak ? 1.32 : 1.62); }
+    // Tool pickups only when they beat the bot's current tier
+    const swordIdx = BOT_SWORD_IDS.indexOf(itemId);
+    if (swordIdx > bot.swordIdx) { bot.swordIdx = swordIdx; return true; }
+    const pickIdx = BOT_PICK_IDS.indexOf(itemId);
+    if (pickIdx > bot.pickIdx) { bot.pickIdx = pickIdx; return true; }
+    const axeIdx = BOT_AXE_IDS.indexOf(itemId);
+    if (axeIdx > bot.axeIdx) { bot.axeIdx = axeIdx; return true; }
 
-/* Amanatides & Woo voxel traversal. Returns false as soon as an opaque block
-   interrupts the segment a->b. Two voxel keys can be excluded (the block being
-   right-clicked and the empty voxel being filled). */
-function botSegmentClear(ax, ay, az, bx, by, bz, ignoreKeyA, ignoreKeyB) {
-  const dx = bx - ax, dy = by - ay, dz = bz - az;
-  const len = Math.hypot(dx, dy, dz);
-  if (len < 1e-4) return true;
-  const ux = dx / len, uy = dy / len, uz = dz / len;
-
-  let ix = Math.floor(ax), iy = Math.floor(ay), iz = Math.floor(az);
-  const stepX = ux < 0 ? -1 : 1;
-  const stepY = uy < 0 ? -1 : 1;
-  const stepZ = uz < 0 ? -1 : 1;
-  const tDeltaX = ux !== 0 ? Math.abs(1 / ux) : Infinity;
-  const tDeltaY = uy !== 0 ? Math.abs(1 / uy) : Infinity;
-  const tDeltaZ = uz !== 0 ? Math.abs(1 / uz) : Infinity;
-  let tMaxX = ux !== 0 ? (stepX > 0 ? (ix + 1 - ax) : (ax - ix)) / Math.abs(ux) : Infinity;
-  let tMaxY = uy !== 0 ? (stepY > 0 ? (iy + 1 - ay) : (ay - iy)) / Math.abs(uy) : Infinity;
-  let tMaxZ = uz !== 0 ? (stepZ > 0 ? (iz + 1 - az) : (az - iz)) / Math.abs(uz) : Infinity;
-
-  let guard = 0;
-  while (guard++ < 96) {
-    let t;
-    if (tMaxX <= tMaxY && tMaxX <= tMaxZ) { ix += stepX; t = tMaxX; tMaxX += tDeltaX; }
-    else if (tMaxY <= tMaxZ) { iy += stepY; t = tMaxY; tMaxY += tDeltaY; }
-    else { iz += stepZ; t = tMaxZ; tMaxZ += tDeltaZ; }
-    if (t > len - 0.02) break;
-    if (iy < 0 || iy >= WORLD_H) continue;
-
-    const key = ix + ',' + iy + ',' + iz;
-    if (key === ignoreKeyA || key === ignoreKeyB) continue;
-    const id = getBlock(ix, iy, iz);
-    if (!id) continue;
-    if (isLadderBlock(id)) continue; // non-solid, does not stop a ray
     return false;
   }
-  return true;
-}
 
-/* Eye -> hitbox check used before any melee hit. Samples a few heights on the
-   target so a bot standing on a ledge can still hit someone standing below it,
-   while a real wall still blocks the swing. */
-function botCanSeeEntity(bot, target) {
-  const bodyH = target.isLocalPlayer
-    ? (player.height || 1.8)
-    : ((target.ref && target.ref.height) || 1.8);
-  const ex = bot.pos.x, ey = botEyeY(bot), ez = bot.pos.z;
-  const heights = [Math.min(1.35, bodyH * 0.75), Math.min(1.5, bodyH * 0.9), Math.min(0.5, bodyH * 0.35)];
-  for (let i = 0; i < heights.length; i++) {
-    if (botSegmentClear(ex, ey, ez, target.pos.x, target.pos.y + heights[i], target.pos.z)) return true;
-  }
-  return false;
-}
+  /* ============================================================================
+     VOXEL VISIBILITY HELPERS
+     Bots interact with the world the same way a player does: an action needs a
+     clear 3D ray from the eyes to the face/body it is aimed at. This is what
+     stops them hitting through walls and placing blocks on faces they cannot
+     actually see.
+     ========================================================================== */
+  function botEyeY(bot) { return bot.pos.y + (bot.sneak ? 1.32 : 1.62); }
 
-/* Where a bridging bot must point its crosshair: the visible lateral face of
-   the block supporting the new bridge block. Returns null if no support face
-   is within reach or line of sight, in which case the bot must not place. */
-function botBridgeFaceAim(bot, targetVoxel, world) {
-  const eyeY = botEyeY(bot);
-  const dirs = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
-  let best = null, bestScore = 1e9;
-  for (let i = 0; i < dirs.length; i++) {
-    const d = dirs[i];
-    const sx = targetVoxel.x + d[0], sy = targetVoxel.y + d[1], sz = targetVoxel.z + d[2];
-    if (!world.isSolid(sx, sy, sz)) continue;
-
-    // Centre of the face shared by the support and the new block, nudged
-    // slightly inside the support so the ray terminates on its surface.
-    const fx = targetVoxel.x + 0.5 + d[0] * 0.55;
-    const fy = targetVoxel.y + 0.5 + d[1] * 0.55;
-    const fz = targetVoxel.z + 0.5 + d[2] * 0.55;
-    const reach = Math.hypot(fx - bot.pos.x, fy - eyeY, fz - bot.pos.z);
-    if (reach > BOT_REACH) continue;
-
-    const supportKey = sx + ',' + sy + ',' + sz;
-    const targetKey = targetVoxel.x + ',' + targetVoxel.y + ',' + targetVoxel.z;
-    if (!botSegmentClear(bot.pos.x, eyeY, bot.pos.z, fx, fy, fz, supportKey, targetKey)) continue;
-
-    // Prefer side faces next to the bot; only fall back to top/bottom when
-    // there is genuinely nothing lateral to click.
-    let score = reach;
-    if (d[1] > 0) score += 0.6;
-    else if (d[1] < 0) score += 0.25;
-    if (score < bestScore) { bestScore = score; best = { x: fx, y: fy, z: fz, reach }; }
-  }
-  return best;
-}
-
-/* ============================================================================
-   LAYER 1: WorldGridQuery (Voxel Helper Layer)
-   ========================================================================== */
-class WorldGridQuery {
-  constructor() {
-    this.orthDirs = [
-      [1, 0, 0], [-1, 0, 0],
-      [0, 1, 0], [0, -1, 0],
-      [0, 0, 1], [0, 0, -1]
-    ];
+  function botWrapAngle(a) {
+    while (a > Math.PI) a -= Math.PI * 2;
+    while (a < -Math.PI) a += Math.PI * 2;
+    return a;
   }
 
-  isSolid(gx, gy, gz) {
-    if (gy < 0 || gy >= WORLD_H) return false;
-    const id = getBlock(gx | 0, gy | 0, gz | 0);
-    if (!id) return false;
-    return !isLadderBlock(id);
+  /* Amanatides & Woo voxel traversal. Returns false as soon as an opaque block
+     interrupts the segment a->b. Two voxel keys can be excluded (the block being
+     right-clicked and the empty voxel being filled). */
+  function botSegmentClear(ax, ay, az, bx, by, bz, ignoreKeyA, ignoreKeyB) {
+    const dx = bx - ax, dy = by - ay, dz = bz - az;
+    const len = Math.hypot(dx, dy, dz);
+    if (len < 1e-4) return true;
+    const ux = dx / len, uy = dy / len, uz = dz / len;
+
+    let ix = Math.floor(ax), iy = Math.floor(ay), iz = Math.floor(az);
+    const stepX = ux < 0 ? -1 : 1;
+    const stepY = uy < 0 ? -1 : 1;
+    const stepZ = uz < 0 ? -1 : 1;
+    const tDeltaX = ux !== 0 ? Math.abs(1 / ux) : Infinity;
+    const tDeltaY = uy !== 0 ? Math.abs(1 / uy) : Infinity;
+    const tDeltaZ = uz !== 0 ? Math.abs(1 / uz) : Infinity;
+    let tMaxX = ux !== 0 ? (stepX > 0 ? (ix + 1 - ax) : (ax - ix)) / Math.abs(ux) : Infinity;
+    let tMaxY = uy !== 0 ? (stepY > 0 ? (iy + 1 - ay) : (ay - iy)) / Math.abs(uy) : Infinity;
+    let tMaxZ = uz !== 0 ? (stepZ > 0 ? (iz + 1 - az) : (az - iz)) / Math.abs(uz) : Infinity;
+
+    let guard = 0;
+    while (guard++ < 96) {
+      let t;
+      if (tMaxX <= tMaxY && tMaxX <= tMaxZ) { ix += stepX; t = tMaxX; tMaxX += tDeltaX; }
+      else if (tMaxY <= tMaxZ) { iy += stepY; t = tMaxY; tMaxY += tDeltaY; }
+      else { iz += stepZ; t = tMaxZ; tMaxZ += tDeltaZ; }
+      if (t > len - 0.02) break;
+      if (iy < 0 || iy >= WORLD_H) continue;
+
+      const key = ix + ',' + iy + ',' + iz;
+      if (key === ignoreKeyA || key === ignoreKeyB) continue;
+      const id = getBlock(ix, iy, iz);
+      if (!id) continue;
+      if (isLadderBlock(id)) continue; // non-solid, does not stop a ray
+      return false;
+    }
+    return true;
   }
 
-  hasAdjacentSupport(gx, gy, gz) {
-    const x = gx | 0, y = gy | 0, z = gz | 0;
-    for (let i = 0; i < 6; i++) {
-      const d = this.orthDirs[i];
-      if (this.isSolid(x + d[0], y + d[1], z + d[2])) return true;
+  /* Eye -> hitbox check used before any melee or ranged shot. Samples a few
+     heights on the target so a bot standing on a ledge can still hit someone
+     standing below it, while a real wall still blocks the swing. */
+  function botCanSeeEntity(bot, target) {
+    const bodyH = target.isLocalPlayer
+      ? (player.height || 1.8)
+      : ((target.ref && target.ref.height) || 1.8);
+    const ex = bot.pos.x, ey = botEyeY(bot), ez = bot.pos.z;
+    const heights = [Math.min(1.35, bodyH * 0.75), Math.min(1.5, bodyH * 0.9), Math.min(0.5, bodyH * 0.35)];
+    for (let i = 0; i < heights.length; i++) {
+      if (botSegmentClear(ex, ey, ez, target.pos.x, target.pos.y + heights[i], target.pos.z)) return true;
     }
     return false;
   }
 
-  isWalkable(gx, gy, gz) {
-    const x = gx | 0, y = gy | 0, z = gz | 0;
-    if (y < 1 || y > WORLD_H - 3) return false;
-    return this.isSolid(x, y - 1, z) && !this.isSolid(x, y, z) && !this.isSolid(x, y + 1, z);
+  /* Where a bridging bot must point its crosshair: the visible lateral face of
+     the block supporting the new bridge block. Returns null if no support face
+     is within reach or line of sight, in which case the bot must not place. */
+  function botBridgeFaceAim(bot, targetVoxel, world) {
+    const eyeY = botEyeY(bot);
+    const dirs = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+    let best = null, bestScore = 1e9;
+    for (let i = 0; i < dirs.length; i++) {
+      const d = dirs[i];
+      const sx = targetVoxel.x + d[0], sy = targetVoxel.y + d[1], sz = targetVoxel.z + d[2];
+      if (!world.isSolid(sx, sy, sz)) continue;
+
+      // Centre of the face shared by the support and the new block, nudged
+      // slightly inside the support so the ray terminates on its surface.
+      const fx = targetVoxel.x + 0.5 + d[0] * 0.55;
+      const fy = targetVoxel.y + 0.5 + d[1] * 0.55;
+      const fz = targetVoxel.z + 0.5 + d[2] * 0.55;
+      const reach = Math.hypot(fx - bot.pos.x, fy - eyeY, fz - bot.pos.z);
+      if (reach > BOT_REACH) continue;
+
+      const supportKey = sx + ',' + sy + ',' + sz;
+      const targetKey = targetVoxel.x + ',' + targetVoxel.y + ',' + targetVoxel.z;
+      if (!botSegmentClear(bot.pos.x, eyeY, bot.pos.z, fx, fy, fz, supportKey, targetKey)) continue;
+
+      // Prefer side faces next to the bot; only fall back to top/bottom when
+      // there is genuinely nothing lateral to click.
+      let score = reach;
+      if (d[1] > 0) score += 0.6;
+      else if (d[1] < 0) score += 0.25;
+      if (score < bestScore) { bestScore = score; best = { x: fx, y: fy, z: fz, reach }; }
+    }
+    return best;
   }
 
-  canBridgeTo(gx, gy, gz) {
-    const x = gx | 0, y = gy | 0, z = gz | 0;
-    if (y < 1 || y > WORLD_H - 3) return false;
-    return !this.isSolid(x, y, z) && !this.isSolid(x, y + 1, z) && this.hasAdjacentSupport(x, y, z);
-  }
+  /* ============================================================================
+     LAYER 1: WorldGridQuery (Voxel Helper Layer)
+     ========================================================================== */
+  class WorldGridQuery {
+    constructor() {
+      this.orthDirs = [
+        [1, 0, 0], [-1, 0, 0],
+        [0, 1, 0], [0, -1, 0],
+        [0, 0, 1], [0, 0, -1]
+      ];
+    }
 
-  intersectsAnyEntity(gx, gy, gz) {
-    const minX = gx, maxX = gx + 1;
-    const minY = gy, maxY = gy + 1;
-    const minZ = gz, maxZ = gz + 1;
-    const r = 0.3, E = 1e-4;
+    isSolid(gx, gy, gz) {
+      if (gy < 0 || gy >= WORLD_H) return false;
+      const id = getBlock(gx | 0, gy | 0, gz | 0);
+      if (!id) return false;
+      return !isLadderBlock(id);
+    }
 
-    if (typeof player !== 'undefined' && player && !player.eliminated && !player.spectator && player.respawnCooldown <= 0) {
-      if (maxX > player.pos.x - r + E && minX < player.pos.x + r - E &&
+    hasAdjacentSupport(gx, gy, gz) {
+      const x = gx | 0, y = gy | 0, z = gz | 0;
+      for (let i = 0; i < 6; i++) {
+        const d = this.orthDirs[i];
+        if (this.isSolid(x + d[0], y + d[1], z + d[2])) return true;
+      }
+      return false;
+    }
+
+    isWalkable(gx, gy, gz) {
+      const x = gx | 0, y = gy | 0, z = gz | 0;
+      if (y < 1 || y > WORLD_H - 3) return false;
+      return this.isSolid(x, y - 1, z) && !this.isSolid(x, y, z) && !this.isSolid(x, y + 1, z);
+    }
+
+    canBridgeTo(gx, gy, gz) {
+      const x = gx | 0, y = gy | 0, z = gz | 0;
+      if (y < 1 || y > WORLD_H - 3) return false;
+      return !this.isSolid(x, y, z) && !this.isSolid(x, y + 1, z) && this.hasAdjacentSupport(x, y, z);
+    }
+
+    intersectsAnyEntity(gx, gy, gz) {
+      const minX = gx, maxX = gx + 1;
+      const minY = gy, maxY = gy + 1;
+      const minZ = gz, maxZ = gz + 1;
+      const r = 0.3, E = 1e-4;
+
+      if (typeof player !== 'undefined' && player && !player.eliminated && !player.spectator && player.respawnCooldown <= 0) {
+        if (maxX > player.pos.x - r + E && minX < player.pos.x + r - E &&
           maxY > player.pos.y + E && minY < player.pos.y + player.height - E &&
           maxZ > player.pos.z - r + E && minZ < player.pos.z + r - E) {
-        return true;
+          return true;
+        }
       }
-    }
-    for (let i = 0; i < remotePlayers.length; i++) {
-      const rp = remotePlayers[i];
-      if (!rp || !rp.alive || rp.eliminated || rp.respawning) continue;
-      if (maxX > rp.pos.x - r + E && minX < rp.pos.x + r - E &&
+      for (let i = 0; i < remotePlayers.length; i++) {
+        const rp = remotePlayers[i];
+        if (!rp || !rp.alive || rp.eliminated || rp.respawning) continue;
+        if (maxX > rp.pos.x - r + E && minX < rp.pos.x + r - E &&
           maxY > rp.pos.y + E && minY < rp.pos.y + rp.height - E &&
           maxZ > rp.pos.z - r + E && minZ < rp.pos.z + r - E) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    placeBlock(gx, gy, gz, blockIdOrTeamColor) {
+      const x = gx | 0, y = gy | 0, z = gz | 0;
+      if (y < 1 || y >= WORLD_H - 1) return false;
+      if (this.isSolid(x, y, z) || getBlock(x, y, z)) return false;
+      if (!this.hasAdjacentSupport(x, y, z)) return false;
+      if (this.intersectsAnyEntity(x, y, z)) return false;
+
+      let blockId = 25;
+      if (typeof blockIdOrTeamColor === 'number' && BLOCKS[blockIdOrTeamColor]) {
+        blockId = blockIdOrTeamColor;
+      } else if (typeof blockIdOrTeamColor === 'string') {
+        const t = TEAMS.find(tm => tm.name === blockIdOrTeamColor);
+        if (t) blockId = t.wool;
+      } else if (typeof blockIdOrTeamColor === 'number') {
+        const t = TEAMS.find(tm => tm.hex === blockIdOrTeamColor);
+        if (t) blockId = t.wool;
+      }
+
+      applyRemoteBlock(x, y, z, blockId);
+      queueBlockChange(x, y, z, blockId);
+      botMarkPlacedBlock(x, y, z);
+      return true;
+    }
+  }
+
+  const worldGrid = new WorldGridQuery();
+
+  /* ============================================================================
+     LAYER 2: VoxelPathfinder (Bounded 3D A* with Bridging)
+     ========================================================================== */
+  class VoxelPathfinder {
+    constructor(grid) {
+      this.grid = grid;
+      this.cardinals = [
+        [1, 0], [-1, 0], [0, 1], [0, -1]
+      ];
+    }
+
+    snapStartVoxel(pos) {
+      const gx = Math.floor(pos.x);
+      const gz = Math.floor(pos.z);
+      const baseY = Math.floor(pos.y + 0.05);
+      const offsets = [0, 1, -1, 2, -2, -3];
+      for (let i = 0; i < offsets.length; i++) {
+        const gy = baseY + offsets[i];
+        if (this.grid.isWalkable(gx, gy, gz)) return { x: gx, y: gy, z: gz };
+      }
+      return { x: gx, y: clamp(baseY, 1, WORLD_H - 4), z: gz };
+    }
+
+    snapGoalVoxel(goalPos) {
+      const gx = Math.floor(goalPos.x);
+      const gz = Math.floor(goalPos.z);
+      const baseY = Math.floor(goalPos.y + 0.05);
+      const offsets = [0, 1, -1, 2, -2, -3];
+      for (let i = 0; i < offsets.length; i++) {
+        const gy = baseY + offsets[i];
+        if (this.grid.isWalkable(gx, gy, gz)) return { x: gx, y: gy, z: gz };
+      }
+      // Goal sits inside a solid block (bed, vending machine, generator base): snap to nearest walkable neighbor
+      let best = null, bestDist = 1e9;
+      for (let r = 1; r <= 3; r++) {
+        for (let ox = -r; ox <= r; ox++) {
+          for (let oz = -r; oz <= r; oz++) {
+            if (Math.abs(ox) !== r && Math.abs(oz) !== r) continue;
+            for (let oy = -2; oy <= 2; oy++) {
+              const wy = baseY + oy;
+              if (!this.grid.isWalkable(gx + ox, wy, gz + oz)) continue;
+              const d = Math.hypot(ox, oy, oz);
+              if (d < bestDist) {
+                bestDist = d;
+                best = { x: gx + ox, y: wy, z: gz + oz };
+              }
+            }
+          }
+        }
+        if (best) return best;
+      }
+      return { x: gx, y: clamp(baseY, 1, WORLD_H - 4), z: gz };
+    }
+
+    findPath(bot, goalPos, opts) {
+      opts = opts || {};
+      const maxNodes = opts.maxNodes || 300;
+      const allowBridging = opts.allowBridging !== false && (bot.blockCount | 0) > 0;
+      const maxBridgeBlocks = Math.max(0, bot.blockCount | 0);
+
+      const start = this.snapStartVoxel(bot.pos);
+      const goal = this.snapGoalVoxel(goalPos);
+
+      if (start.x === goal.x && start.y === goal.y && start.z === goal.z) {
+        return [{ x: goal.x + 0.5, y: goal.y, z: goal.z + 0.5, action: 'WALK' }];
+      }
+
+      const nowMs = performance.now();
+      const open = [];
+      const closed = new Set();
+      const gScore = new Map();
+
+      const startKey = start.x + ',' + start.y + ',' + start.z;
+      const startH = Math.hypot(goal.x - start.x, goal.y - start.y, goal.z - start.z);
+      const startNode = {
+        x: start.x, y: start.y, z: start.z,
+        g: 0, f: startH,
+        action: 'WALK',
+        bridgesUsed: 0,
+        parent: null
+      };
+      open.push(startNode);
+      gScore.set(startKey, 0);
+
+      let bestNode = startNode;
+      let bestH = startH;
+      let expanded = 0;
+
+      while (open.length > 0 && expanded < maxNodes) {
+        let bi = 0;
+        for (let i = 1; i < open.length; i++) {
+          if (open[i].f < open[bi].f) bi = i;
+        }
+        const cur = open.splice(bi, 1)[0];
+        const cKey = cur.x + ',' + cur.y + ',' + cur.z;
+        if (closed.has(cKey)) continue;
+        closed.add(cKey);
+        expanded++;
+
+        const hCur = Math.hypot(goal.x - cur.x, goal.y - cur.y, goal.z - cur.z);
+        if (hCur < bestH) {
+          bestH = hCur;
+          bestNode = cur;
+        }
+        if (cur.x === goal.x && cur.z === goal.z && Math.abs(cur.y - goal.y) <= 1) {
+          bestNode = cur;
+          break;
+        }
+
+        const badPenalty = (cellX, cellZ) => {
+          if (!bot.badCells) return 0;
+          const exp = bot.badCells.get(cellX + ',' + cellZ);
+          return (exp && exp > nowMs) ? 10.0 : 0;
+        };
+
+        for (let d = 0; d < 4; d++) {
+          const dx = this.cardinals[d][0];
+          const dz = this.cardinals[d][1];
+          const nx = cur.x + dx;
+          const nz = cur.z + dz;
+
+          // 1. Flat walk (cost: 1.0)
+          if (this.grid.isWalkable(nx, cur.y, nz)) {
+            const nKey = nx + ',' + cur.y + ',' + nz;
+            if (!closed.has(nKey)) {
+              const ng = cur.g + 1.0 + badPenalty(nx, nz);
+              const prev = gScore.get(nKey);
+              if (prev === undefined || ng < prev) {
+                gScore.set(nKey, ng);
+                const h = Math.hypot(goal.x - nx, goal.y - cur.y, goal.z - nz);
+                open.push({ x: nx, y: cur.y, z: nz, g: ng, f: ng + h * 1.15, action: 'WALK', bridgesUsed: cur.bridgesUsed, parent: cur });
+              }
+            }
+            continue;
+          }
+
+          // 2. 1-block jump step-up (cost: 1.8)
+          const jumpY = cur.y + 1;
+          if (
+            jumpY <= WORLD_H - 3 &&
+            !this.grid.isSolid(cur.x, cur.y + 2, cur.z) &&
+            this.grid.isWalkable(nx, jumpY, nz)
+          ) {
+            const nKey = nx + ',' + jumpY + ',' + nz;
+            if (!closed.has(nKey)) {
+              const ng = cur.g + 1.8 + badPenalty(nx, nz);
+              const prev = gScore.get(nKey);
+              if (prev === undefined || ng < prev) {
+                gScore.set(nKey, ng);
+                const h = Math.hypot(goal.x - nx, goal.y - jumpY, goal.z - nz);
+                open.push({ x: nx, y: jumpY, z: nz, g: ng, f: ng + h * 1.15, action: 'JUMP', bridgesUsed: cur.bridgesUsed, parent: cur });
+              }
+            }
+            continue;
+          }
+
+          // 3. Safe drop <= 3 blocks onto solid ground (cost: 1.5)
+          let dropped = false;
+          if (!this.grid.isSolid(nx, cur.y, nz) && !this.grid.isSolid(nx, cur.y + 1, nz)) {
+            for (let drop = 1; drop <= 3; drop++) {
+              const dropY = cur.y - drop;
+              if (dropY < 1) break;
+              if (this.grid.isSolid(nx, dropY, nz)) break; // hit solid before finding walkable floor
+              if (this.grid.isWalkable(nx, dropY, nz)) {
+                const nKey = nx + ',' + dropY + ',' + nz;
+                if (!closed.has(nKey)) {
+                  const ng = cur.g + 1.5 + drop * 0.05 + badPenalty(nx, nz);
+                  const prev = gScore.get(nKey);
+                  if (prev === undefined || ng < prev) {
+                    gScore.set(nKey, ng);
+                    const h = Math.hypot(goal.x - nx, goal.y - dropY, goal.z - nz);
+                    open.push({ x: nx, y: dropY, z: nz, g: ng, f: ng + h * 1.15, action: 'WALK', bridgesUsed: cur.bridgesUsed, parent: cur });
+                  }
+                }
+                dropped = true;
+                break;
+              }
+            }
+          }
+          if (dropped) continue;
+
+          // 4. Air-bridge placement (cost: 3.5, permitted only if bot.blockCount > 0 and canBridgeTo is valid)
+          if (
+            allowBridging &&
+            cur.bridgesUsed < maxBridgeBlocks &&
+            cur.y >= BASE_Y - 1 &&
+            !this.grid.isSolid(nx, cur.y - 1, nz) &&
+            (this.grid.canBridgeTo(nx, cur.y - 1, nz) || (cur.action === 'BRIDGE' && !this.grid.isSolid(nx, cur.y, nz) && !this.grid.isSolid(nx, cur.y + 1, nz)))
+          ) {
+            const nKey = nx + ',' + cur.y + ',' + nz;
+            if (!closed.has(nKey)) {
+              const ng = cur.g + 3.5 + badPenalty(nx, nz);
+              const prev = gScore.get(nKey);
+              if (prev === undefined || ng < prev) {
+                gScore.set(nKey, ng);
+                const h = Math.hypot(goal.x - nx, goal.y - cur.y, goal.z - nz);
+                open.push({ x: nx, y: cur.y, z: nz, g: ng, f: ng + h * 1.15, action: 'BRIDGE', bridgesUsed: cur.bridgesUsed + 1, parent: cur });
+              }
+            }
+          }
+        }
+      }
+
+      const waypoints = [];
+      let p = bestNode;
+      while (p && p.parent) {
+        waypoints.push({
+          x: p.x + 0.5,
+          y: p.y,
+          z: p.z + 0.5,
+          action: p.action
+        });
+        p = p.parent;
+      }
+      waypoints.reverse();
+      return waypoints;
+    }
+  }
+
+  const voxelPathfinder = new VoxelPathfinder(worldGrid);
+
+  /* ============================================================================
+     BRIDGE WAYPOINT EXECUTION & LEDGE HELPERS
+     ========================================================================== */
+  function getSupportBlockForBot(bot) {
+    const by = Math.floor(bot.pos.y - 0.02);
+    const cx = Math.floor(bot.pos.x);
+    const cz = Math.floor(bot.pos.z);
+    if (worldGrid.isSolid(cx, by, cz)) return { x: cx, y: by, z: cz };
+    const r = 0.3;
+    const offsets = [[r, 0], [-r, 0], [0, r], [0, -r], [r, r], [-r, r], [r, -r], [-r, -r]];
+    for (let i = 0; i < offsets.length; i++) {
+      const sx = Math.floor(bot.pos.x + offsets[i][0]);
+      const sz = Math.floor(bot.pos.z + offsets[i][1]);
+      if (worldGrid.isSolid(sx, by, sz)) return { x: sx, y: by, z: sz };
+    }
+    return { x: cx, y: by, z: cz };
+  }
+
+  function isBotOnNarrowBridge(bot, world) {
+    const by = Math.floor(bot.pos.y - 0.02);
+    const cx = Math.floor(bot.pos.x);
+    const cz = Math.floor(bot.pos.z);
+    let solidNeighbors = 0;
+    const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    for (let i = 0; i < 4; i++) {
+      const nx = cx + dirs[i][0];
+      const nz = cz + dirs[i][1];
+      if (world.isSolid(nx, by, nz) || world.isSolid(nx, by + 1, nz) || world.isSolid(nx, by - 1, nz)) {
+        solidNeighbors++;
+      }
+    }
+    return solidNeighbors <= 2;
+  }
+
+  function isNearLedge(bot, targetVoxel, maxDist) {
+    const limit = maxDist == null ? 0.45 : maxDist;
+    const dx = Math.max(targetVoxel.x - bot.pos.x, 0, bot.pos.x - (targetVoxel.x + 1));
+    const dz = Math.max(targetVoxel.z - bot.pos.z, 0, bot.pos.z - (targetVoxel.z + 1));
+    return Math.hypot(dx, dz) <= limit;
+  }
+
+  function moveTowardEdge(bot, targetVoxel) {
+    bot.sneak = true;
+    bot.height = 1.5;
+
+    const sup = getSupportBlockForBot(bot);
+    const dirX = clamp((targetVoxel.x + 0.5) - (sup.x + 0.5), -1, 1);
+    const dirZ = clamp((targetVoxel.z + 0.5) - (sup.z + 0.5), -1, 1);
+
+    // Target point on the support block's ledge (~0.18 blocks inside the edge, well within 0.45 of targetVoxel)
+    const edgeX = sup.x + 0.5 + dirX * 0.32;
+    const edgeZ = sup.z + 0.5 + dirZ * 0.32;
+
+    const dx = edgeX - bot.pos.x;
+    const dz = edgeZ - bot.pos.z;
+    const dist = Math.hypot(dx, dz);
+
+    const style = BOT_BRIDGE_STYLES[bot.botTalent.bridge] || BOT_BRIDGE_STYLES.speed;
+    const moveSpd = BOT_BASE_SPEED * (style.speed || 1.0) * 0.68;
+
+    if (dist > 0.04) {
+      bot.vel.x = (dx / dist) * moveSpd;
+      bot.vel.z = (dz / dist) * moveSpd;
+    } else {
+      bot.vel.x = 0;
+      bot.vel.z = 0;
+    }
+
+    // Clamp horizontal position so the bot never steps off the support block before targetVoxel is solid
+    const minSafeX = sup.x + 0.14;
+    const maxSafeX = sup.x + 0.86;
+    const minSafeZ = sup.z + 0.14;
+    const maxSafeZ = sup.z + 0.86;
+    if (bot.pos.x < minSafeX && bot.vel.x < 0) bot.vel.x = 0;
+    if (bot.pos.x > maxSafeX && bot.vel.x > 0) bot.vel.x = 0;
+    if (bot.pos.z < minSafeZ && bot.vel.z < 0) bot.vel.z = 0;
+    if (bot.pos.z > maxSafeZ && bot.vel.z > 0) bot.vel.z = 0;
+  }
+
+  function moveTowardCenter(bot, cx, cy, cz) {
+    const dx = cx - bot.pos.x;
+    const dz = cz - bot.pos.z;
+    const dist = Math.hypot(dx, dz);
+    const style = BOT_BRIDGE_STYLES[bot.botTalent.bridge] || BOT_BRIDGE_STYLES.speed;
+    const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
+    const moveSpd = BOT_BASE_SPEED * diff.speed * (style.speed || 1.0) * (style.sprint ? 1.12 : 0.92);
+
+    bot.sneak = true;
+    bot.height = 1.5;
+
+    if (dist > 0.05) {
+      bot.vel.x = (dx / dist) * moveSpd;
+      bot.vel.z = (dz / dist) * moveSpd;
+    } else {
+      bot.vel.x = 0;
+      bot.vel.z = 0;
+    }
+  }
+
+  function stepBridgeWaypoint(bot, wp, world) {
+    const targetVoxel = { x: Math.floor(wp.x), y: Math.floor(wp.y) - 1, z: Math.floor(wp.z) };
+    const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
+
+    // 1. Move toward the edge of the current support block facing targetVoxel
+    moveTowardEdge(bot, targetVoxel);
+
+    const aim = botBridgeFaceAim(bot, targetVoxel, world);
+    if (aim) bot.lookAt(aim.x, aim.y, aim.z);
+
+    // 2. Only place when grounded, not falling, near ledge, placeCooldown ready, and valid support exists
+    if (
+      aim &&
+      bot.onGround &&
+      bot.vel.y >= -0.1 &&
+      bot.placeCooldown <= 0 &&
+      bot.blockCount > 0 &&
+      !world.isSolid(targetVoxel.x, targetVoxel.y, targetVoxel.z) &&
+      world.hasAdjacentSupport(targetVoxel.x, targetVoxel.y, targetVoxel.z) &&
+      isNearLedge(bot, targetVoxel, 0.45)
+    ) {
+      const eyeY = botEyeY(bot);
+      const horiz = Math.hypot(aim.x - bot.pos.x, aim.z - bot.pos.z) || 0.001;
+      const needPitch = clamp(-Math.atan2(eyeY - aim.y, horiz), -1.45, 1.45);
+      if (Math.abs(bot.pitch - needPitch) <= 0.24 &&
+        world.placeBlock(targetVoxel.x, targetVoxel.y, targetVoxel.z, bot.teamColor)) {
+        bot.blockCount--;
+        bot.blocks = bot.blockCount;
+        bot.placeCooldown = diff.placeCd || 0.16;
+        bot.swingFlag = true;
+        bot.timers.swing = 0.25;
+        if (typeof SFX !== 'undefined' && typeof player !== 'undefined' && player && player.pos.distanceTo(bot.pos) < 28) {
+          SFX.place();
+        }
+      }
+    }
+
+    // 3. Advance waypoint only after the bridge block physically exists
+    if (world.isSolid(targetVoxel.x, targetVoxel.y, targetVoxel.z)) {
+      moveTowardCenter(bot, wp.x, wp.y, wp.z);
+    }
+  }
+
+  /* ============================================================================
+     SHOP & BED DEFENSE HELPERS
+     ========================================================================== */
+  function botBestToolForBlock(bot, blockId) {
+    const def = BLOCKS[blockId];
+    if (!def) return bot.gearSword();
+    if (def.bed) return bot.axeIdx > 0 ? bot.gearAxe() : (bot.pickIdx > 0 ? bot.gearPick() : bot.gearSword());
+    if (def.tool === 'shears' && bot.hasShears) return 'shears';
+    if (def.tool === 'pickaxe') return bot.gearPick();
+    if (def.tool === 'axe') return bot.gearAxe();
+    if (def.tool === 'shovel') return bot.gearPick();
+    return bot.gearSword();
+  }
+
+  function botCalcBreakTime(bot, blockId, toolId) {
+    const def = BLOCKS[blockId];
+    if (!def) return 0.45;
+    if (def.unbreakable) return Infinity;
+    const item = toolId ? ITEMS[toolId] : null;
+    const rightTool = item && item.tool === def.tool;
+    let mult = 1.0;
+    if (rightTool && item.material) mult = TOOL_SPEED[item.material] || 2;
+    else if (def.need) mult = 0.3;
+    const haste = (teamUpgrades[bot.teamName] && teamUpgrades[bot.teamName].haste) || 0;
+    if (haste > 0) mult *= (1 + haste * 0.25);
+    const scale = [1.25, 1.06, 0.95, 0.86][bot.botDifficulty] || 1.0;
+    return Math.max(0.10, ((def.hard * 1.4) / mult) * scale);
+  }
+
+  function botCanAffordShop(bot) {
+    const minBlocks = bot.botTalent.minBlocks || 20;
+    if (bot.blockCount < minBlocks && bot.res.iron_ingot >= 4) return true;
+    if (bot.swordIdx === 0 && bot.res.iron_ingot >= 10) return true;
+    if (bot.swordIdx < 2 && bot.res.gold_ingot >= 7) return true;
+    if (bot.swordIdx < 3 && bot.res.emerald >= 4) return true;
+    if (bot.armorIdx === 0 && bot.res.iron_ingot >= 40) return true;
+    if (bot.armorIdx < 2 && bot.res.gold_ingot >= 12) return true;
+    if (bot.armorIdx < 3 && bot.res.emerald >= 6) return true;
+    if (!bot.hasShears && bot.res.iron_ingot >= 20) return true;
+    if (bot.pickIdx === 0 && bot.res.iron_ingot >= 10) return true;
+    if (bot.axeIdx === 0 && bot.res.iron_ingot >= 10) return true;
+    if (!bot.hasBow && bot.res.gold_ingot >= 12 && (typeof ITEMS === 'undefined' || ITEMS.bow)) return true;
+    if (bot.hasBow && (bot.arrows || 0) < 8 && bot.res.gold_ingot >= 2) return true;
+    if (bot.res.diamond >= 2) {
+      const tu = teamUpgrades[bot.teamName];
+      if (tu && ((tu.sharpness === 0 && bot.res.diamond >= 4) || (tu.protection < 4 && bot.res.diamond >= (2 << tu.protection)))) {
         return true;
       }
     }
     return false;
   }
 
-  placeBlock(gx, gy, gz, blockIdOrTeamColor) {
-    const x = gx | 0, y = gy | 0, z = gz | 0;
-    if (y < 1 || y >= WORLD_H - 1) return false;
-    if (this.isSolid(x, y, z) || getBlock(x, y, z)) return false;
-    if (!this.hasAdjacentSupport(x, y, z)) return false;
-    if (this.intersectsAnyEntity(x, y, z)) return false;
+  function botExecutePurchases(bot) {
+    let bought = false;
 
-    let blockId = 25;
-    if (typeof blockIdOrTeamColor === 'number' && BLOCKS[blockIdOrTeamColor]) {
-      blockId = blockIdOrTeamColor;
-    } else if (typeof blockIdOrTeamColor === 'string') {
-      const t = TEAMS.find(tm => tm.name === blockIdOrTeamColor);
-      if (t) blockId = t.wool;
-    } else if (typeof blockIdOrTeamColor === 'number') {
-      const t = TEAMS.find(tm => tm.hex === blockIdOrTeamColor);
-      if (t) blockId = t.wool;
+    // 1. Wool blocks up to target stack (at least 24-32 for bridging & defense)
+    const targetWool = Math.max(24, (bot.botTalent.minBlocks || 20) + 8);
+    while (bot.blockCount < targetWool && bot.res.iron_ingot >= 4) {
+      bot.res.iron_ingot -= 4;
+      bot.blocks += 16;
+      bot.blockCount = bot.blocks;
+      bought = true;
     }
 
-    applyRemoteBlock(x, y, z, blockId);
-    queueBlockChange(x, y, z, blockId);
-    botMarkPlacedBlock(x, y, z);
-    return true;
-  }
-}
-
-const worldGrid = new WorldGridQuery();
-
-/* ============================================================================
-   LAYER 2: VoxelPathfinder (Bounded 3D A* with Bridging)
-   ========================================================================== */
-class VoxelPathfinder {
-  constructor(grid) {
-    this.grid = grid;
-    this.cardinals = [
-      [1, 0], [-1, 0], [0, 1], [0, -1]
-    ];
-  }
-
-  snapStartVoxel(pos) {
-    const gx = Math.floor(pos.x);
-    const gz = Math.floor(pos.z);
-    const baseY = Math.floor(pos.y + 0.05);
-    const offsets = [0, 1, -1, 2, -2, -3];
-    for (let i = 0; i < offsets.length; i++) {
-      const gy = baseY + offsets[i];
-      if (this.grid.isWalkable(gx, gy, gz)) return { x: gx, y: gy, z: gz };
-    }
-    return { x: gx, y: clamp(baseY, 1, WORLD_H - 4), z: gz };
-  }
-
-  snapGoalVoxel(goalPos) {
-    const gx = Math.floor(goalPos.x);
-    const gz = Math.floor(goalPos.z);
-    const baseY = Math.floor(goalPos.y + 0.05);
-    const offsets = [0, 1, -1, 2, -2, -3];
-    for (let i = 0; i < offsets.length; i++) {
-      const gy = baseY + offsets[i];
-      if (this.grid.isWalkable(gx, gy, gz)) return { x: gx, y: gy, z: gz };
-    }
-    // Goal sits inside a solid block (bed, vending machine, generator base): snap to nearest walkable neighbor
-    let best = null, bestDist = 1e9;
-    for (let r = 1; r <= 3; r++) {
-      for (let ox = -r; ox <= r; ox++) {
-        for (let oz = -r; oz <= r; oz++) {
-          if (Math.abs(ox) !== r && Math.abs(oz) !== r) continue;
-          for (let oy = -2; oy <= 2; oy++) {
-            const wy = baseY + oy;
-            if (!this.grid.isWalkable(gx + ox, wy, gz + oz)) continue;
-            const d = Math.hypot(ox, oy, oz);
-            if (d < bestDist) {
-              bestDist = d;
-              best = { x: gx + ox, y: wy, z: gz + oz };
-            }
-          }
-        }
-      }
-      if (best) return best;
-    }
-    return { x: gx, y: clamp(baseY, 1, WORLD_H - 4), z: gz };
-  }
-
-  findPath(bot, goalPos, opts) {
-    opts = opts || {};
-    const maxNodes = opts.maxNodes || 300;
-    const allowBridging = opts.allowBridging !== false && (bot.blockCount | 0) > 0;
-    const maxBridgeBlocks = Math.max(0, bot.blockCount | 0);
-
-    const start = this.snapStartVoxel(bot.pos);
-    const goal = this.snapGoalVoxel(goalPos);
-
-    if (start.x === goal.x && start.y === goal.y && start.z === goal.z) {
-      return [{ x: goal.x + 0.5, y: goal.y, z: goal.z + 0.5, action: 'WALK' }];
+    // 2. Permanent armor progression
+    if (bot.armorIdx < 3 && bot.res.emerald >= 6) {
+      bot.res.emerald -= 6;
+      bot.applyArmorSet(3);
+      bought = true;
+    } else if (bot.armorIdx < 2 && bot.res.gold_ingot >= 12) {
+      bot.res.gold_ingot -= 12;
+      bot.applyArmorSet(2);
+      bought = true;
+    } else if (bot.armorIdx < 1 && bot.res.iron_ingot >= 40) {
+      bot.res.iron_ingot -= 40;
+      bot.applyArmorSet(1);
+      bought = true;
     }
 
-    const nowMs = performance.now();
-    const open = [];
-    const closed = new Set();
-    const gScore = new Map();
-
-    const startKey = start.x + ',' + start.y + ',' + start.z;
-    const startH = Math.hypot(goal.x - start.x, goal.y - start.y, goal.z - start.z);
-    const startNode = {
-      x: start.x, y: start.y, z: start.z,
-      g: 0, f: startH,
-      action: 'WALK',
-      bridgesUsed: 0,
-      parent: null
-    };
-    open.push(startNode);
-    gScore.set(startKey, 0);
-
-    let bestNode = startNode;
-    let bestH = startH;
-    let expanded = 0;
-
-    while (open.length > 0 && expanded < maxNodes) {
-      let bi = 0;
-      for (let i = 1; i < open.length; i++) {
-        if (open[i].f < open[bi].f) bi = i;
-      }
-      const cur = open.splice(bi, 1)[0];
-      const cKey = cur.x + ',' + cur.y + ',' + cur.z;
-      if (closed.has(cKey)) continue;
-      closed.add(cKey);
-      expanded++;
-
-      const hCur = Math.hypot(goal.x - cur.x, goal.y - cur.y, goal.z - cur.z);
-      if (hCur < bestH) {
-        bestH = hCur;
-        bestNode = cur;
-      }
-      if (cur.x === goal.x && cur.z === goal.z && Math.abs(cur.y - goal.y) <= 1) {
-        bestNode = cur;
-        break;
-      }
-
-      const badPenalty = (cellX, cellZ) => {
-        if (!bot.badCells) return 0;
-        const exp = bot.badCells.get(cellX + ',' + cellZ);
-        return (exp && exp > nowMs) ? 10.0 : 0;
-      };
-
-      for (let d = 0; d < 4; d++) {
-        const dx = this.cardinals[d][0];
-        const dz = this.cardinals[d][1];
-        const nx = cur.x + dx;
-        const nz = cur.z + dz;
-
-        // 1. Flat walk (cost: 1.0)
-        if (this.grid.isWalkable(nx, cur.y, nz)) {
-          const nKey = nx + ',' + cur.y + ',' + nz;
-          if (!closed.has(nKey)) {
-            const ng = cur.g + 1.0 + badPenalty(nx, nz);
-            const prev = gScore.get(nKey);
-            if (prev === undefined || ng < prev) {
-              gScore.set(nKey, ng);
-              const h = Math.hypot(goal.x - nx, goal.y - cur.y, goal.z - nz);
-              open.push({ x: nx, y: cur.y, z: nz, g: ng, f: ng + h * 1.15, action: 'WALK', bridgesUsed: cur.bridgesUsed, parent: cur });
-            }
-          }
-          continue;
-        }
-
-        // 2. 1-block jump step-up (cost: 1.8)
-        const jumpY = cur.y + 1;
-        if (
-          jumpY <= WORLD_H - 3 &&
-          !this.grid.isSolid(cur.x, cur.y + 2, cur.z) &&
-          this.grid.isWalkable(nx, jumpY, nz)
-        ) {
-          const nKey = nx + ',' + jumpY + ',' + nz;
-          if (!closed.has(nKey)) {
-            const ng = cur.g + 1.8 + badPenalty(nx, nz);
-            const prev = gScore.get(nKey);
-            if (prev === undefined || ng < prev) {
-              gScore.set(nKey, ng);
-              const h = Math.hypot(goal.x - nx, goal.y - jumpY, goal.z - nz);
-              open.push({ x: nx, y: jumpY, z: nz, g: ng, f: ng + h * 1.15, action: 'JUMP', bridgesUsed: cur.bridgesUsed, parent: cur });
-            }
-          }
-          continue;
-        }
-
-        // 3. Safe drop <= 3 blocks onto solid ground (cost: 1.5)
-        let dropped = false;
-        if (!this.grid.isSolid(nx, cur.y, nz) && !this.grid.isSolid(nx, cur.y + 1, nz)) {
-          for (let drop = 1; drop <= 3; drop++) {
-            const dropY = cur.y - drop;
-            if (dropY < 1) break;
-            if (this.grid.isSolid(nx, dropY, nz)) break; // hit solid before finding walkable floor
-            if (this.grid.isWalkable(nx, dropY, nz)) {
-              const nKey = nx + ',' + dropY + ',' + nz;
-              if (!closed.has(nKey)) {
-                const ng = cur.g + 1.5 + drop * 0.05 + badPenalty(nx, nz);
-                const prev = gScore.get(nKey);
-                if (prev === undefined || ng < prev) {
-                  gScore.set(nKey, ng);
-                  const h = Math.hypot(goal.x - nx, goal.y - dropY, goal.z - nz);
-                  open.push({ x: nx, y: dropY, z: nz, g: ng, f: ng + h * 1.15, action: 'WALK', bridgesUsed: cur.bridgesUsed, parent: cur });
-                }
-              }
-              dropped = true;
-              break;
-            }
-          }
-        }
-        if (dropped) continue;
-
-        // 4. Air-bridge placement (cost: 3.5, permitted only if bot.blockCount > 0 and canBridgeTo is valid)
-        if (
-          allowBridging &&
-          cur.bridgesUsed < maxBridgeBlocks &&
-          cur.y >= BASE_Y - 1 &&
-          !this.grid.isSolid(nx, cur.y - 1, nz) &&
-          (this.grid.canBridgeTo(nx, cur.y - 1, nz) || (cur.action === 'BRIDGE' && !this.grid.isSolid(nx, cur.y, nz) && !this.grid.isSolid(nx, cur.y + 1, nz)))
-        ) {
-          const nKey = nx + ',' + cur.y + ',' + nz;
-          if (!closed.has(nKey)) {
-            const ng = cur.g + 3.5 + badPenalty(nx, nz);
-            const prev = gScore.get(nKey);
-            if (prev === undefined || ng < prev) {
-              gScore.set(nKey, ng);
-              const h = Math.hypot(goal.x - nx, goal.y - cur.y, goal.z - nz);
-              open.push({ x: nx, y: cur.y, z: nz, g: ng, f: ng + h * 1.15, action: 'BRIDGE', bridgesUsed: cur.bridgesUsed + 1, parent: cur });
-            }
-          }
-        }
-      }
+    // 3. Sword progression
+    if (bot.swordIdx < 3 && bot.res.emerald >= 4) {
+      bot.res.emerald -= 4;
+      bot.swordIdx = 3;
+      bought = true;
+    } else if (bot.swordIdx < 2 && bot.res.gold_ingot >= 7) {
+      bot.res.gold_ingot -= 7;
+      bot.swordIdx = 2;
+      bought = true;
+    } else if (bot.swordIdx < 1 && bot.res.iron_ingot >= 10) {
+      bot.res.iron_ingot -= 10;
+      bot.swordIdx = 1;
+      bought = true;
     }
 
-    const waypoints = [];
-    let p = bestNode;
-    while (p && p.parent) {
-      waypoints.push({
-        x: p.x + 0.5,
-        y: p.y,
-        z: p.z + 0.5,
-        action: p.action
-      });
-      p = p.parent;
+    // 4. Bed-breaking tools (Shears, Pickaxe, Axe)
+    if (!bot.hasShears && bot.res.iron_ingot >= 20) {
+      bot.res.iron_ingot -= 20;
+      bot.hasShears = true;
+      bought = true;
     }
-    waypoints.reverse();
-    return waypoints;
-  }
-}
-
-const voxelPathfinder = new VoxelPathfinder(worldGrid);
-
-/* ============================================================================
-   BRIDGE WAYPOINT EXECUTION & LEDGE HELPERS (Exact Motor Specification)
-   ========================================================================== */
-function getSupportBlockForBot(bot) {
-  const by = Math.floor(bot.pos.y - 0.02);
-  const cx = Math.floor(bot.pos.x);
-  const cz = Math.floor(bot.pos.z);
-  if (worldGrid.isSolid(cx, by, cz)) return { x: cx, y: by, z: cz };
-  const r = 0.3;
-  const offsets = [[r, 0], [-r, 0], [0, r], [0, -r], [r, r], [-r, r], [r, -r], [-r, -r]];
-  for (let i = 0; i < offsets.length; i++) {
-    const sx = Math.floor(bot.pos.x + offsets[i][0]);
-    const sz = Math.floor(bot.pos.z + offsets[i][1]);
-    if (worldGrid.isSolid(sx, by, sz)) return { x: sx, y: by, z: sz };
-  }
-  return { x: cx, y: by, z: cz };
-}
-
-function isNearLedge(bot, targetVoxel, maxDist) {
-  const limit = maxDist == null ? 0.45 : maxDist;
-  const dx = Math.max(targetVoxel.x - bot.pos.x, 0, bot.pos.x - (targetVoxel.x + 1));
-  const dz = Math.max(targetVoxel.z - bot.pos.z, 0, bot.pos.z - (targetVoxel.z + 1));
-  return Math.hypot(dx, dz) <= limit;
-}
-
-function moveTowardEdge(bot, targetVoxel) {
-  bot.sneak = true;
-  bot.height = 1.5;
-
-  const sup = getSupportBlockForBot(bot);
-  const dirX = clamp((targetVoxel.x + 0.5) - (sup.x + 0.5), -1, 1);
-  const dirZ = clamp((targetVoxel.z + 0.5) - (sup.z + 0.5), -1, 1);
-
-  // Target point on the support block's ledge (~0.18 blocks inside the edge, well within 0.45 of targetVoxel)
-  const edgeX = sup.x + 0.5 + dirX * 0.32;
-  const edgeZ = sup.z + 0.5 + dirZ * 0.32;
-
-  const dx = edgeX - bot.pos.x;
-  const dz = edgeZ - bot.pos.z;
-  const dist = Math.hypot(dx, dz);
-
-  const style = BOT_BRIDGE_STYLES[bot.botTalent.bridge] || BOT_BRIDGE_STYLES.speed;
-  const moveSpd = BOT_BASE_SPEED * (style.speed || 1.0) * 0.68;
-
-  if (dist > 0.04) {
-    bot.vel.x = (dx / dist) * moveSpd;
-    bot.vel.z = (dz / dist) * moveSpd;
-  } else {
-    bot.vel.x = 0;
-    bot.vel.z = 0;
-  }
-
-  // Clamp horizontal position so the bot never steps off the support block before targetVoxel is solid
-  const minSafeX = sup.x + 0.14;
-  const maxSafeX = sup.x + 0.86;
-  const minSafeZ = sup.z + 0.14;
-  const maxSafeZ = sup.z + 0.86;
-  if (bot.pos.x < minSafeX && bot.vel.x < 0) bot.vel.x = 0;
-  if (bot.pos.x > maxSafeX && bot.vel.x > 0) bot.vel.x = 0;
-  if (bot.pos.z < minSafeZ && bot.vel.z < 0) bot.vel.z = 0;
-  if (bot.pos.z > maxSafeZ && bot.vel.z > 0) bot.vel.z = 0;
-}
-
-function moveTowardCenter(bot, cx, cy, cz) {
-  const dx = cx - bot.pos.x;
-  const dz = cz - bot.pos.z;
-  const dist = Math.hypot(dx, dz);
-  const style = BOT_BRIDGE_STYLES[bot.botTalent.bridge] || BOT_BRIDGE_STYLES.speed;
-  const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
-  const moveSpd = BOT_BASE_SPEED * diff.speed * (style.speed || 1.0) * (style.sprint ? 1.12 : 0.92);
-
-  // You cannot safely walk a one-block bridge standing tall: keep the crouch
-  // for the whole bridge segment, not just on the placement tick.
-  bot.sneak = true;
-  bot.height = 1.5;
-
-  if (dist > 0.05) {
-    bot.vel.x = (dx / dist) * moveSpd;
-    bot.vel.z = (dz / dist) * moveSpd;
-  } else {
-    bot.vel.x = 0;
-    bot.vel.z = 0;
-  }
-}
-
-function stepBridgeWaypoint(bot, wp, world) {
-  const targetVoxel = { x: Math.floor(wp.x), y: Math.floor(wp.y) - 1, z: Math.floor(wp.z) };
-
-  // 1. Move toward the edge of the current support block facing targetVoxel
-  moveTowardEdge(bot, targetVoxel);
-
-  /* Java bridging is not "look at the empty block and click": the crosshair
-     has to be on the lateral (or top/bottom) face of the supporting block,
-     within reach and with no wall in the way. Keep the head pointed at that
-     face for the whole segment so the pose matches the action. */
-  const aim = botBridgeFaceAim(bot, targetVoxel, world);
-  if (aim) bot.lookAt(aim.x, aim.y, aim.z);
-
-  // 2. Only place when grounded, not falling, near ledge, and valid orthogonal support exists
-  if (
-    aim &&
-    bot.onGround &&
-    bot.vel.y >= -0.1 &&
-    bot.blockCount > 0 &&
-    !world.isSolid(targetVoxel.x, targetVoxel.y, targetVoxel.z) &&
-    world.hasAdjacentSupport(targetVoxel.x, targetVoxel.y, targetVoxel.z) &&
-    isNearLedge(bot, targetVoxel, 0.45)
-  ) {
-    /* Click only once the head has actually turned onto the face. Without this
-       the block could pop in while the bot still stared straight ahead, which
-       reads as "bridging in front of itself" even though the placement is legal. */
-    const eyeY = botEyeY(bot);
-    const horiz = Math.hypot(aim.x - bot.pos.x, aim.z - bot.pos.z) || 0.001;
-    const needPitch = clamp(-Math.atan2(eyeY - aim.y, horiz), -1.45, 1.45);
-    if (Math.abs(bot.pitch - needPitch) <= 0.20 &&
-        world.placeBlock(targetVoxel.x, targetVoxel.y, targetVoxel.z, bot.teamColor)) {
-      bot.blockCount--;
-      bot.blocks = bot.blockCount;
-      bot.swingFlag = true;
-      bot.timers.swing = 0.25;
-      if (typeof SFX !== 'undefined' && typeof player !== 'undefined' && player && player.pos.distanceTo(bot.pos) < 28) {
-        SFX.place();
-      }
+    if (bot.pickIdx === 0 && bot.res.iron_ingot >= 10) {
+      bot.res.iron_ingot -= 10;
+      bot.pickIdx = 1;
+      bought = true;
+    } else if (bot.pickIdx === 1 && bot.res.gold_ingot >= 3) {
+      bot.res.gold_ingot -= 3;
+      bot.pickIdx = 3;
+      bought = true;
     }
-  }
+    if (bot.axeIdx === 0 && bot.res.iron_ingot >= 10) {
+      bot.res.iron_ingot -= 10;
+      bot.axeIdx = 1;
+      bought = true;
+    } else if (bot.axeIdx === 1 && bot.res.gold_ingot >= 3) {
+      bot.res.gold_ingot -= 3;
+      bot.axeIdx = 2;
+      bought = true;
+    }
 
-  // 3. Advance waypoint only after the bridge block physically exists
-  if (world.isSolid(targetVoxel.x, targetVoxel.y, targetVoxel.z)) {
-    moveTowardCenter(bot, wp.x, wp.y, wp.z);
-  }
-}
+    // 5. Utility & Ranged items (Bow, Arrows, Knockback stick, Fireball, Ender Pearl)
+    if (!bot.hasBow && bot.res.gold_ingot >= 12 && (typeof ITEMS === 'undefined' || ITEMS.bow)) {
+      bot.res.gold_ingot -= 12;
+      bot.hasBow = true;
+      bot.arrows = Math.min(32, (bot.arrows || 0) + 12);
+      bought = true;
+    }
+    if (bot.hasBow && (bot.arrows || 0) < 16 && bot.res.gold_ingot >= 2) {
+      bot.res.gold_ingot -= 2;
+      bot.arrows = Math.min(32, (bot.arrows || 0) + 8);
+      bought = true;
+    }
+    if (!bot.hasKbStick && bot.res.gold_ingot >= 5 && (bot.botTalent.key === 'duelist' || bot.botTalent.key === 'trickster')) {
+      bot.res.gold_ingot -= 5;
+      bot.hasKbStick = true;
+      bought = true;
+    }
+    if (bot.fireballs < 2 && bot.res.iron_ingot >= 40) {
+      bot.res.iron_ingot -= 40;
+      bot.fireballs++;
+      bought = true;
+    }
+    if (bot.enderPearls < 1 && bot.res.emerald >= 4) {
+      bot.res.emerald -= 4;
+      bot.enderPearls++;
+      bought = true;
+    }
 
-/* ============================================================================
-   SHOP & BED DEFENSE HELPERS
-   ========================================================================== */
-function botBestToolForBlock(bot, blockId) {
-  const def = BLOCKS[blockId];
-  if (!def) return bot.gearSword();
-  if (def.bed) return bot.axeIdx > 0 ? bot.gearAxe() : (bot.pickIdx > 0 ? bot.gearPick() : bot.gearSword());
-  if (def.tool === 'shears' && bot.hasShears) return 'shears';
-  if (def.tool === 'pickaxe') return bot.gearPick();
-  if (def.tool === 'axe') return bot.gearAxe();
-  if (def.tool === 'shovel') return bot.gearPick();
-  return bot.gearSword();
-}
-
-function botCalcBreakTime(bot, blockId, toolId) {
-  const def = BLOCKS[blockId];
-  if (!def) return 0.45;
-  if (def.unbreakable) return Infinity;
-  const item = toolId ? ITEMS[toolId] : null;
-  const rightTool = item && item.tool === def.tool;
-  let mult = 1.0;
-  if (rightTool && item.material) mult = TOOL_SPEED[item.material] || 2;
-  else if (def.need) mult = 0.3;
-  const haste = (teamUpgrades[bot.teamName] && teamUpgrades[bot.teamName].haste) || 0;
-  if (haste > 0) mult *= (1 + haste * 0.25);
-  const scale = [1.25, 1.06, 0.95, 0.86][bot.botDifficulty] || 1.0;
-  return Math.max(0.10, ((def.hard * 1.4) / mult) * scale);
-}
-
-function botCanAffordShop(bot) {
-  const minBlocks = bot.botTalent.minBlocks || 20;
-  if (bot.blockCount < minBlocks && bot.res.iron_ingot >= 4) return true;
-  if (bot.swordIdx === 0 && bot.res.iron_ingot >= 10) return true;
-  if (bot.swordIdx < 2 && bot.res.gold_ingot >= 7) return true;
-  if (bot.swordIdx < 3 && bot.res.emerald >= 4) return true;
-  if (bot.armorIdx === 0 && bot.res.iron_ingot >= 40) return true;
-  if (bot.armorIdx < 2 && bot.res.gold_ingot >= 12) return true;
-  if (bot.armorIdx < 3 && bot.res.emerald >= 6) return true;
-  if (!bot.hasShears && bot.res.iron_ingot >= 20) return true;
-  if (bot.pickIdx === 0 && bot.res.iron_ingot >= 10) return true;
-  if (bot.axeIdx === 0 && bot.res.iron_ingot >= 10) return true;
-  if (bot.res.diamond >= 2) {
+    // 6. Team Upgrades with Diamonds
     const tu = teamUpgrades[bot.teamName];
-    if (tu && ((tu.sharpness === 0 && bot.res.diamond >= 4) || (tu.protection < 4 && bot.res.diamond >= (2 << tu.protection)))) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function botExecutePurchases(bot) {
-  let bought = false;
-
-  // 1. Wool blocks up to target stack (at least 24-32 for bridging & defense)
-  const targetWool = Math.max(24, (bot.botTalent.minBlocks || 20) + 8);
-  while (bot.blockCount < targetWool && bot.res.iron_ingot >= 4) {
-    bot.res.iron_ingot -= 4;
-    bot.blocks += 16;
-    bot.blockCount = bot.blocks;
-    bought = true;
-  }
-
-  // 2. Permanent armor progression
-  if (bot.armorIdx < 3 && bot.res.emerald >= 6) {
-    bot.res.emerald -= 6;
-    bot.applyArmorSet(3);
-    bought = true;
-  } else if (bot.armorIdx < 2 && bot.res.gold_ingot >= 12) {
-    bot.res.gold_ingot -= 12;
-    bot.applyArmorSet(2);
-    bought = true;
-  } else if (bot.armorIdx < 1 && bot.res.iron_ingot >= 40) {
-    bot.res.iron_ingot -= 40;
-    bot.applyArmorSet(1);
-    bought = true;
-  }
-
-  // 3. Sword progression
-  if (bot.swordIdx < 3 && bot.res.emerald >= 4) {
-    bot.res.emerald -= 4;
-    bot.swordIdx = 3;
-    bought = true;
-  } else if (bot.swordIdx < 2 && bot.res.gold_ingot >= 7) {
-    bot.res.gold_ingot -= 7;
-    bot.swordIdx = 2;
-    bought = true;
-  } else if (bot.swordIdx < 1 && bot.res.iron_ingot >= 10) {
-    bot.res.iron_ingot -= 10;
-    bot.swordIdx = 1;
-    bought = true;
-  }
-
-  // 4. Bed-breaking tools (Shears, Pickaxe, Axe)
-  if (!bot.hasShears && bot.res.iron_ingot >= 20) {
-    bot.res.iron_ingot -= 20;
-    bot.hasShears = true;
-    bought = true;
-  }
-  if (bot.pickIdx === 0 && bot.res.iron_ingot >= 10) {
-    bot.res.iron_ingot -= 10;
-    bot.pickIdx = 1;
-    bought = true;
-  } else if (bot.pickIdx === 1 && bot.res.gold_ingot >= 3) {
-    bot.res.gold_ingot -= 3;
-    bot.pickIdx = 3;
-    bought = true;
-  }
-  if (bot.axeIdx === 0 && bot.res.iron_ingot >= 10) {
-    bot.res.iron_ingot -= 10;
-    bot.axeIdx = 1;
-    bought = true;
-  } else if (bot.axeIdx === 1 && bot.res.gold_ingot >= 3) {
-    bot.res.gold_ingot -= 3;
-    bot.axeIdx = 2;
-    bought = true;
-  }
-
-  // 5. Utility items (Knockback stick, Fireball, Ender Pearl)
-  if (!bot.hasKbStick && bot.res.gold_ingot >= 5 && (bot.botTalent.key === 'duelist' || bot.botTalent.key === 'trickster')) {
-    bot.res.gold_ingot -= 5;
-    bot.hasKbStick = true;
-    bought = true;
-  }
-  if (bot.fireballs < 2 && bot.res.iron_ingot >= 40) {
-    bot.res.iron_ingot -= 40;
-    bot.fireballs++;
-    bought = true;
-  }
-  if (bot.enderPearls < 1 && bot.res.emerald >= 4) {
-    bot.res.emerald -= 4;
-    bot.enderPearls++;
-    bought = true;
-  }
-
-  // 6. Team Upgrades with Diamonds
-  const tu = teamUpgrades[bot.teamName];
-  if (tu && bot.res.diamond > 0) {
-    if (tu.sharpness === 0 && bot.res.diamond >= 4) {
-      bot.res.diamond -= 4;
-      applyTeamUpgrade(bot.teamName, 'sharpness', 1);
-      netSend({ t: 'tupg', team: bot.teamName, key: 'sharpness', lvl: 1 });
-      bought = true;
-    }
-    const protCost = 2 << (tu.protection || 0);
-    if ((tu.protection || 0) < 4 && bot.res.diamond >= protCost) {
-      bot.res.diamond -= protCost;
-      const nextLvl = (tu.protection || 0) + 1;
-      applyTeamUpgrade(bot.teamName, 'protection', nextLvl);
-      netSend({ t: 'tupg', team: bot.teamName, key: 'protection', lvl: nextLvl });
-      bought = true;
-    }
-    const hasteCost = 2 << (tu.haste || 0);
-    if ((tu.haste || 0) < 2 && bot.res.diamond >= hasteCost) {
-      bot.res.diamond -= hasteCost;
-      const nextLvl = (tu.haste || 0) + 1;
-      applyTeamUpgrade(bot.teamName, 'haste', nextLvl);
-      netSend({ t: 'tupg', team: bot.teamName, key: 'haste', lvl: nextLvl });
-      bought = true;
-    }
-  }
-
-  if (bought) {
-    bot.setHeldSoon(bot.gearSword());
-    if (typeof SFX !== 'undefined' && typeof player !== 'undefined' && player && player.pos.distanceTo(bot.pos) < 24) {
-      SFX.buy();
-    }
-  }
-  return bought;
-}
-
-function botTryPlaceBedDefense(bot) {
-  const team = bot.team;
-  if (!team || !team.bedPos || teamBedBroken[team.name]) return false;
-  if (bot.blockCount <= 4) return false;
-  if (bot.placeCooldown > 0) return false;
-
-  const bx = team.bedPos.x, bz = team.bedPos.z, by = BASE_Y + 1;
-  const shellOffsets = [
-    [0, 1, 0], [0, 1, 1],
-    [-1, 0, 0], [1, 0, 0], [0, 0, -1],
-    [-1, 0, 1], [1, 0, 1], [0, 0, 2]
-  ];
-  for (let i = 0; i < shellOffsets.length; i++) {
-    const tx = bx + shellOffsets[i][0];
-    const ty = by + shellOffsets[i][1];
-    const tz = bz + shellOffsets[i][2];
-    if (worldGrid.isSolid(tx, ty, tz) || getBlock(tx, ty, tz)) continue;
-    if (!worldGrid.hasAdjacentSupport(tx, ty, tz)) continue;
-    const dist = Math.hypot(tx + 0.5 - bot.pos.x, ty + 0.5 - (bot.pos.y + 1), tz + 0.5 - bot.pos.z);
-    if (dist > 4.4) continue;
-    bot.lookAt(tx + 0.5, ty + 0.5, tz + 0.5);
-    if (worldGrid.placeBlock(tx, ty, tz, bot.teamColor)) {
-      bot.blockCount--;
-      bot.blocks = bot.blockCount;
-      bot.placeCooldown = 0.18;
-      bot.swingFlag = true;
-      bot.timers.swing = 0.24;
-      return true;
-    }
-  }
-  return false;
-}
-
-function botFindBedTargetVoxel(bot, team) {
-  if (!team || !team.bedPos || teamBedBroken[team.name]) return null;
-  const bx = team.bedPos.x, bz = team.bedPos.z, by = BASE_Y + 1;
-  const bedCells = [{ x: bx, y: by, z: bz }, { x: bx, y: by, z: bz + 1 }];
-
-  // 1. Check if either half of the bed is directly exposed and within reach
-  for (let i = 0; i < bedCells.length; i++) {
-    const c = bedCells[i];
-    if (getBlock(c.x, c.y, c.z) === team.bed) {
-      const dist = Math.hypot(c.x + 0.5 - bot.pos.x, c.y + 0.5 - (bot.pos.y + 1), c.z + 0.5 - bot.pos.z);
-      if (dist <= 4.5) {
-        const exposed = !worldGrid.isSolid(c.x, c.y + 1, c.z) ||
-                        !worldGrid.isSolid(c.x + 1, c.y, c.z) ||
-                        !worldGrid.isSolid(c.x - 1, c.y, c.z) ||
-                        !worldGrid.isSolid(c.x, c.y, c.z - 1) ||
-                        !worldGrid.isSolid(c.x, c.y, c.z + 1);
-        if (exposed) return { x: c.x, y: c.y, z: c.z, id: team.bed, isBed: true };
+    if (tu && bot.res.diamond > 0) {
+      if (tu.sharpness === 0 && bot.res.diamond >= 4) {
+        bot.res.diamond -= 4;
+        applyTeamUpgrade(bot.teamName, 'sharpness', 1);
+        netSend({ t: 'tupg', team: bot.teamName, key: 'sharpness', lvl: 1 });
+        bought = true;
+      }
+      const protCost = 2 << (tu.protection || 0);
+      if ((tu.protection || 0) < 4 && bot.res.diamond >= protCost) {
+        bot.res.diamond -= protCost;
+        const nextLvl = (tu.protection || 0) + 1;
+        applyTeamUpgrade(bot.teamName, 'protection', nextLvl);
+        netSend({ t: 'tupg', team: bot.teamName, key: 'protection', lvl: nextLvl });
+        bought = true;
+      }
+      const hasteCost = 2 << (tu.haste || 0);
+      if ((tu.haste || 0) < 2 && bot.res.diamond >= hasteCost) {
+        bot.res.diamond -= hasteCost;
+        const nextLvl = (tu.haste || 0) + 1;
+        applyTeamUpgrade(bot.teamName, 'haste', nextLvl);
+        netSend({ t: 'tupg', team: bot.teamName, key: 'haste', lvl: nextLvl });
+        bought = true;
       }
     }
-  }
 
-  // 2. Otherwise select the easiest outer defense block covering the bed
-  const shellOffsets = [
-    [0, 1, 0], [0, 1, 1],
-    [-1, 0, 0], [1, 0, 0], [0, 0, -1],
-    [-1, 0, 1], [1, 0, 1], [0, 0, 2],
-    [0, 2, 0], [0, 2, 1],
-    [-1, 1, 0], [1, 1, 0], [0, 1, -1],
-    [-1, 1, 1], [1, 1, 1], [0, 1, 2]
-  ];
-  let best = null, bestScore = 1e9;
-  for (let i = 0; i < shellOffsets.length; i++) {
-    const tx = bx + shellOffsets[i][0];
-    const ty = by + shellOffsets[i][1];
-    const tz = bz + shellOffsets[i][2];
-    const id = getBlock(tx, ty, tz);
-    if (!id) continue;
-    if (id === team.bed) return { x: tx, y: ty, z: tz, id, isBed: true };
-    const def = BLOCKS[id];
-    if (!def || def.unbreakable) continue;
-    const dist = Math.hypot(tx + 0.5 - bot.pos.x, ty + 0.5 - (bot.pos.y + 1), tz + 0.5 - bot.pos.z);
-    if (dist > 4.8) continue;
-    const toolId = botBestToolForBlock(bot, id);
-    const tBreak = botCalcBreakTime(bot, id, toolId);
-    const score = tBreak * 2.2 + dist;
-    if (score < bestScore) {
-      bestScore = score;
-      best = { x: tx, y: ty, z: tz, id, isBed: false };
+    if (bought) {
+      bot.setHeldSoon(bot.gearSword());
+      if (typeof SFX !== 'undefined' && typeof player !== 'undefined' && player && player.pos.distanceTo(bot.pos) < 24) {
+        SFX.buy();
+      }
     }
-  }
-  return best;
-}
-
-/* ============================================================================
-   LAYER 3: BotBrain (Utility / State Machine at 4-5 Hz)
-   ========================================================================== */
-const BOT_STATES = {
-  GATHER_GEN: 'GATHER_GEN',
-  BUY_GEAR: 'BUY_GEAR',
-  BRIDGE_RUSH: 'BRIDGE_RUSH',
-  ATTACK_PLAYER: 'ATTACK_PLAYER',
-  BREAK_BED: 'BREAK_BED',
-  DEFEND_BASE: 'DEFEND_BASE',
-  RETREAT: 'RETREAT'
-};
-
-class BotBrain {
-  constructor(grid, pathfinder) {
-    this.grid = grid;
-    this.pathfinder = pathfinder;
+    return bought;
   }
 
-  gatherActiveEnemies(bot) {
-    const enemies = [];
-    if (typeof player !== 'undefined' && player && !player.eliminated && !player.spectator && player.respawnCooldown <= 0 && PLAYER_TEAM.name !== bot.teamName) {
-      enemies.push({ id: NET.myId || 'local_player', name: NET.myName || 'Player', teamName: PLAYER_TEAM.name, pos: player.pos, vel: player.vel, health: player.health, isLocalPlayer: true, ref: player });
+  function botTryPlaceBedDefense(bot) {
+    const team = bot.team;
+    if (!team || !team.bedPos || teamBedBroken[team.name]) return false;
+    if (bot.blockCount <= 4) return false;
+    if (bot.placeCooldown > 0) return false;
+
+    const bx = team.bedPos.x, bz = team.bedPos.z, by = BASE_Y + 1;
+    const shellOffsets = [
+      [0, 1, 0], [0, 1, 1],
+      [-1, 0, 0], [1, 0, 0], [0, 0, -1],
+      [-1, 0, 1], [1, 0, 1], [0, 0, 2]
+    ];
+    for (let i = 0; i < shellOffsets.length; i++) {
+      const tx = bx + shellOffsets[i][0];
+      const ty = by + shellOffsets[i][1];
+      const tz = bz + shellOffsets[i][2];
+      if (worldGrid.isSolid(tx, ty, tz) || getBlock(tx, ty, tz)) continue;
+      if (!worldGrid.hasAdjacentSupport(tx, ty, tz)) continue;
+      const dist = Math.hypot(tx + 0.5 - bot.pos.x, ty + 0.5 - (bot.pos.y + 1), tz + 0.5 - bot.pos.z);
+      if (dist > 4.4) continue;
+      bot.lookAt(tx + 0.5, ty + 0.5, tz + 0.5);
+      if (worldGrid.placeBlock(tx, ty, tz, bot.teamColor)) {
+        bot.blockCount--;
+        bot.blocks = bot.blockCount;
+        bot.placeCooldown = 0.18;
+        bot.swingFlag = true;
+        bot.timers.swing = 0.24;
+        return true;
+      }
     }
-    for (let i = 0; i < remotePlayers.length; i++) {
-      const rp = remotePlayers[i];
-      if (!rp || rp === bot || !rp.alive || rp.eliminated || rp.respawning) continue;
-      if (rp.teamName === bot.teamName) continue;
-      if (rp.effects && rp.effects.invis > 0 && rp.hurtTime <= 0 && rp.pos.distanceTo(bot.pos) > 4.5) continue;
-      enemies.push({ id: rp.id, name: rp.name, teamName: rp.teamName, pos: rp.pos, vel: rp.vel, health: rp.health, isLocalPlayer: false, ref: rp });
-    }
-    return enemies;
+    return false;
   }
 
-  findNearestEnemy(bot, enemies) {
-    let best = null, bestD = 1e9;
-    for (let i = 0; i < enemies.length; i++) {
-      const e = enemies[i];
-      const d = Math.hypot(e.pos.x - bot.pos.x, e.pos.z - bot.pos.z);
-      if (d < bestD) { bestD = d; best = e; }
-    }
-    return { enemy: best, dist: bestD };
-  }
+  function botFindBedTargetVoxel(bot, team) {
+    if (!team || !team.bedPos || teamBedBroken[team.name]) return null;
+    const bx = team.bedPos.x, bz = team.bedPos.z, by = BASE_Y + 1;
+    const bedCells = [{ x: bx, y: by, z: bz }, { x: bx, y: by, z: bz + 1 }];
 
-  findEnemyWithinBedRadius(bot, enemies, radius) {
-    const bed = bot.team && bot.team.bedPos;
-    if (!bed || teamBedBroken[bot.teamName]) return null;
-    let best = null, bestD = radius;
-    for (let i = 0; i < enemies.length; i++) {
-      const e = enemies[i];
-      const d = Math.hypot(e.pos.x - (bed.x + 0.5), e.pos.z - (bed.z + 1.0));
-      if (d <= bestD && Math.abs(e.pos.y - BASE_Y) <= 7) {
-        bestD = d;
-        best = e;
+    // 1. Check if either half of the bed is directly exposed and within reach
+    for (let i = 0; i < bedCells.length; i++) {
+      const c = bedCells[i];
+      if (getBlock(c.x, c.y, c.z) === team.bed) {
+        const dist = Math.hypot(c.x + 0.5 - bot.pos.x, c.y + 0.5 - (bot.pos.y + 1), c.z + 0.5 - bot.pos.z);
+        if (dist <= 4.5) {
+          const exposed = !worldGrid.isSolid(c.x, c.y + 1, c.z) ||
+            !worldGrid.isSolid(c.x + 1, c.y, c.z) ||
+            !worldGrid.isSolid(c.x - 1, c.y, c.z) ||
+            !worldGrid.isSolid(c.x, c.y, c.z - 1) ||
+            !worldGrid.isSolid(c.x, c.y, c.z + 1);
+          if (exposed) return { x: c.x, y: c.y, z: c.z, id: team.bed, isBed: true };
+        }
+      }
+    }
+
+    // 2. Otherwise select the easiest outer defense block covering the bed
+    const shellOffsets = [
+      [0, 1, 0], [0, 1, 1],
+      [-1, 0, 0], [1, 0, 0], [0, 0, -1],
+      [-1, 0, 1], [1, 0, 1], [0, 0, 2],
+      [0, 2, 0], [0, 2, 1],
+      [-1, 1, 0], [1, 1, 0], [0, 1, -1],
+      [-1, 1, 1], [1, 1, 1], [0, 1, 2]
+    ];
+    let best = null, bestScore = 1e9;
+    for (let i = 0; i < shellOffsets.length; i++) {
+      const tx = bx + shellOffsets[i][0];
+      const ty = by + shellOffsets[i][1];
+      const tz = bz + shellOffsets[i][2];
+      const id = getBlock(tx, ty, tz);
+      if (!id) continue;
+      if (id === team.bed) return { x: tx, y: ty, z: tz, id, isBed: true };
+      const def = BLOCKS[id];
+      if (!def || def.unbreakable) continue;
+      const dist = Math.hypot(tx + 0.5 - bot.pos.x, ty + 0.5 - (bot.pos.y + 1), tz + 0.5 - bot.pos.z);
+      if (dist > 4.8) continue;
+      const toolId = botBestToolForBlock(bot, id);
+      const tBreak = botCalcBreakTime(bot, id, toolId);
+      const score = tBreak * 2.2 + dist;
+      if (score < bestScore) {
+        bestScore = score;
+        best = { x: tx, y: ty, z: tz, id, isBed: false };
       }
     }
     return best;
   }
 
-  selectTargetEnemyTeam(bot) {
-    let bestTeam = null, bestScore = -1e9;
-    for (let i = 0; i < TEAMS.length; i++) {
-      const t = TEAMS[i];
-      if (t.name === bot.teamName) continue;
-      if (!botTeamHasMember(t.name) && botTeamAliveCount(t.name) === 0) continue;
-      const bedAlive = !teamBedBroken[t.name];
-      const aliveCount = botTeamAliveCount(t.name);
-      if (!bedAlive && aliveCount === 0) continue;
+  /* ============================================================================
+     LAYER 3: BotBrain (Utility / State Machine at 4-5 Hz)
+     ========================================================================== */
+  const BOT_STATES = {
+    GATHER_GEN: 'GATHER_GEN',
+    BUY_GEAR: 'BUY_GEAR',
+    BRIDGE_RUSH: 'BRIDGE_RUSH',
+    ATTACK_PLAYER: 'ATTACK_PLAYER',
+    BREAK_BED: 'BREAK_BED',
+    DEFEND_BASE: 'DEFEND_BASE',
+    RETREAT: 'RETREAT'
+  };
 
-      const dist = Math.hypot(t.x - bot.pos.x, t.z - bot.pos.z);
-      let score = -dist * 1.1;
-      if (bedAlive) score += 45;
-      else score += 15;
-      if (t.name === PLAYER_TEAM.name) score += 20; // prefer pressuring the human team
-      if (bot.targetTeam && bot.targetTeam.name === t.name) score += 12; // sticky target hysteresis
-      if (score > bestScore) {
-        bestScore = score;
-        bestTeam = t;
-      }
+  class BotBrain {
+    constructor(grid, pathfinder) {
+      this.grid = grid;
+      this.pathfinder = pathfinder;
     }
-    return bestTeam;
-  }
 
-  selectBestGenerator(bot) {
-    // Prefer own base generators when gathering for a rush; visit diamond/emerald if stocked
-    const ownBasePos = { x: bot.team.x, z: bot.team.z };
-    let bestGen = null, bestScore = -1e9;
-    for (let i = 0; i < generators.length; i++) {
-      const g = generators[i];
-      const distFromBase = Math.hypot(g.pos.x - ownBasePos.x, g.pos.z - ownBasePos.z);
-      const distFromBot = Math.hypot(g.pos.x - bot.pos.x, g.pos.z - bot.pos.z);
-      let score = -distFromBot * 0.8;
-      if (distFromBase <= BASE_R + 2) {
-        score += 40;
-        if (g.type === 'iron' && bot.res.iron_ingot < 24) score += 15;
-        if (g.type === 'gold' && bot.res.gold_ingot < 8) score += 10;
-      } else if (g.type === 'diamond' && bot.blockCount >= 20) {
-        score += 12;
-      } else if (g.type === 'emerald' && bot.blockCount >= 28 && bot.swordIdx >= 1) {
-        score += 10;
+    gatherActiveEnemies(bot) {
+      const enemies = [];
+      if (typeof player !== 'undefined' && player && !player.eliminated && !player.spectator && player.respawnCooldown <= 0 && PLAYER_TEAM.name !== bot.teamName) {
+        enemies.push({ id: NET.myId || 'local_player', name: NET.myName || 'Player', teamName: PLAYER_TEAM.name, pos: player.pos, vel: player.vel, health: player.health, isLocalPlayer: true, ref: player });
       }
-      if (score > bestScore) {
-        bestScore = score;
-        bestGen = g;
+      for (let i = 0; i < remotePlayers.length; i++) {
+        const rp = remotePlayers[i];
+        if (!rp || rp === bot || !rp.alive || rp.eliminated || rp.respawning) continue;
+        if (rp.teamName === bot.teamName) continue;
+        if (rp.effects && rp.effects.invis > 0 && rp.hurtTime <= 0 && rp.pos.distanceTo(bot.pos) > 4.5) continue;
+        enemies.push({ id: rp.id, name: rp.name, teamName: rp.teamName, pos: rp.pos, vel: rp.vel, health: rp.health, isLocalPlayer: false, ref: rp });
       }
+      return enemies;
     }
-    return bestGen;
-  }
 
-  getStateGoalPosition(bot) {
-    switch (bot.state) {
-      case BOT_STATES.GATHER_GEN:
-      case BOT_STATES.RETREAT: {
-        const gen = this.selectBestGenerator(bot);
-        if (gen) return { x: gen.pos.x, y: gen.pos.y, z: gen.pos.z };
-        return { x: bot.team.spawnX, y: BASE_Y + 1, z: bot.team.spawnZ };
+    findNearestEnemy(bot, enemies) {
+      let best = null, bestD = 1e9;
+      for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        const d = Math.hypot(e.pos.x - bot.pos.x, e.pos.z - bot.pos.z);
+        if (d < bestD) { bestD = d; best = e; }
       }
-      case BOT_STATES.BUY_GEAR: {
-        if (bot.res.diamond >= 2 && bot.team.upgradePos) {
-          return { x: bot.team.upgradePos.x, y: BASE_Y + 1, z: bot.team.upgradePos.z };
-        }
-        if (bot.team.shopPos) {
-          return { x: bot.team.shopPos.x, y: BASE_Y + 1, z: bot.team.shopPos.z };
-        }
-        return { x: bot.team.spawnX, y: BASE_Y + 1, z: bot.team.spawnZ };
-      }
-      case BOT_STATES.DEFEND_BASE: {
-        if (bot.targetEnemy) {
-          return { x: bot.targetEnemy.pos.x, y: bot.targetEnemy.pos.y, z: bot.targetEnemy.pos.z };
-        }
-        if (bot.team.bedPos) {
-          return { x: bot.team.bedPos.x + 0.5, y: BASE_Y + 1, z: bot.team.bedPos.z + 0.5 };
-        }
-        return { x: bot.team.spawnX, y: BASE_Y + 1, z: bot.team.spawnZ };
-      }
-      case BOT_STATES.ATTACK_PLAYER: {
-        if (bot.targetEnemy) {
-          return { x: bot.targetEnemy.pos.x, y: bot.targetEnemy.pos.y, z: bot.targetEnemy.pos.z };
-        }
-        return null;
-      }
-      case BOT_STATES.BREAK_BED:
-      case BOT_STATES.BRIDGE_RUSH: {
-        const t = bot.targetTeam || this.selectTargetEnemyTeam(bot);
-        if (t && t.bedPos && !teamBedBroken[t.name]) {
-          return { x: t.bedPos.x + 0.5, y: BASE_Y + 1, z: t.bedPos.z + 0.5 };
-        }
-        if (bot.targetEnemy) {
-          return { x: bot.targetEnemy.pos.x, y: bot.targetEnemy.pos.y, z: bot.targetEnemy.pos.z };
-        }
-        if (t) return { x: t.spawnX, y: BASE_Y + 1, z: t.spawnZ };
-        return { x: 0, y: BASE_Y + 1, z: 0 };
-      }
-      default:
-        return { x: bot.team.spawnX, y: BASE_Y + 1, z: bot.team.spawnZ };
+      return { enemy: best, dist: bestD };
     }
-  }
 
-  evaluate(bot, nowMs) {
-    const enemies = this.gatherActiveEnemies(bot);
-    const { enemy: nearest, dist: nearestDist } = this.findNearestEnemy(bot, enemies);
-    bot.nearest = nearest;
-    bot.nearestDist = nearestDist;
+    findEnemyWithinBedRadius(bot, enemies, radius) {
+      const bed = bot.team && bot.team.bedPos;
+      if (!bed || teamBedBroken[bot.teamName]) return null;
+      let best = null, bestD = radius;
+      for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        const d = Math.hypot(e.pos.x - (bed.x + 0.5), e.pos.z - (bed.z + 1.0));
+        if (d <= bestD && Math.abs(e.pos.y - BASE_Y) <= 7) {
+          bestD = d;
+          best = e;
+        }
+      }
+      return best;
+    }
 
-    const bedIntruder = this.findEnemyWithinBedRadius(bot, enemies, 14.0);
-    bot.bedThreat = !!bedIntruder;
-
-    // Check emergency interrupts that bypass the 750ms state hysteresis lock
-    const fallingBelowPlatform = bot.pos.y < BASE_Y - 1.5;
-    const outOfBlocksMidBridge = bot.state === BOT_STATES.BRIDGE_RUSH && bot.blockCount <= 0;
-    const emergencyInterrupt =
-      bot.damageInterrupt ||
-      fallingBelowPlatform ||
-      bot.bedLostInterrupt ||
-      outOfBlocksMidBridge ||
-      bot.stuckAborted;
-
-    const locked = nowMs < bot.stateLockUntil && !emergencyInterrupt;
-
-    if (!locked) {
-      let desiredState = bot.state;
-      const minBlocks = bot.botTalent.minBlocks || 20;
-      const hasBasicGear = bot.swordIdx >= 1 || bot.armorIdx >= 1 || bot.res.iron_ingot >= 8;
-
-      // Nearest enemy bed distance check
-      let closestEnemyBedTeam = null;
-      let closestEnemyBedDist = 1e9;
+    selectTargetEnemyTeam(bot) {
+      let bestTeam = null, bestScore = -1e9;
       for (let i = 0; i < TEAMS.length; i++) {
         const t = TEAMS[i];
-        if (t.name === bot.teamName || !t.bedPos || teamBedBroken[t.name]) continue;
-        const d = Math.hypot(t.bedPos.x + 0.5 - bot.pos.x, t.bedPos.z + 1.0 - bot.pos.z);
-        if (d < closestEnemyBedDist) {
-          closestEnemyBedDist = d;
-          closestEnemyBedTeam = t;
+        if (t.name === bot.teamName) continue;
+        if (!botTeamHasMember(t.name) && botTeamAliveCount(t.name) === 0) continue;
+        const bedAlive = !teamBedBroken[t.name];
+        const aliveCount = botTeamAliveCount(t.name);
+        if (!bedAlive && aliveCount === 0) continue;
+
+        const dist = Math.hypot(t.x - bot.pos.x, t.z - bot.pos.z);
+        let score = -dist * 1.1;
+        if (bedAlive) score += 45;
+        else score += 15;
+        if (t.name === PLAYER_TEAM.name) score += 20; // prefer pressuring the human team
+        if (bot.targetTeam && bot.targetTeam.name === t.name) score += 12; // sticky target hysteresis
+        if (score > bestScore) {
+          bestScore = score;
+          bestTeam = t;
         }
       }
+      return bestTeam;
+    }
 
-      // Priority 1: Critical low HP retreat (unless finishing an exposed bed right in front of us)
-      if (bot.health <= 6.5 && !(closestEnemyBedDist <= 3.5 && nearestDist > 4.0) && !bot.isNearOwnBase()) {
-        desiredState = BOT_STATES.RETREAT;
+    selectBestGenerator(bot) {
+      const ownBasePos = { x: bot.team.x, z: bot.team.z };
+      let bestGen = null, bestScore = -1e9;
+      for (let i = 0; i < generators.length; i++) {
+        const g = generators[i];
+        const distFromBase = Math.hypot(g.pos.x - ownBasePos.x, g.pos.z - ownBasePos.z);
+        const distFromBot = Math.hypot(g.pos.x - bot.pos.x, g.pos.z - bot.pos.z);
+        let score = -distFromBot * 0.8;
+        if (distFromBase <= BASE_R + 2) {
+          score += 40;
+          if (g.type === 'iron' && bot.res.iron_ingot < 24) score += 15;
+          if (g.type === 'gold' && bot.res.gold_ingot < 8) score += 10;
+        } else if (g.type === 'diamond' && bot.blockCount >= 20) {
+          score += 12;
+        } else if (g.type === 'emerald' && bot.blockCount >= 28 && bot.swordIdx >= 1) {
+          score += 10;
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestGen = g;
+        }
       }
-      // Priority 2: Break enemy bed when within 3.5 blocks
-      else if (closestEnemyBedTeam && closestEnemyBedDist <= 3.5) {
-        desiredState = BOT_STATES.BREAK_BED;
-        bot.targetTeam = closestEnemyBedTeam;
+      return bestGen;
+    }
+
+    getStateGoalPosition(bot) {
+      switch (bot.state) {
+        case BOT_STATES.GATHER_GEN:
+        case BOT_STATES.RETREAT: {
+          const gen = this.selectBestGenerator(bot);
+          if (gen) return { x: gen.pos.x, y: gen.pos.y, z: gen.pos.z };
+          return { x: bot.team.spawnX, y: BASE_Y + 1, z: bot.team.spawnZ };
+        }
+        case BOT_STATES.BUY_GEAR: {
+          if (bot.res.diamond >= 2 && bot.team.upgradePos) {
+            return { x: bot.team.upgradePos.x, y: BASE_Y + 1, z: bot.team.upgradePos.z };
+          }
+          if (bot.team.shopPos) {
+            return { x: bot.team.shopPos.x, y: BASE_Y + 1, z: bot.team.shopPos.z };
+          }
+          return { x: bot.team.spawnX, y: BASE_Y + 1, z: bot.team.spawnZ };
+        }
+        case BOT_STATES.DEFEND_BASE: {
+          if (bot.targetEnemy) {
+            return { x: bot.targetEnemy.pos.x, y: bot.targetEnemy.pos.y, z: bot.targetEnemy.pos.z };
+          }
+          if (bot.team.bedPos) {
+            return { x: bot.team.bedPos.x + 0.5, y: BASE_Y + 1, z: bot.team.bedPos.z + 0.5 };
+          }
+          return { x: bot.team.spawnX, y: BASE_Y + 1, z: bot.team.spawnZ };
+        }
+        case BOT_STATES.ATTACK_PLAYER: {
+          if (bot.targetEnemy) {
+            return { x: bot.targetEnemy.pos.x, y: bot.targetEnemy.pos.y, z: bot.targetEnemy.pos.z };
+          }
+          return null;
+        }
+        case BOT_STATES.BREAK_BED:
+        case BOT_STATES.BRIDGE_RUSH: {
+          const t = bot.targetTeam || this.selectTargetEnemyTeam(bot);
+          if (t && t.bedPos && !teamBedBroken[t.name]) {
+            return { x: t.bedPos.x + 0.5, y: BASE_Y + 1, z: t.bedPos.z + 0.5 };
+          }
+          if (bot.targetEnemy) {
+            return { x: bot.targetEnemy.pos.x, y: bot.targetEnemy.pos.y, z: bot.targetEnemy.pos.z };
+          }
+          if (t) return { x: t.spawnX, y: BASE_Y + 1, z: t.spawnZ };
+          return { x: 0, y: BASE_Y + 1, z: 0 };
+        }
+        default:
+          return { x: bot.team.spawnX, y: BASE_Y + 1, z: bot.team.spawnZ };
       }
-      // Priority 3: Defend own base if an enemy enters within 14 blocks of own bed while alive
-      else if (bedIntruder) {
-        desiredState = BOT_STATES.DEFEND_BASE;
-        bot.targetEnemy = bedIntruder;
-      }
-      // Priority 4: Engage nearby enemy in melee/combat
-      else if (nearest && nearestDist <= 9.5 && Math.abs(nearest.pos.y - bot.pos.y) <= 4.5) {
-        desiredState = BOT_STATES.ATTACK_PLAYER;
-        bot.targetEnemy = nearest;
-      }
-      // Priority 5: Buy gear/blocks when at base and affordable. This must be
-      // checked before the out-of-blocks rule, otherwise a bot that starts with
-      // zero blocks can never shop and gets pinned to its generators forever.
-      else if (bot.isNearOwnBase() && botCanAffordShop(bot)) {
-        desiredState = BOT_STATES.BUY_GEAR;
-      }
-      // Priority 6: Out of blocks and unable to buy -> gather resources
-      else if (bot.blockCount <= 0) {
-        desiredState = BOT_STATES.GATHER_GEN;
-      }
-      // Priority 7: Gather 16-24 blocks and basic gear before starting a bridge
-      // rush. Only do this while standing at home, otherwise a bot halfway
-      // across a bridge turns around the moment its stack dips below the
-      // threshold and never arrives (it also abandons its finished walkway).
-      else if (bot.isNearOwnBase() && (bot.blockCount < minBlocks || !hasBasicGear)) {
-        desiredState = BOT_STATES.GATHER_GEN;
-      }
-      // Priority 8: Bridge rush enemy island / remaining enemy
-      else {
-        const targetTeam = this.selectTargetEnemyTeam(bot);
-        if (targetTeam) {
-          desiredState = BOT_STATES.BRIDGE_RUSH;
-          bot.targetTeam = targetTeam;
-          if (nearest && nearest.teamName === targetTeam.name) bot.targetEnemy = nearest;
-        } else if (nearest) {
+    }
+
+    evaluate(bot, nowMs) {
+      const enemies = this.gatherActiveEnemies(bot);
+      const { enemy: nearest, dist: nearestDist } = this.findNearestEnemy(bot, enemies);
+      bot.nearest = nearest;
+      bot.nearestDist = nearestDist;
+
+      const bedIntruder = this.findEnemyWithinBedRadius(bot, enemies, 14.0);
+      bot.bedThreat = !!bedIntruder;
+
+      // Check emergency interrupts that bypass the 750ms state hysteresis lock
+      const fallingBelowPlatform = bot.pos.y < BASE_Y - 1.5;
+      const outOfBlocksMidBridge = bot.state === BOT_STATES.BRIDGE_RUSH && bot.blockCount <= 0;
+      const emergencyInterrupt =
+        bot.damageInterrupt ||
+        fallingBelowPlatform ||
+        bot.bedLostInterrupt ||
+        outOfBlocksMidBridge ||
+        bot.stuckAborted;
+
+      const locked = nowMs < bot.stateLockUntil && !emergencyInterrupt;
+
+      if (!locked) {
+        let desiredState = bot.state;
+        const minBlocks = bot.botTalent.minBlocks || 20;
+        const hasBasicGear = bot.swordIdx >= 1 || bot.armorIdx >= 1 || bot.res.iron_ingot >= 8;
+
+        // Nearest enemy bed distance check
+        let closestEnemyBedTeam = null;
+        let closestEnemyBedDist = 1e9;
+        for (let i = 0; i < TEAMS.length; i++) {
+          const t = TEAMS[i];
+          if (t.name === bot.teamName || !t.bedPos || teamBedBroken[t.name]) continue;
+          const d = Math.hypot(t.bedPos.x + 0.5 - bot.pos.x, t.bedPos.z + 1.0 - bot.pos.z);
+          if (d < closestEnemyBedDist) {
+            closestEnemyBedDist = d;
+            closestEnemyBedTeam = t;
+          }
+        }
+
+        // Priority 1: Critical low HP retreat (unless finishing an exposed bed right in front of us)
+        if (bot.health <= 6.5 && !(closestEnemyBedDist <= 3.5 && nearestDist > 4.0) && !bot.isNearOwnBase()) {
+          desiredState = BOT_STATES.RETREAT;
+        }
+        // Priority 2: Break enemy bed when within 3.5 blocks
+        else if (closestEnemyBedTeam && closestEnemyBedDist <= 3.5) {
+          desiredState = BOT_STATES.BREAK_BED;
+          bot.targetTeam = closestEnemyBedTeam;
+        }
+        // Priority 3: Defend own base if an enemy enters within 14 blocks of own bed while alive
+        else if (bedIntruder) {
+          desiredState = BOT_STATES.DEFEND_BASE;
+          bot.targetEnemy = bedIntruder;
+        }
+        // Priority 4: Engage nearby enemy in combat (avoid abandoning an active bridge
+        // prematurely unless within 3.8 blocks or able to bridge/walk directly to them)
+        else if (
+          nearest &&
+          nearestDist <= 9.5 &&
+          Math.abs(nearest.pos.y - bot.pos.y) <= 4.5 &&
+          (!bot.bridging || nearestDist <= 3.8 || bot.blockCount > 0)
+        ) {
           desiredState = BOT_STATES.ATTACK_PLAYER;
           bot.targetEnemy = nearest;
-        } else {
+        }
+        // Priority 5: Buy gear/blocks when at base and affordable
+        else if (bot.isNearOwnBase() && botCanAffordShop(bot)) {
+          desiredState = BOT_STATES.BUY_GEAR;
+        }
+        // Priority 6: Out of blocks and unable to buy -> gather resources
+        else if (bot.blockCount <= 0) {
           desiredState = BOT_STATES.GATHER_GEN;
         }
-      }
+        // Priority 7: Gather 16-24 blocks and basic gear before starting a bridge rush
+        else if (bot.isNearOwnBase() && (bot.blockCount < minBlocks || !hasBasicGear)) {
+          desiredState = BOT_STATES.GATHER_GEN;
+        }
+        // Priority 8: Bridge rush enemy island / remaining enemy
+        else {
+          const targetTeam = this.selectTargetEnemyTeam(bot);
+          if (targetTeam) {
+            desiredState = BOT_STATES.BRIDGE_RUSH;
+            bot.targetTeam = targetTeam;
+            if (nearest && nearest.teamName === targetTeam.name) bot.targetEnemy = nearest;
+          } else if (nearest) {
+            desiredState = BOT_STATES.ATTACK_PLAYER;
+            bot.targetEnemy = nearest;
+          } else {
+            desiredState = BOT_STATES.GATHER_GEN;
+          }
+        }
 
-      if (desiredState !== bot.state) {
-        bot.state = desiredState;
-        bot.stateLockUntil = nowMs + BOT_STATE_LOCK_MS;
-        bot.path.length = 0;
-        bot.pathGoalKey = '';
-        bot.mine = null;
-        bot.miningActive = false;
-        bot.bridging = false;
-      }
-    }
-
-    // Clear one-shot interrupt flags after evaluation
-    bot.damageInterrupt = false;
-    bot.bedLostInterrupt = false;
-    bot.stuckAborted = false;
-
-    // Execute instant shop interaction when near shop/upgrade machine
-    if (bot.state === BOT_STATES.BUY_GEAR && bot.isNearOwnBase()) {
-      const shopDist = bot.team.shopPos ? Math.hypot(bot.team.shopPos.x - bot.pos.x, bot.team.shopPos.z - bot.pos.z) : 0;
-      const upgDist = bot.team.upgradePos ? Math.hypot(bot.team.upgradePos.x - bot.pos.x, bot.team.upgradePos.z - bot.pos.z) : 0;
-      if (shopDist <= 4.5 || upgDist <= 4.5) {
-        botExecutePurchases(bot);
-        bot.stateLockUntil = 0; // allow immediate transition to rush/defend after shopping
-      }
-    }
-
-    // Refresh 3D voxel path when needed
-    const goal = this.getStateGoalPosition(bot);
-    if (goal) {
-      const gKey = Math.floor(goal.x) + ',' + Math.floor(goal.y) + ',' + Math.floor(goal.z);
-      const needsRepath =
-        bot.forceRepath ||
-        bot.path.length === 0 ||
-        (gKey !== bot.pathGoalKey && bot.pathTimer <= 0);
-
-      if (needsRepath) {
-        bot.forceRepath = false;
-        bot.pathGoalKey = gKey;
-        bot.pathTimer = 0.55;
-        const allowBridge = bot.state !== BOT_STATES.GATHER_GEN && bot.state !== BOT_STATES.BUY_GEAR && bot.blockCount > 0;
-        bot.path = this.pathfinder.findPath(bot, goal, { maxNodes: 300, allowBridging: allowBridge });
-      }
-    }
-  }
-}
-
-const botBrain = new BotBrain(worldGrid, voxelPathfinder);
-
-/* ============================================================================
-   LAYER 4: BotMotor (Per-Frame Movement, Edge-Bridging, Combat & Watchdog)
-   ========================================================================== */
-class BotMotor {
-  constructor(grid, pathfinder, brain) {
-    this.grid = grid;
-    this.pathfinder = pathfinder;
-    this.brain = brain;
-  }
-
-  step(bot, rawDt) {
-    // Clamped delta time for deterministic physics & edge alignment
-    const dt = Math.min(rawDt, 0.05);
-    if (dt <= 0) return;
-
-    const nowMs = performance.now();
-
-    // Handle respawn countdown
-    if (bot.eliminated) return;
-    if (bot.respawning || !bot.alive) {
-      if (teamBedBroken[bot.teamName]) {
-        bot.eliminated = true;
-        bot.respawning = false;
-        return;
-      }
-      bot.respawnTimer -= dt;
-      if (bot.respawnTimer <= 0) {
-        bot.resetSpawn();
-        if (typeof addEventMessage === 'function') {
-          addEventMessage('<b>' + bot.name + '</b> respawned', '#9fe0ff');
+        if (desiredState !== bot.state) {
+          const wasBridging = bot.bridging;
+          bot.state = desiredState;
+          bot.stateLockUntil = nowMs + BOT_STATE_LOCK_MS;
+          bot.path.length = 0;
+          bot.pathGoalKey = '';
+          bot.forceRepath = true;
+          bot.mine = null;
+          bot.miningActive = false;
+          if (!wasBridging || desiredState !== BOT_STATES.ATTACK_PLAYER) {
+            bot.bridging = false;
+          }
         }
       }
-      return;
+
+      // Clear one-shot interrupt flags after evaluation
+      bot.damageInterrupt = false;
+      bot.bedLostInterrupt = false;
+      bot.stuckAborted = false;
+
+      // Execute instant shop interaction when near shop/upgrade machine
+      if (bot.state === BOT_STATES.BUY_GEAR && bot.isNearOwnBase()) {
+        const shopDist = bot.team.shopPos ? Math.hypot(bot.team.shopPos.x - bot.pos.x, bot.team.shopPos.z - bot.pos.z) : 0;
+        const upgDist = bot.team.upgradePos ? Math.hypot(bot.team.upgradePos.x - bot.pos.x, bot.team.upgradePos.z - bot.pos.z) : 0;
+        if (shopDist <= 4.5 || upgDist <= 4.5) {
+          botExecutePurchases(bot);
+          bot.stateLockUntil = 0; // allow immediate transition to rush/defend after shopping
+        }
+      }
+
+      // Refresh 3D voxel path when needed
+      const goal = this.getStateGoalPosition(bot);
+      if (goal) {
+        const gKey = Math.floor(goal.x) + ',' + Math.floor(goal.y) + ',' + Math.floor(goal.z);
+        const needsRepath =
+          bot.forceRepath ||
+          bot.path.length === 0 ||
+          (gKey !== bot.pathGoalKey && bot.pathTimer <= 0);
+
+        if (needsRepath) {
+          bot.forceRepath = false;
+          bot.pathGoalKey = gKey;
+          bot.pathTimer = 0.55;
+          const allowBridge = bot.state !== BOT_STATES.GATHER_GEN && bot.state !== BOT_STATES.BUY_GEAR && bot.blockCount > 0;
+          bot.path = this.pathfinder.findPath(bot, goal, { maxNodes: 300, allowBridging: allowBridge });
+        }
+      }
+    }
+  }
+
+  const botBrain = new BotBrain(worldGrid, voxelPathfinder);
+
+  /* ============================================================================
+     LAYER 4: BotMotor (Per-Frame Movement, Edge-Bridging, Combat & Watchdog)
+     ========================================================================== */
+  class BotMotor {
+    constructor(grid, pathfinder, brain) {
+      this.grid = grid;
+      this.pathfinder = pathfinder;
+      this.brain = brain;
     }
 
-    // Cooldowns & passive regeneration
-    bot.stateTime += dt;
-    bot.pathTimer = Math.max(0, bot.pathTimer - dt);
-    bot.attackTimer = Math.max(0, bot.attackTimer - dt);
-    bot.placeCooldown = Math.max(0, bot.placeCooldown - dt);
-    bot.rangedTimer = Math.max(0, bot.rangedTimer - dt);
-    bot.wtapTimer = Math.max(0, bot.wtapTimer - dt);
-    bot.nudgeTimer = Math.max(0, (bot.nudgeTimer || 0) - dt);
-    bot.timeSinceDamage += dt;
+    ensureBotCombatFields(bot) {
+      if (bot.combatReactionTimer === undefined) bot.combatReactionTimer = 0;
+      if (bot.lastCombatTargetId === undefined) bot.lastCombatTargetId = null;
+      if (bot.bowDrawTimer === undefined) bot.bowDrawTimer = 0;
+      if (bot.rangedThreatTimer === undefined) bot.rangedThreatTimer = 0;
+      if (bot.rangedThreatDir === undefined) bot.rangedThreatDir = { x: 0, z: 0 };
+      if (bot.dodgeStrafeDir === undefined) bot.dodgeStrafeDir = Math.random() < 0.5 ? 1 : -1;
+      if (bot.hasBow === undefined) bot.hasBow = false;
+      if (bot.arrows === undefined) bot.arrows = 0;
+      if (bot.isPillaringUp === undefined) bot.isPillaringUp = false;
+      if (bot.pillarCooldown === undefined) bot.pillarCooldown = 0;
+    }
 
-    if (bot.health < bot.maxHealth && bot.timeSinceDamage >= 4.0) {
-      bot.regenAccum += dt;
-      if (bot.regenAccum >= 1.5) {
+    step(bot, rawDt) {
+      // Clamped delta time for deterministic physics & edge alignment
+      const dt = Math.min(rawDt, 0.05);
+      if (dt <= 0) return;
+
+      this.ensureBotCombatFields(bot);
+      const nowMs = performance.now();
+      const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
+
+      // Handle respawn countdown
+      if (bot.eliminated) return;
+      if (bot.respawning || !bot.alive) {
+        if (teamBedBroken[bot.teamName]) {
+          bot.eliminated = true;
+          bot.respawning = false;
+          return;
+        }
+        bot.respawnTimer -= dt;
+        if (bot.respawnTimer <= 0) {
+          bot.resetSpawn();
+          bot.isPillaringUp = false;
+          bot.combatReactionTimer = 0;
+          bot.lastCombatTargetId = null;
+          if (typeof addEventMessage === 'function') {
+            addEventMessage('<b>' + bot.name + '</b> respawned', '#9fe0ff');
+          }
+        }
+        return;
+      }
+
+      // Cooldowns & passive regeneration
+      bot.stateTime += dt;
+      bot.pathTimer = Math.max(0, bot.pathTimer - dt);
+      bot.attackTimer = Math.max(0, bot.attackTimer - dt);
+      bot.placeCooldown = Math.max(0, bot.placeCooldown - dt);
+      bot.rangedTimer = Math.max(0, bot.rangedTimer - dt);
+      bot.wtapTimer = Math.max(0, bot.wtapTimer - dt);
+      bot.nudgeTimer = Math.max(0, (bot.nudgeTimer || 0) - dt);
+      bot.combatReactionTimer = Math.max(0, bot.combatReactionTimer - dt);
+      bot.rangedThreatTimer = Math.max(0, bot.rangedThreatTimer - dt);
+      bot.pillarCooldown = Math.max(0, bot.pillarCooldown - dt);
+      bot.timeSinceDamage += dt;
+
+      if (bot.health < bot.maxHealth && bot.timeSinceDamage >= 4.0) {
+        bot.regenAccum += dt;
+        if (bot.regenAccum >= 1.5) {
+          bot.regenAccum = 0;
+          bot.health = Math.min(bot.maxHealth, bot.health + 1);
+        }
+      } else {
         bot.regenAccum = 0;
-        bot.health = Math.min(bot.maxHealth, bot.health + 1);
       }
-    } else {
-      bot.regenAccum = 0;
+
+      // Collect resources when standing near a generator
+      this.collectNearbyGenerators(bot, dt);
+
+      // Run strategic BotBrain at difficulty-scaled ~4-5 Hz
+      bot.decisionTimer -= dt;
+      if (bot.decisionTimer <= 0) {
+        bot.decisionTimer = diff.decision || BOT_BRAIN_INTERVAL;
+        this.brain.evaluate(bot, nowMs);
+      }
+
+      // Detect incoming ranged attacks (aimed bows / incoming projectiles)
+      this.detectIncomingRangedThreat(bot, diff);
+
+      // Void clutch check if falling below platform Y-level
+      if (bot.pos.y < BASE_Y - 1.5 && bot.vel.y < -2.0) {
+        this.tryVoidClutch(bot, nowMs);
+      }
+
+      // Reset per-frame movement intent
+      bot._hasMoveIntent = false;
+      bot.bridging = false;
+
+      // Check if the bot clutched below island height and needs to pillar back up
+      const needsPillarRecovery =
+        (bot.knockbackTime || 0) <= 0 &&
+        bot.pos.y < BASE_Y - 0.35 &&
+        bot.blockCount > 0 &&
+        (bot.onGround || bot.isPillaringUp);
+
+      // Hit stun: while a hit's knockback is still active, do not let the AI
+      // overwrite the knockback velocity with path/combat steering.
+      if ((bot.knockbackTime || 0) > 0) {
+        bot.miningActive = false;
+        bot.sneak = false;
+        bot.height = 1.8;
+        bot.isPillaringUp = false;
+      } else if (needsPillarRecovery) {
+        this.executePillarRecovery(bot, dt);
+      } else if (bot.state === BOT_STATES.BREAK_BED) {
+        bot.isPillaringUp = false;
+        this.executeBreakBed(bot, dt);
+      } else if (bot.state === BOT_STATES.ATTACK_PLAYER || (bot.state === BOT_STATES.DEFEND_BASE && bot.targetEnemy && Math.hypot(bot.targetEnemy.pos.x - bot.pos.x, bot.targetEnemy.pos.z - bot.pos.z) <= 8.5)) {
+        bot.isPillaringUp = false;
+        this.executeCombat(bot, dt);
+      } else {
+        bot.isPillaringUp = false;
+        this.executeNavigation(bot, dt);
+      }
+
+      // Opportunistic ranged attack (bow / fireball / ender pearl) when at medium-long range
+      if ((bot.knockbackTime || 0) <= 0 && !bot.isPillaringUp && bot.state !== BOT_STATES.BREAK_BED) {
+        this.tryRangedAttack(bot, dt, diff);
+      }
+
+      // Apply evasive weaving / cover when under bow or fireball threat
+      if ((bot.knockbackTime || 0) <= 0 && !bot.isPillaringUp && bot.rangedThreatTimer > 0) {
+        this.applyRangedEvasion(bot, dt, diff);
+      }
+
+      // Place bed defense blocks opportunistically when at base and idle/gathering
+      if ((bot.knockbackTime || 0) <= 0 && !bot.isPillaringUp && bot.isNearOwnBase() && !bot.bedThreat && bot.state !== BOT_STATES.BRIDGE_RUSH && bot.state !== BOT_STATES.ATTACK_PLAYER) {
+        botTryPlaceBedDefense(bot);
+      }
+
+      // Anti-Stuck Watchdog (evaluates every 500ms)
+      this.updateWatchdog(bot, dt, nowMs);
+
+      // Integrate physics with ledge safety clamp
+      this.integratePhysics(bot, dt);
+
+      // Smooth look angle interpolation
+      const turnAlpha = Math.min(1, dt * (11 + bot.botDifficulty * 3));
+      const yd = botWrapAngle(bot.targetYaw - bot.yaw);
+      if (Math.abs(yd) > 0.008) bot.yaw += yd * turnAlpha;
+      const pd = bot.targetPitch - bot.pitch;
+      if (Math.abs(pd) > 0.008) bot.pitch += pd * turnAlpha;
     }
 
-    // Collect resources when standing near a generator
-    this.collectNearbyGenerators(bot, dt);
-
-    // Run strategic BotBrain at 4-5 Hz (every 200-250ms)
-    bot.decisionTimer -= dt;
-    if (bot.decisionTimer <= 0) {
-      bot.decisionTimer = BOT_BRAIN_INTERVAL;
-      this.brain.evaluate(bot, nowMs);
-    }
-
-    // Void clutch check if falling below platform Y-level
-    if (bot.pos.y < BASE_Y - 1.5 && bot.vel.y < -2.0) {
-      this.tryVoidClutch(bot, nowMs);
-    }
-
-    // Reset per-frame movement intent
-    bot._hasMoveIntent = false;
-    bot.bridging = false;
-
-    // Hit stun: while a hit's knockback is still active, do not let the AI
-    // overwrite the knockback velocity with path/combat steering. Without this
-    // the motor cancels the push on the very next frame and hits feel weightless.
-    if ((bot.knockbackTime || 0) > 0) {
-      bot.miningActive = false;
-      bot.sneak = false;
-      bot.height = 1.8;
-    } else if (bot.state === BOT_STATES.BREAK_BED) {
-      this.executeBreakBed(bot, dt);
-    } else if (bot.state === BOT_STATES.ATTACK_PLAYER || (bot.state === BOT_STATES.DEFEND_BASE && bot.targetEnemy && Math.hypot(bot.targetEnemy.pos.x - bot.pos.x, bot.targetEnemy.pos.z - bot.pos.z) <= 8.5)) {
-      this.executeCombat(bot, dt);
-    } else {
-      this.executeNavigation(bot, dt);
-    }
-
-    // Place bed defense blocks opportunistically when at base and idle/gathering
-    if ((bot.knockbackTime || 0) <= 0 && bot.isNearOwnBase() && !bot.bedThreat && bot.state !== BOT_STATES.BRIDGE_RUSH && bot.state !== BOT_STATES.ATTACK_PLAYER) {
-      botTryPlaceBedDefense(bot);
-    }
-
-    // Anti-Stuck Watchdog (evaluates every 500ms)
-    this.updateWatchdog(bot, dt, nowMs);
-
-    // Integrate physics with ledge safety clamp
-    this.integratePhysics(bot, dt);
-
-    // Smooth look angle interpolation
-    const turnAlpha = Math.min(1, dt * (12 + bot.botDifficulty * 3));
-    let yd = bot.targetYaw - bot.yaw;
-    while (yd > Math.PI) yd -= Math.PI * 2;
-    while (yd < -Math.PI) yd += Math.PI * 2;
-    if (Math.abs(yd) > 0.008) bot.yaw += yd * turnAlpha;
-    const pd = bot.targetPitch - bot.pitch;
-    if (Math.abs(pd) > 0.008) bot.pitch += pd * turnAlpha;
-  }
-
-  collectNearbyGenerators(bot, dt) {
-    for (let i = 0; i < generators.length; i++) {
-      const g = generators[i];
-      const d = Math.hypot(g.pos.x - bot.pos.x, g.pos.z - bot.pos.z);
-      if (d <= 2.6 && Math.abs(g.pos.y - bot.pos.y) <= 2.2) {
-        const key = g.type === 'iron' ? 'iron_ingot' : g.type === 'gold' ? 'gold_ingot' : g.type === 'diamond' ? 'diamond' : 'emerald';
-        const rate = 1.0 / Math.max(0.5, g.max || 1.5);
-        bot._genFrac = bot._genFrac || { iron_ingot: 0, gold_ingot: 0, diamond: 0, emerald: 0 };
-        bot._genFrac[key] += rate * dt * 1.15;
-        if (bot._genFrac[key] >= 1.0) {
-          const whole = Math.floor(bot._genFrac[key]);
-          bot._genFrac[key] -= whole;
-          bot.res[key] = Math.min(64, (bot.res[key] || 0) + whole);
+    collectNearbyGenerators(bot, dt) {
+      for (let i = 0; i < generators.length; i++) {
+        const g = generators[i];
+        const d = Math.hypot(g.pos.x - bot.pos.x, g.pos.z - bot.pos.z);
+        if (d <= 2.6 && Math.abs(g.pos.y - bot.pos.y) <= 2.2) {
+          const key = g.type === 'iron' ? 'iron_ingot' : g.type === 'gold' ? 'gold_ingot' : g.type === 'diamond' ? 'diamond' : 'emerald';
+          const rate = 1.0 / Math.max(0.5, g.max || 1.5);
+          bot._genFrac = bot._genFrac || { iron_ingot: 0, gold_ingot: 0, diamond: 0, emerald: 0 };
+          bot._genFrac[key] += rate * dt * 1.15;
+          if (bot._genFrac[key] >= 1.0) {
+            const whole = Math.floor(bot._genFrac[key]);
+            bot._genFrac[key] -= whole;
+            bot.res[key] = Math.min(64, (bot.res[key] || 0) + whole);
+          }
         }
       }
     }
-  }
 
-  tryVoidClutch(bot, nowMs) {
-    const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
-    if (nowMs - bot.lastClutch < 2500) return;
+    tryVoidClutch(bot, nowMs) {
+      const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
+      if (nowMs - bot.lastClutch < 2200) return;
 
-    // 1. Ender pearl clutch
-    if (bot.enderPearls > 0 && Math.random() < diff.clutch) {
-      bot.enderPearls--;
-      bot.lastClutch = nowMs;
-      const aim = new THREE.Vector3(bot.team.spawnX - bot.pos.x, (BASE_Y + 6) - bot.pos.y, bot.team.spawnZ - bot.pos.z);
-      botSpawnProjectile(bot, 'ender_pearl', aim);
-      return;
-    }
-
-    // 2. Block wall clutch if adjacent solid block exists
-    if (bot.blockCount > 0 && Math.random() < diff.clutch) {
-      const bx = Math.floor(bot.pos.x);
-      const by = Math.floor(bot.pos.y - 0.5);
-      const bz = Math.floor(bot.pos.z);
-      if (this.grid.hasAdjacentSupport(bx, by, bz) && this.grid.placeBlock(bx, by, bz, bot.teamColor)) {
-        bot.blockCount--;
-        bot.blocks = bot.blockCount;
+      // 1. Ender pearl clutch
+      if (bot.enderPearls > 0 && Math.random() < diff.clutch) {
+        bot.enderPearls--;
         bot.lastClutch = nowMs;
-      }
-    }
-  }
-
-  executeNavigation(bot, dt) {
-    bot.miningActive = false;
-    bot.setHeldSoon(bot.state === BOT_STATES.BRIDGE_RUSH && bot.blockCount > 0 ? ('b' + bot.teamColor) : bot.gearSword());
-
-    if (!bot.path || bot.path.length === 0) {
-      // Gently decelerate when waiting at generator/shop
-      bot.vel.x *= Math.max(0, 1 - dt * 14);
-      bot.vel.z *= Math.max(0, 1 - dt * 14);
-      bot.sneak = false;
-      bot.height = 1.8;
-      return;
-    }
-
-    const wp = bot.path[0];
-    const hDist = Math.hypot(wp.x - bot.pos.x, wp.z - bot.pos.z);
-
-    // Bridge waypoint execution
-    if (wp.action === 'BRIDGE') {
-      if (bot.blockCount <= 0) {
-        // Immediately abort bridging and return to generator
-        bot.path.length = 0;
-        bot.bridging = false;
-        bot.stateLockUntil = 0;
+        if (typeof botSpawnProjectile === 'function') {
+          const aim = new THREE.Vector3(bot.team.spawnX - bot.pos.x, (BASE_Y + 6) - bot.pos.y, bot.team.spawnZ - bot.pos.z);
+          botSpawnProjectile(bot, 'ender_pearl', aim);
+        }
         return;
       }
-      bot.bridging = true;
+
+      // 2. Block wall clutch if adjacent solid block exists (check feet and 1 block below)
+      if (bot.blockCount > 0 && Math.random() < diff.clutch) {
+        const bx = Math.floor(bot.pos.x);
+        const bz = Math.floor(bot.pos.z);
+        const tryYs = [Math.floor(bot.pos.y - 0.5), Math.floor(bot.pos.y - 1.2), Math.floor(bot.pos.y + 0.1)];
+        for (let i = 0; i < tryYs.length; i++) {
+          const by = tryYs[i];
+          if (this.grid.hasAdjacentSupport(bx, by, bz) && this.grid.placeBlock(bx, by, bz, bot.teamColor)) {
+            bot.blockCount--;
+            bot.blocks = bot.blockCount;
+            bot.lastClutch = nowMs;
+            bot.isPillaringUp = true;
+            bot.pos.x = bx + 0.5;
+            bot.pos.z = bz + 0.5;
+            if (bot.pos.y < by + 1.0) bot.pos.y = by + 1.02;
+            bot.vel.x = 0;
+            bot.vel.z = 0;
+            bot.vel.y = 0;
+            bot.onGround = true;
+            break;
+          }
+        }
+      }
+    }
+
+    /* ==========================================================================
+       POST-CLUTCH PILLAR RECOVERY
+       When a bot catches itself on a wall below island level (BASE_Y), it steps
+       out from any overhang if needed, pillars straight up with blocks, and
+       bridges onto the island deck once back at BASE_Y + 1.
+       ======================================================================== */
+    executePillarRecovery(bot, dt) {
+      bot.isPillaringUp = true;
       bot._hasMoveIntent = true;
+      bot.miningActive = false;
+      bot.sneak = true;
+      bot.height = 1.5;
       bot.setHeldSoon('b' + bot.teamColor);
-      stepBridgeWaypoint(bot, wp, this.grid);
 
-      const targetVoxel = { x: Math.floor(wp.x), y: Math.floor(wp.y) - 1, z: Math.floor(wp.z) };
-      if (this.grid.isSolid(targetVoxel.x, targetVoxel.y, targetVoxel.z) && hDist <= 0.34) {
-        bot.path.shift();
+      const sup = getSupportBlockForBot(bot);
+      const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
+
+      // Check if an island overhang blocks jumping straight up from sup
+      const headBlocked =
+        this.grid.isSolid(sup.x, sup.y + 2, sup.z) ||
+        this.grid.isSolid(sup.x, sup.y + 3, sup.z);
+
+      if (headBlocked) {
+        // Bridge horizontally 1 block away from the wall/overhang so headroom opens up
+        const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        for (let i = 0; i < 4; i++) {
+          const nx = sup.x + dirs[i][0];
+          const nz = sup.z + dirs[i][1];
+          if (!this.grid.isSolid(nx, sup.y, nz) &&
+            !this.grid.isSolid(nx, sup.y + 1, nz) &&
+            !this.grid.isSolid(nx, sup.y + 2, nz)) {
+            stepBridgeWaypoint(bot, { x: nx + 0.5, y: sup.y + 1, z: nz + 0.5, action: 'BRIDGE' }, this.grid);
+            return;
+          }
+        }
       }
-      return;
-    }
 
-    // Standard WALK / JUMP waypoint execution
-    bot.bridging = false;
-    bot.sneak = false;
-    bot.height = 1.8;
+      // Center the bot on the pillar column so it stays balanced while jumping
+      const cx = sup.x + 0.5;
+      const cz = sup.z + 0.5;
+      bot.vel.x = clamp((cx - bot.pos.x) * 8.0, -2.5, 2.5);
+      bot.vel.z = clamp((cz - bot.pos.z) * 8.0, -2.5, 2.5);
+      bot.lookAt(cx, bot.pos.y - 1.2, cz);
 
-    if (hDist <= 0.32 && Math.abs(wp.y - bot.pos.y) <= 1.2) {
-      bot.path.shift();
-      if (bot.path.length === 0) {
-        bot.vel.x *= 0.3;
-        bot.vel.z *= 0.3;
-        return;
-      }
-    }
-
-    const nextWp = bot.path[0];
-    const dx = nextWp.x - bot.pos.x;
-    const dz = nextWp.z - bot.pos.z;
-    const dist = Math.max(0.001, Math.hypot(dx, dz));
-    const dirX = dx / dist;
-    const dirZ = dz / dist;
-
-    bot._hasMoveIntent = true;
-    bot.lookAt(nextWp.x, bot.pos.y + 1.5, nextWp.z);
-
-    const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
-    const speedMult = diff.speed * (bot.botTalent.speed || 1.0) * (bot.wtapTimer > 0 ? 0.55 : 1.0);
-    const moveSpd = BOT_BASE_SPEED * speedMult;
-
-    // Perpendicular strafe nudge if watchdog tick 1 fired
-    let strafeX = 0, strafeZ = 0;
-    if (bot.nudgeTimer > 0) {
-      strafeX = -dirZ * bot.strafeDir * 0.65;
-      strafeZ = dirX * bot.strafeDir * 0.65;
-    }
-
-    bot.vel.x = (dirX + strafeX) * moveSpd;
-    bot.vel.z = (dirZ + strafeZ) * moveSpd;
-
-    // Trigger jump if waypoint explicitly requests JUMP
-    if (nextWp.action === 'JUMP' && bot.onGround && dist <= 1.15) {
-      bot.vel.y = BOT_JUMP_VELOCITY;
-      bot.onGround = false;
-    }
-
-    // Step-Up & Obstacle Check before entering next horizontal voxel
-    this.checkStepUpAndObstacles(bot, dirX, dirZ, dt);
-  }
-
-  checkStepUpAndObstacles(bot, dirX, dirZ, dt) {
-    const lookAhead = 0.62;
-    const nx = Math.floor(bot.pos.x + dirX * lookAhead);
-    const nz = Math.floor(bot.pos.z + dirZ * lookAhead);
-    const ny = Math.floor(bot.pos.y + 0.05);
-
-    const curX = Math.floor(bot.pos.x);
-    const curZ = Math.floor(bot.pos.z);
-    if (nx === curX && nz === curZ) return;
-
-    const footSolid = this.grid.isSolid(nx, ny, nz);
-    const headSolid = this.grid.isSolid(nx, ny + 1, nz);
-    const aboveHeadSolid = this.grid.isSolid(nx, ny + 2, nz);
-
-    // 1-block step-up: ny is solid, ny + 1 and ny + 2 are air -> automatic jump
-    if (footSolid && !headSolid && !aboveHeadSolid) {
-      if (bot.onGround) {
+      // Jump when grounded
+      if (bot.onGround && bot.pillarCooldown <= 0) {
         bot.vel.y = BOT_JUMP_VELOCITY;
         bot.onGround = false;
       }
-      return;
-    }
 
-    // 2-block wall: ny + 1 is solid -> mine if breakable defense block, else recalculate A*
-    if (headSolid) {
-      const wallY = headSolid ? (ny + 1) : ny;
-      const blockId = getBlock(nx, wallY, nz);
-      if (botIsPlayerPlacedBlock(nx, wallY, nz, blockId)) {
-        const toolId = botBestToolForBlock(bot, blockId);
-        bot.setHeldSoon(toolId);
-        bot.lookAt(nx + 0.5, wallY + 0.5, nz + 0.5);
-        this.mineVoxel(bot, nx, wallY, nz, blockId, toolId, dt);
-      } else {
-        if (bot.badCells) bot.badCells.set(nx + ',' + nz, performance.now() + 5000);
-        bot.forceRepath = true;
+      // Place a block directly underneath once feet clear sup.y + 1
+      const placeY = sup.y + 1;
+      if (
+        !bot.onGround &&
+        bot.pos.y >= placeY + 1.02 &&
+        bot.blockCount > 0 &&
+        bot.placeCooldown <= 0 &&
+        !this.grid.isSolid(sup.x, placeY, sup.z) &&
+        this.grid.hasAdjacentSupport(sup.x, placeY, sup.z)
+      ) {
+        if (this.grid.placeBlock(sup.x, placeY, sup.z, bot.teamColor)) {
+          bot.blockCount--;
+          bot.blocks = bot.blockCount;
+          bot.placeCooldown = Math.max(0.12, diff.placeCd || 0.16);
+          bot.pillarCooldown = 0.08;
+          bot.swingFlag = true;
+          bot.timers.swing = 0.24;
+          if (typeof SFX !== 'undefined' && typeof player !== 'undefined' && player && player.pos.distanceTo(bot.pos) < 28) {
+            SFX.place();
+          }
+        }
+      }
+
+      // Once back up to island height, force a fresh path onto solid island ground
+      if (bot.pos.y >= BASE_Y + 0.85) {
+        bot.isPillaringUp = false;
         bot.path.length = 0;
-      }
-    }
-  }
-
-  mineVoxel(bot, bx, by, bz, blockId, toolId, dt) {
-    const key = bx + ',' + by + ',' + bz;
-    if (!bot.mine || bot.mine.key !== key) {
-      bot.mine = {
-        key, x: bx, y: by, z: bz, id: blockId,
-        progress: 0,
-        duration: botCalcBreakTime(bot, blockId, toolId)
-      };
-    }
-    bot.miningActive = true;
-    bot.swingFlag = true;
-    bot.timers.swing = 0.24;
-    bot.mine.progress += dt;
-
-    if (bot.mine.progress >= bot.mine.duration) {
-      const def = BLOCKS[blockId];
-      bot.mine = null;
-      bot.miningActive = false;
-
-      if (def && def.bed) {
-        // Destroy both halves of the bed
-        const victimTeam = def.bed;
-        for (let oz = -1; oz <= 1; oz++) {
-          if (getBlock(bx, by, bz + oz) === blockId) {
-            applyRemoteBlock(bx, by, bz + oz, 0);
-            queueBlockChange(bx, by, bz + oz, 0);
-          }
-        }
-        if (!teamBedBroken[victimTeam]) {
-          teamBedBroken[victimTeam] = true;
-          recordBedBreak(bot.teamName, victimTeam);
-          netSend({ t: 'bed', team: victimTeam, by: bot.name, byTeam: bot.teamName });
-          updateStatusBar();
-          if (typeof addEventMessage === 'function') {
-            addEventMessage('<b style="color:#ff8888">' + victimTeam + "'s bed</b> was destroyed by <b>" + bot.name + '</b>', '#ff6666');
-          }
-          if (typeof SFX !== 'undefined') SFX.bed();
-        }
-        bot.stateLockUntil = 0;
-      } else {
-        applyRemoteBlock(bx, by, bz, 0);
-        queueBlockChange(bx, by, bz, 0);
-        botUnmarkPlacedBlock(bx, by, bz);
-        if (typeof SFX !== 'undefined' && typeof player !== 'undefined' && player && player.pos.distanceTo(bot.pos) < 28) {
-          SFX.breakBlock();
-        }
-      }
-    }
-  }
-
-  executeBreakBed(bot, dt) {
-    const targetTeam = bot.targetTeam || this.brain.selectTargetEnemyTeam(bot);
-    if (!targetTeam || teamBedBroken[targetTeam.name]) {
-      bot.mine = null;
-      bot.miningActive = false;
-      bot.stateLockUntil = 0;
-      return;
-    }
-
-    const bedVoxel = botFindBedTargetVoxel(bot, targetTeam);
-    if (!bedVoxel) {
-      // Approach bed if slightly out of reach
-      this.executeNavigation(bot, dt);
-      return;
-    }
-
-    // Equip best tool for the outer defense block (shears/pickaxe/axe)
-    const toolId = botBestToolForBlock(bot, bedVoxel.id);
-    bot.setHeldSoon(toolId);
-    bot.lookAt(bedVoxel.x + 0.5, bedVoxel.y + 0.4, bedVoxel.z + 0.5);
-
-    // Slow/stop horizontal drift while mining bed
-    bot.vel.x *= Math.max(0, 1 - dt * 16);
-    bot.vel.z *= Math.max(0, 1 - dt * 16);
-    bot.sneak = true;
-    bot.height = 1.5;
-
-    this.mineVoxel(bot, bedVoxel.x, bedVoxel.y, bedVoxel.z, bedVoxel.id, toolId, dt);
-  }
-
-  executeCombat(bot, dt) {
-    bot.miningActive = false;
-    const enemy = bot.targetEnemy || bot.nearest;
-    if (!enemy || (enemy.ref && (enemy.ref.eliminated || (enemy.isLocalPlayer && (player.eliminated || player.spectator || player.respawnCooldown > 0)) || (!enemy.isLocalPlayer && !enemy.ref.alive)))) {
-      bot.targetEnemy = null;
-      bot.stateLockUntil = 0;
-      return;
-    }
-
-    const dx = enemy.pos.x - bot.pos.x;
-    const dz = enemy.pos.z - bot.pos.z;
-    const dy = enemy.pos.y - bot.pos.y;
-    const dist = Math.max(0.001, Math.hypot(dx, dz));
-    const dirX = dx / dist;
-    const dirZ = dz / dist;
-
-    bot.lookAt(enemy.pos.x, enemy.pos.y + 1.35, enemy.pos.z);
-
-    // Strafe & close distance
-    bot.strafeTimer -= dt;
-    if (bot.strafeTimer <= 0) {
-      bot.strafeTimer = 0.45 + Math.random() * 0.55;
-      bot.strafeDir *= -1;
-    }
-
-    const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
-    const moveSpd = BOT_BASE_SPEED * diff.speed * (bot.botTalent.speed || 1.0) * (bot.wtapTimer > 0 ? 0.50 : 1.04);
-
-    // Long-range chase: follow the brain's WALK/JUMP/BRIDGE path instead of
-    // charging straight off the island edge into the void.
-    const usePathApproach = dist > 3.0 && bot.path && bot.path.length > 0;
-    if (usePathApproach) {
-      bot._hasMoveIntent = true;
-      this.executeNavigation(bot, dt);
-      bot.lookAt(enemy.pos.x, enemy.pos.y + 1.35, enemy.pos.z);
-    } else if (dist > 2.35) {
-      bot._hasMoveIntent = true;
-      const strafeWeight = dist < 5.0 ? 0.38 : 0.15;
-      // Refuse to charge over a gap: if the cell under the next step is air,
-      // stop and let the brain recompute a bridging path instead of walking
-      // straight off the island edge.
-      const probeX = Math.floor(bot.pos.x + dirX * 0.75);
-      const probeZ = Math.floor(bot.pos.z + dirZ * 0.75);
-      const probeY = Math.floor(bot.pos.y + 0.05);
-      const groundAhead = this.grid.isSolid(probeX, probeY, probeZ) ||
-        this.grid.isSolid(probeX, probeY - 1, probeZ) ||
-        this.grid.isSolid(probeX, probeY - 2, probeZ);
-      if (!groundAhead) {
         bot.forceRepath = true;
-        bot.vel.x *= Math.max(0, 1 - dt * 18);
-        bot.vel.z *= Math.max(0, 1 - dt * 18);
-      } else {
-        bot.vel.x = (dirX - dirZ * bot.strafeDir * strafeWeight) * moveSpd;
-        bot.vel.z = (dirZ + dirX * bot.strafeDir * strafeWeight) * moveSpd;
-        this.checkStepUpAndObstacles(bot, dirX, dirZ, dt);
+        bot.stateLockUntil = 0;
+      }
+    }
+
+    /* ==========================================================================
+       RANGED ATTACKS (Bow, Fireball, Ender Pearl) & EVASION
+       ======================================================================== */
+    detectIncomingRangedThreat(bot, diff) {
+      const ex = bot.pos.x, ey = bot.pos.y + 1.0, ez = bot.pos.z;
+
+      // 1. Check active projectiles heading toward the bot
+      const checkList = (list) => {
+        if (!Array.isArray(list)) return false;
+        for (let i = 0; i < list.length; i++) {
+          const p = list[i];
+          if (!p || !p.pos || !p.vel) continue;
+          if (p.owner === bot || p.ownerId === bot.id || p.teamName === bot.teamName) continue;
+          const toBotX = ex - p.pos.x;
+          const toBotY = ey - p.pos.y;
+          const toBotZ = ez - p.pos.z;
+          const dist = Math.hypot(toBotX, toBotY, toBotZ);
+          if (dist > 20 || dist < 0.5) continue;
+          const spd = Math.hypot(p.vel.x, p.vel.y, p.vel.z);
+          if (spd < 1.0) continue;
+          const dot = (p.vel.x * toBotX + p.vel.y * toBotY + p.vel.z * toBotZ) / (spd * dist);
+          if (dot > 0.86) {
+            bot.rangedThreatTimer = 0.55;
+            bot.rangedThreatDir = { x: p.vel.x / spd, z: p.vel.z / spd };
+            return true;
+          }
+        }
+        return false;
+      };
+
+      if (checkList(botProjectiles)) return;
+      if (typeof projectiles !== 'undefined' && checkList(projectiles)) return;
+
+      // 2. Check enemies aiming a bow or fireball directly at the bot
+      const checkShooter = (entPos, entYaw, heldId, isDrawing) => {
+        if (!entPos) return false;
+        const dx = ex - entPos.x;
+        const dz = ez - entPos.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist > 28 || dist < 4.5) return false;
+        const holdingRanged = isDrawing || heldId === 'bow' || heldId === 'fireball';
+        if (!holdingRanged) return false;
+        const lookX = -Math.sin(entYaw || 0);
+        const lookZ = -Math.cos(entYaw || 0);
+        const dot = (lookX * dx + lookZ * dz) / dist;
+        if (dot > 0.94 && Math.random() < (0.35 + diff.aim * 0.5)) {
+          bot.rangedThreatTimer = 0.45;
+          bot.rangedThreatDir = { x: dx / dist, z: dz / dist };
+          return true;
+        }
+        return false;
+      };
+
+      if (typeof player !== 'undefined' && player && !player.eliminated && !player.spectator && PLAYER_TEAM.name !== bot.teamName) {
+        const pHeld = player.heldItemId || (typeof getHeldItemId === 'function' ? getHeldItemId() : '');
+        const pDrawing = !!(player.bowDrawing || player.isBowDrawing || (player.bowCharge && player.bowCharge > 0));
+        if (checkShooter(player.pos, player.yaw, pHeld, pDrawing)) return;
       }
 
-      // Jump crit only when solid ground continues ahead (never leap into a gap).
-      if (bot.onGround && dist > 2.6 && dist < 4.4 && Math.abs(dy) <= 1.0 && Math.random() < 0.06) {
-        const aheadX = Math.floor(bot.pos.x + dirX * 0.9);
-        const aheadZ = Math.floor(bot.pos.z + dirZ * 0.9);
+      for (let i = 0; i < remotePlayers.length; i++) {
+        const rp = remotePlayers[i];
+        if (!rp || rp === bot || !rp.alive || rp.eliminated || rp.teamName === bot.teamName) continue;
+        if (checkShooter(rp.pos, rp.yaw, rp.heldItemId, rp.bowDrawing)) return;
+      }
+    }
+
+    applyRangedEvasion(bot, dt, diff) {
+      if (!bot.onGround) return;
+
+      // Periodically flip dodge direction so movement isn't predictable
+      if (Math.random() < dt * 2.5) {
+        bot.dodgeStrafeDir *= -1;
+      }
+
+      const tx = bot.rangedThreatDir.x || 0;
+      const tz = bot.rangedThreatDir.z || 0;
+      const perpX = -tz * bot.dodgeStrafeDir;
+      const perpZ = tx * bot.dodgeStrafeDir;
+
+      // On a narrow bridge, never strafe sideways into the void; instead place side cover if possible
+      if (isBotOnNarrowBridge(bot, this.grid)) {
+        if (bot.blockCount > 6 && bot.placeCooldown <= 0 && diff.build >= 0.75) {
+          const bx = Math.floor(bot.pos.x + Math.round(perpX));
+          const by = Math.floor(bot.pos.y + 1.0);
+          const bz = Math.floor(bot.pos.z + Math.round(perpZ));
+          if (!this.grid.isSolid(bx, by, bz) && this.grid.hasAdjacentSupport(bx, by, bz)) {
+            if (this.grid.placeBlock(bx, by, bz, bot.teamColor)) {
+              bot.blockCount--;
+              bot.blocks = bot.blockCount;
+              bot.placeCooldown = diff.placeCd || 0.16;
+            }
+          }
+        }
+        return;
+      }
+
+      // On solid ground, weave perpendicularly and occasionally jump to throw off arrow elevation
+      const dodgeSpd = BOT_BASE_SPEED * diff.speed * 0.85;
+      bot.vel.x += perpX * dodgeSpd * 0.55;
+      bot.vel.z += perpZ * dodgeSpd * 0.55;
+      bot._hasMoveIntent = true;
+
+      if (Math.random() < 0.05 * diff.aim) {
+        const aheadX = Math.floor(bot.pos.x + perpX * 0.8);
+        const aheadZ = Math.floor(bot.pos.z + perpZ * 0.8);
         if (this.hasSafeGroundBelow(aheadX, Math.floor(bot.pos.y + 0.05), aheadZ)) {
           bot.vel.y = BOT_JUMP_VELOCITY;
           bot.onGround = false;
         }
       }
-    } else {
-      // Combat strafe circle at melee range
-      bot.vel.x = (-dirZ * bot.strafeDir * 0.72) * moveSpd;
-      bot.vel.z = (dirX * bot.strafeDir * 0.72) * moveSpd;
     }
 
-    // Melee strike
-    if (dist <= 3.35 && Math.abs(dy) <= 2.4 && bot.attackTimer <= 0 && botCanSeeEntity(bot, enemy)) {
-      // Use Knockback Stick on narrow bridges, otherwise best sword
-      const onBridge = !this.grid.isSolid(Math.floor(bot.pos.x) + 1, Math.floor(bot.pos.y - 0.02), Math.floor(bot.pos.z)) &&
-                       !this.grid.isSolid(Math.floor(bot.pos.x) - 1, Math.floor(bot.pos.y - 0.02), Math.floor(bot.pos.z));
-      /* Switching to an axe against an active shield is what makes the 1.9
-         axe-disable work for bots too; it also deals axe damage on that hit. */
-      const targetShielded = !!(enemy.isLocalPlayer && typeof isShieldActive === 'function' && isShieldActive());
-      const useAxe = targetShielded && bot.axeIdx > 0;
-      if (useAxe) {
-        bot.setHeldSoon(bot.gearAxe());
-      } else if (bot.hasKbStick && onBridge && dist <= 4.2) {
-        bot.setHeldSoon('knockback_stick');
+    tryRangedAttack(bot, dt, diff) {
+      if (typeof botSpawnProjectile !== 'function') return;
+      const enemy = bot.targetEnemy || bot.nearest;
+      if (!enemy || !enemy.pos) {
+        bot.bowDrawTimer = 0;
+        return;
+      }
+
+      const dx = enemy.pos.x - bot.pos.x;
+      const dy = enemy.pos.y - bot.pos.y;
+      const dz = enemy.pos.z - bot.pos.z;
+      const dist = Math.hypot(dx, dz);
+
+      // Only use ranged weapons outside melee range and within 30 blocks with clear LOS
+      if (dist < 6.0 || dist > 30.0 || !botCanSeeEntity(bot, enemy)) {
+        bot.bowDrawTimer = 0;
+        return;
+      }
+
+      const evx = (enemy.vel && enemy.vel.x) || 0;
+      const evz = (enemy.vel && enemy.vel.z) || 0;
+      const spread = (1.05 - diff.aim) * 0.14;
+
+      // 1. Bow & Arrow attack (with realistic draw time + ballistic lead)
+      if (bot.hasBow && (bot.arrows || 0) > 0 && bot.rangedTimer <= 0) {
+        bot.setHeldSoon('bow');
+        bot.bowDrawTimer += dt;
+        const tFlight = dist / 28.0;
+        const predX = enemy.pos.x + evx * tFlight * diff.aim;
+        const predZ = enemy.pos.z + evz * tFlight * diff.aim;
+        const predY = enemy.pos.y + 1.15 + 0.5 * 14.0 * tFlight * tFlight;
+        bot.lookAt(predX, predY, predZ);
+
+        const requiredDraw = Math.max(0.55, 0.95 - diff.aim * 0.35);
+        if (bot.bowDrawTimer >= requiredDraw) {
+          bot.bowDrawTimer = 0;
+          bot.arrows--;
+          bot.rangedTimer = Math.max(0.95, 1.55 - diff.aim * 0.5);
+          bot.swingFlag = true;
+          bot.timers.swing = 0.25;
+          const aimVec = new THREE.Vector3(
+            (predX - bot.pos.x) + (Math.random() - 0.5) * spread * dist,
+            predY - botEyeY(bot),
+            (predZ - bot.pos.z) + (Math.random() - 0.5) * spread * dist
+          );
+          botSpawnProjectile(bot, 'arrow', aimVec);
+        }
+        return;
       } else {
-        bot.setHeldSoon(bot.gearSword());
+        bot.bowDrawTimer = 0;
       }
-      const weaponKind = useAxe ? 'axe' : 'sword';
-      const weaponMat = useAxe ? (BOT_SWORD_MATS[bot.axeIdx - 1] || 'wood') : (BOT_SWORD_MATS[bot.swordIdx] || 'wood');
-      const baseDmg = (TOOL_STATS[weaponKind][weaponMat] && TOOL_STATS[weaponKind][weaponMat].dmg) || 4;
-      const sharpLvl = (teamUpgrades[bot.teamName] && teamUpgrades[bot.teamName].sharpness) || 0;
-      const crit = !bot.onGround && bot.vel.y < -0.5;
-      const rawDmg = (baseDmg + sharpLvl * 1.25) * (crit ? COMBAT_1_9_CONFIG.crit.multiplier : 1.0) * diff.damage * (bot.botTalent.dmg || 1.0);
 
-      /* Sprint-reset knockback follows the same 0.4 + 0.5 config as the player. */
-      const botSprint = bot.wtapTimer <= 0;
-      const kbHoriz = bot.heldItemId === 'knockback_stick' ? 22 : knockbackFromSprint(botSprint);
-      const kbVert = bot.heldItemId === 'knockback_stick' ? 8.5 : knockbackVerticalFromSprint(botSprint);
-      const kbVec = new THREE.Vector3(dirX * kbHoriz, kbVert, dirZ * kbHoriz);
-      const botTool = (ITEMS[bot.heldItemId] && ITEMS[bot.heldItemId].tool) || 'sword';
+      // 2. Fireball attack (great for knocking enemies off bridges or pressuring approach)
+      if (bot.fireballs > 0 && bot.rangedTimer <= 0 && dist >= 7.0 && dist <= 24.0) {
+        const tFlight = dist / 18.0;
+        const predX = enemy.pos.x + evx * tFlight * diff.aim;
+        const predZ = enemy.pos.z + evz * tFlight * diff.aim;
+        const predY = enemy.pos.y + 0.45; // aim near feet/bridge for knockback
+        bot.setHeldSoon('fireball');
+        bot.lookAt(predX, predY, predZ);
+        bot.fireballs--;
+        bot.rangedTimer = 1.65;
+        bot.swingFlag = true;
+        bot.timers.swing = 0.25;
+        const aimVec = new THREE.Vector3(
+          (predX - bot.pos.x) + (Math.random() - 0.5) * spread * dist,
+          predY - botEyeY(bot),
+          (predZ - bot.pos.z) + (Math.random() - 0.5) * spread * dist
+        );
+        botSpawnProjectile(bot, 'fireball', aimVec);
+        return;
+      }
 
-      bot.attackTimer = Math.max(0.45, 0.65 - bot.botDifficulty * 0.06);
-      bot.wtapTimer = 0.14; // W-tap sprint reset for extra knockback
-      bot.swingFlag = true;
-      bot.timers.swing = 0.28;
+      // 3. Offensive Ender Pearl during a bridge rush across long island gaps
+      if (
+        bot.enderPearls > 0 &&
+        bot.rangedTimer <= 0 &&
+        bot.state === BOT_STATES.BRIDGE_RUSH &&
+        bot.health >= 12 &&
+        dist >= 16.0 &&
+        dist <= 27.0 &&
+        Math.abs(dy) <= 4.0
+      ) {
+        bot.enderPearls--;
+        bot.rangedTimer = 2.5;
+        const aimVec = new THREE.Vector3(dx, (dy + 1.5) + dist * 0.22, dz);
+        botSpawnProjectile(bot, 'ender_pearl', aimVec);
+      }
+    }
 
-      if (enemy.isLocalPlayer) {
-        if (typeof damagePlayer === 'function') {
-          damagePlayer(rawDmg, bot.name, false, [kbVec.x, kbVec.y, kbVec.z], { attackerPos: [bot.pos.x, bot.pos.y, bot.pos.z], tool: botTool, crit });
+    executeNavigation(bot, dt) {
+      bot.miningActive = false;
+      bot.setHeldSoon(bot.state === BOT_STATES.BRIDGE_RUSH && bot.blockCount > 0 ? ('b' + bot.teamColor) : bot.gearSword());
+
+      if (!bot.path || bot.path.length === 0) {
+        // Gently decelerate when waiting at generator/shop
+        bot.vel.x *= Math.max(0, 1 - dt * 14);
+        bot.vel.z *= Math.max(0, 1 - dt * 14);
+        bot.sneak = false;
+        bot.height = 1.8;
+        return;
+      }
+
+      const wp = bot.path[0];
+      const hDist = Math.hypot(wp.x - bot.pos.x, wp.z - bot.pos.z);
+
+      // Bridge waypoint execution
+      if (wp.action === 'BRIDGE') {
+        if (bot.blockCount <= 0) {
+          // Immediately abort bridging and return to generator
+          bot.path.length = 0;
+          bot.bridging = false;
+          bot.stateLockUntil = 0;
+          return;
         }
-      } else if (enemy.ref) {
-        if (enemy.ref.isBot) {
-          damageBot(enemy.ref, rawDmg, bot.name, kbVec);
+        bot.bridging = true;
+        bot._hasMoveIntent = true;
+        bot.setHeldSoon('b' + bot.teamColor);
+        stepBridgeWaypoint(bot, wp, this.grid);
+
+        const targetVoxel = { x: Math.floor(wp.x), y: Math.floor(wp.y) - 1, z: Math.floor(wp.z) };
+        if (this.grid.isSolid(targetVoxel.x, targetVoxel.y, targetVoxel.z) && hDist <= 0.34) {
+          bot.path.shift();
+        }
+        return;
+      }
+
+      // Standard WALK / JUMP waypoint execution
+      bot.bridging = false;
+      bot.sneak = false;
+      bot.height = 1.8;
+
+      if (hDist <= 0.32 && Math.abs(wp.y - bot.pos.y) <= 1.2) {
+        bot.path.shift();
+        if (bot.path.length === 0) {
+          bot.vel.x *= 0.3;
+          bot.vel.z *= 0.3;
+          return;
+        }
+      }
+
+      const nextWp = bot.path[0];
+      const dx = nextWp.x - bot.pos.x;
+      const dz = nextWp.z - bot.pos.z;
+      const dist = Math.max(0.001, Math.hypot(dx, dz));
+      const dirX = dx / dist;
+      const dirZ = dz / dist;
+
+      bot._hasMoveIntent = true;
+      bot.lookAt(nextWp.x, bot.pos.y + 1.5, nextWp.z);
+
+      const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
+      const speedMult = diff.speed * (bot.botTalent.speed || 1.0) * (bot.wtapTimer > 0 ? 0.55 : 1.0);
+      const moveSpd = BOT_BASE_SPEED * speedMult;
+
+      // Perpendicular strafe nudge if watchdog tick 1 fired (skip on narrow bridges)
+      let strafeX = 0, strafeZ = 0;
+      if (bot.nudgeTimer > 0 && !isBotOnNarrowBridge(bot, this.grid)) {
+        strafeX = -dirZ * bot.strafeDir * 0.65;
+        strafeZ = dirX * bot.strafeDir * 0.65;
+      }
+
+      bot.vel.x = (dirX + strafeX) * moveSpd;
+      bot.vel.z = (dirZ + strafeZ) * moveSpd;
+
+      // Trigger jump if waypoint explicitly requests JUMP
+      if (nextWp.action === 'JUMP' && bot.onGround && dist <= 1.15) {
+        bot.vel.y = BOT_JUMP_VELOCITY;
+        bot.onGround = false;
+      }
+
+      // Step-Up & Obstacle Check before entering next horizontal voxel
+      this.checkStepUpAndObstacles(bot, dirX, dirZ, dt);
+    }
+
+    checkStepUpAndObstacles(bot, dirX, dirZ, dt) {
+      const lookAhead = 0.62;
+      const nx = Math.floor(bot.pos.x + dirX * lookAhead);
+      const nz = Math.floor(bot.pos.z + dirZ * lookAhead);
+      const ny = Math.floor(bot.pos.y + 0.05);
+
+      const curX = Math.floor(bot.pos.x);
+      const curZ = Math.floor(bot.pos.z);
+      if (nx === curX && nz === curZ) return;
+
+      const footSolid = this.grid.isSolid(nx, ny, nz);
+      const headSolid = this.grid.isSolid(nx, ny + 1, nz);
+      const aboveHeadSolid = this.grid.isSolid(nx, ny + 2, nz);
+
+      // 1-block step-up: ny is solid, ny + 1 and ny + 2 are air -> automatic jump
+      if (footSolid && !headSolid && !aboveHeadSolid) {
+        if (bot.onGround) {
+          bot.vel.y = BOT_JUMP_VELOCITY;
+          bot.onGround = false;
+        }
+        return;
+      }
+
+      // 2-block wall: ny + 1 is solid -> mine if breakable defense block, else recalculate A*
+      if (headSolid) {
+        const wallY = headSolid ? (ny + 1) : ny;
+        const blockId = getBlock(nx, wallY, nz);
+        if (botIsPlayerPlacedBlock(nx, wallY, nz, blockId)) {
+          const toolId = botBestToolForBlock(bot, blockId);
+          bot.setHeldSoon(toolId);
+          bot.lookAt(nx + 0.5, wallY + 0.5, nz + 0.5);
+          this.mineVoxel(bot, nx, wallY, nz, blockId, toolId, dt);
         } else {
-          netSendTo(enemy.id, { t: 'dmg', target: enemy.id, amount: rawDmg, source: bot.name, kb: [kbVec.x, kbVec.y, kbVec.z], tool: botTool, crit, atk: [bot.pos.x, bot.pos.y, bot.pos.z] });
-          enemy.ref.flashHurt();
+          if (bot.badCells) bot.badCells.set(nx + ',' + nz, performance.now() + 5000);
+          bot.forceRepath = true;
+          bot.path.length = 0;
         }
       }
-      if (typeof SFX !== 'undefined' && typeof player !== 'undefined' && player && player.pos.distanceTo(bot.pos) < 24) {
-        SFX.hit(crit);
+    }
+
+    mineVoxel(bot, bx, by, bz, blockId, toolId, dt) {
+      const key = bx + ',' + by + ',' + bz;
+      if (!bot.mine || bot.mine.key !== key) {
+        bot.mine = {
+          key, x: bx, y: by, z: bz, id: blockId,
+          progress: 0,
+          duration: botCalcBreakTime(bot, blockId, toolId)
+        };
+      }
+      bot.miningActive = true;
+      bot.swingFlag = true;
+      bot.timers.swing = 0.24;
+      bot.mine.progress += dt;
+
+      if (bot.mine.progress >= bot.mine.duration) {
+        const def = BLOCKS[blockId];
+        bot.mine = null;
+        bot.miningActive = false;
+
+        if (def && def.bed) {
+          // Destroy both halves of the bed
+          const victimTeam = def.bed;
+          for (let oz = -1; oz <= 1; oz++) {
+            if (getBlock(bx, by, bz + oz) === blockId) {
+              applyRemoteBlock(bx, by, bz + oz, 0);
+              queueBlockChange(bx, by, bz + oz, 0);
+            }
+          }
+          if (!teamBedBroken[victimTeam]) {
+            teamBedBroken[victimTeam] = true;
+            recordBedBreak(bot.teamName, victimTeam);
+            netSend({ t: 'bed', team: victimTeam, by: bot.name, byTeam: bot.teamName });
+            updateStatusBar();
+            if (typeof addEventMessage === 'function') {
+              addEventMessage('<b style="color:#ff8888">' + victimTeam + "'s bed</b> was destroyed by <b>" + bot.name + '</b>', '#ff6666');
+            }
+            if (typeof SFX !== 'undefined') SFX.bed();
+          }
+          bot.stateLockUntil = 0;
+        } else {
+          applyRemoteBlock(bx, by, bz, 0);
+          queueBlockChange(bx, by, bz, 0);
+          botUnmarkPlacedBlock(bx, by, bz);
+          if (typeof SFX !== 'undefined' && typeof player !== 'undefined' && player && player.pos.distanceTo(bot.pos) < 28) {
+            SFX.breakBlock();
+          }
+        }
       }
     }
-  }
 
-  updateWatchdog(bot, dt, nowMs) {
-    if (!bot.lastCheckPos) {
-      bot.lastCheckPos = bot.pos.clone();
-      bot.stuckCheckTimer = 0;
-      return;
+    executeBreakBed(bot, dt) {
+      const targetTeam = bot.targetTeam || this.brain.selectTargetEnemyTeam(bot);
+      if (!targetTeam || teamBedBroken[targetTeam.name]) {
+        bot.mine = null;
+        bot.miningActive = false;
+        bot.stateLockUntil = 0;
+        return;
+      }
+
+      const bedVoxel = botFindBedTargetVoxel(bot, targetTeam);
+      if (!bedVoxel) {
+        // Approach bed if slightly out of reach
+        this.executeNavigation(bot, dt);
+        return;
+      }
+
+      // Equip best tool for the outer defense block (shears/pickaxe/axe)
+      const toolId = botBestToolForBlock(bot, bedVoxel.id);
+      bot.setHeldSoon(toolId);
+      bot.lookAt(bedVoxel.x + 0.5, bedVoxel.y + 0.4, bedVoxel.z + 0.5);
+
+      // Slow/stop horizontal drift while mining bed
+      bot.vel.x *= Math.max(0, 1 - dt * 16);
+      bot.vel.z *= Math.max(0, 1 - dt * 16);
+      bot.sneak = true;
+      bot.height = 1.5;
+
+      this.mineVoxel(bot, bedVoxel.x, bedVoxel.y, bedVoxel.z, bedVoxel.id, toolId, dt);
     }
 
-    bot.stuckCheckTimer += dt;
-    if (bot.stuckCheckTimer < 0.5) return; // Check every 500ms
+    executeCombat(bot, dt) {
+      bot.miningActive = false;
+      const enemy = bot.targetEnemy || bot.nearest;
+      if (!enemy || (enemy.ref && (enemy.ref.eliminated || (enemy.isLocalPlayer && (player.eliminated || player.spectator || player.respawnCooldown > 0)) || (!enemy.isLocalPlayer && !enemy.ref.alive)))) {
+        bot.targetEnemy = null;
+        bot.lastCombatTargetId = null;
+        bot.stateLockUntil = 0;
+        return;
+      }
 
-    const activelyMoving = bot._hasMoveIntent && !bot.miningActive && bot.state !== BOT_STATES.BREAK_BED;
-    if (activelyMoving) {
-      const disp = Math.hypot(bot.pos.x - bot.lastCheckPos.x, bot.pos.z - bot.lastCheckPos.z);
-      if (disp < 0.25) {
-        bot.stuckTicks = (bot.stuckTicks || 0) + 1;
+      const diff = BOT_DIFFICULTY[bot.botDifficulty] || BOT_DIFFICULTY[1];
 
-        if (bot.stuckTicks === 1) {
-          // 1 tick (0.5s): Trigger jump + perpendicular strafe nudge
-          if (bot.onGround) {
+      // Trigger human reaction delay whenever acquiring a new combat target
+      const targetKey = enemy.id || enemy.name || 'target';
+      if (bot.lastCombatTargetId !== targetKey) {
+        bot.lastCombatTargetId = targetKey;
+        bot.combatReactionTimer = (diff.reaction || 0.35) * (0.85 + Math.random() * 0.3);
+      }
+
+      const dx = enemy.pos.x - bot.pos.x;
+      const dz = enemy.pos.z - bot.pos.z;
+      const dy = enemy.pos.y - bot.pos.y;
+      const dist = Math.max(0.001, Math.hypot(dx, dz));
+      const dirX = dx / dist;
+      const dirZ = dz / dist;
+
+      // Strafe & spacing variation
+      bot.strafeTimer -= dt;
+      if (bot.strafeTimer <= 0) {
+        bot.strafeTimer = 0.55 + Math.random() * 0.65;
+        bot.strafeDir *= -1;
+      }
+
+      const moveSpd = BOT_BASE_SPEED * diff.speed * (bot.botTalent.speed || 1.0) * (bot.wtapTimer > 0 ? 0.52 : 1.0);
+      const onNarrowBridge = isBotOnNarrowBridge(bot, this.grid);
+      const hasBridgeWp = bot.path && bot.path.length > 0 && bot.path[0].action === 'BRIDGE';
+
+      // Check whether solid ground exists immediately ahead toward the enemy
+      const probeX = Math.floor(bot.pos.x + dirX * 0.75);
+      const probeZ = Math.floor(bot.pos.z + dirZ * 0.75);
+      const probeY = Math.floor(bot.pos.y + 0.05);
+      const groundAhead =
+        this.grid.isSolid(probeX, probeY, probeZ) ||
+        this.grid.isSolid(probeX, probeY - 1, probeZ) ||
+        this.grid.isSolid(probeX, probeY - 2, probeZ);
+
+      // 1. Gap-closing & Bridge Combat: if a gap lies between the bot and the enemy
+      // (or a BRIDGE path is active) and we're outside melee reach, keep bridging
+      // instead of freezing in a sneak standoff at the edge!
+      if (dist > 2.85 && (hasBridgeWp || !groundAhead)) {
+        if (hasBridgeWp) {
+          bot._hasMoveIntent = true;
+          this.executeNavigation(bot, dt);
+        } else if (bot.blockCount > 0) {
+          // Place a direct bridge block toward the opponent across the gap
+          const stepX = Math.abs(dirX) >= Math.abs(dirZ) ? Math.sign(dirX) : 0;
+          const stepZ = Math.abs(dirZ) > Math.abs(dirX) ? Math.sign(dirZ) : 0;
+          const curGx = Math.floor(bot.pos.x);
+          const curGz = Math.floor(bot.pos.z);
+          const nextWp = {
+            x: curGx + stepX + 0.5,
+            y: probeY,
+            z: curGz + stepZ + 0.5,
+            action: 'BRIDGE'
+          };
+          bot.bridging = true;
+          bot._hasMoveIntent = true;
+          bot.setHeldSoon('b' + bot.teamColor);
+          stepBridgeWaypoint(bot, nextWp, this.grid);
+        } else {
+          // Out of blocks at a gap: back away safely so we aren't a sitting duck
+          bot.vel.x = -dirX * moveSpd * 0.6;
+          bot.vel.z = -dirZ * moveSpd * 0.6;
+        }
+      }
+      // 2. Standard path approach when chasing around obstacles at medium distance
+      else if (dist > 3.6 && bot.path && bot.path.length > 0 && groundAhead) {
+        bot._hasMoveIntent = true;
+        this.executeNavigation(bot, dt);
+        bot.lookAt(enemy.pos.x, enemy.pos.y + 1.35, enemy.pos.z);
+      }
+      // 3. Advancing on solid ground or along a narrow 1-block bridge
+      else if (dist > 2.35) {
+        bot.lookAt(enemy.pos.x, enemy.pos.y + 1.35, enemy.pos.z);
+        bot._hasMoveIntent = true;
+        // Never strafe sideways on a 1-block bridge (prevents ledge-clamp freeze)
+        const strafeWeight = onNarrowBridge ? 0.0 : (dist < 4.8 ? 0.34 : 0.14);
+        bot.vel.x = (dirX - dirZ * bot.strafeDir * strafeWeight) * moveSpd;
+        bot.vel.z = (dirZ + dirX * bot.strafeDir * strafeWeight) * moveSpd;
+        this.checkStepUpAndObstacles(bot, dirX, dirZ, dt);
+
+        // Jump crit only on wide solid ground (never leap on a narrow bridge)
+        if (!onNarrowBridge && bot.onGround && dist > 2.5 && dist < 4.2 && Math.abs(dy) <= 1.0 && Math.random() < 0.05) {
+          const aheadX = Math.floor(bot.pos.x + dirX * 0.9);
+          const aheadZ = Math.floor(bot.pos.z + dirZ * 0.9);
+          if (this.hasSafeGroundBelow(aheadX, Math.floor(bot.pos.y + 0.05), aheadZ)) {
             bot.vel.y = BOT_JUMP_VELOCITY;
             bot.onGround = false;
           }
-          bot.strafeDir *= -1;
-          bot.nudgeTimer = 0.35;
-        } else if (bot.stuckTicks === 2) {
-          // 2 ticks (1.0s): Force A* path recalculation from current snapped voxel
-          const aheadX = Math.floor(bot.pos.x - Math.sin(bot.targetYaw) * 0.8);
-          const aheadZ = Math.floor(bot.pos.z - Math.cos(bot.targetYaw) * 0.8);
-          if (bot.badCells) bot.badCells.set(aheadX + ',' + aheadZ, nowMs + 6000);
-          bot.path.length = 0;
-          bot.forceRepath = true;
-        } else if (bot.stuckTicks >= 3) {
-          // 3+ ticks (1.5s): Abort target, clear path queue, transition to GATHER_GEN or DEFEND_BASE
-          bot.targetEnemy = null;
-          bot.targetTeam = null;
-          bot.path.length = 0;
-          bot.bridging = false;
-          bot.mine = null;
-          bot.miningActive = false;
+        }
+      }
+      // 4. Close-quarters melee range (<= 2.35 blocks)
+      else {
+        bot.lookAt(enemy.pos.x, enemy.pos.y + 1.35, enemy.pos.z);
+        bot._hasMoveIntent = true;
+        if (onNarrowBridge) {
+          // Hold steady or press gently forward on a 1-block bridge instead of freezing sideways
+          const push = dist > 1.75 ? 0.45 : 0.0;
+          bot.vel.x = dirX * moveSpd * push;
+          bot.vel.z = dirZ * moveSpd * push;
+        } else {
+          // Human-like strafe with slight spacing adjustment
+          const radial = dist < 1.75 ? -0.25 : 0.12;
+          bot.vel.x = (dirX * radial - dirZ * bot.strafeDir * 0.62) * moveSpd;
+          bot.vel.z = (dirZ * radial + dirX * bot.strafeDir * 0.62) * moveSpd;
+        }
+      }
+
+      // Human melee reach (~3.0 blocks), aim cone check, and reaction delay gate
+      const maxMeleeReach = 2.85 + (diff.aim || 0.8) * 0.25;
+      const desiredYaw = Math.atan2(-dx, -dz);
+      const yawErr = Math.abs(botWrapAngle(desiredYaw - bot.yaw));
+      const maxAimCone = (1.15 - (diff.aim || 0.8)) * 0.85 + 0.14;
+
+      // If enemy is behind the bot, require a brief human turn-reaction window
+      if (yawErr > 1.25 && bot.combatReactionTimer <= 0) {
+        bot.combatReactionTimer = (diff.reaction || 0.35) * 0.55;
+      }
+
+      if (
+        dist <= maxMeleeReach &&
+        Math.abs(dy) <= 2.3 &&
+        bot.attackTimer <= 0 &&
+        bot.combatReactionTimer <= 0 &&
+        yawErr <= maxAimCone &&
+        botCanSeeEntity(bot, enemy)
+      ) {
+        // Use Knockback Stick on narrow bridges, otherwise best sword (or axe vs shield)
+        const targetShielded = !!(enemy.isLocalPlayer && typeof isShieldActive === 'function' && isShieldActive());
+        const useAxe = targetShielded && bot.axeIdx > 0;
+        if (useAxe) {
+          bot.setHeldSoon(bot.gearAxe());
+        } else if (bot.hasKbStick && onNarrowBridge && dist <= 3.4) {
+          bot.setHeldSoon('knockback_stick');
+        } else {
+          bot.setHeldSoon(bot.gearSword());
+        }
+        const weaponKind = useAxe ? 'axe' : 'sword';
+        const weaponMat = useAxe ? (BOT_SWORD_MATS[bot.axeIdx - 1] || 'wood') : (BOT_SWORD_MATS[bot.swordIdx] || 'wood');
+        const baseDmg = (TOOL_STATS[weaponKind][weaponMat] && TOOL_STATS[weaponKind][weaponMat].dmg) || 4;
+        const sharpLvl = (teamUpgrades[bot.teamName] && teamUpgrades[bot.teamName].sharpness) || 0;
+        const crit = !bot.onGround && bot.vel.y < -0.5;
+        const rawDmg = (baseDmg + sharpLvl * 1.25) * (crit ? COMBAT_1_9_CONFIG.crit.multiplier : 1.0) * diff.damage * (bot.botTalent.dmg || 1.0);
+
+        // Probabilistic W-tap sprint reset based on difficulty (diff.wtap)
+        const didWtap = Math.random() < (diff.wtap || 0.5);
+        const botSprint = didWtap && bot.wtapTimer <= 0 && !bot.sneak;
+        const kbHoriz = bot.heldItemId === 'knockback_stick' ? 22 : knockbackFromSprint(botSprint);
+        const kbVert = bot.heldItemId === 'knockback_stick' ? 8.5 : knockbackVerticalFromSprint(botSprint);
+        const kbVec = new THREE.Vector3(dirX * kbHoriz, kbVert, dirZ * kbHoriz);
+        const botTool = (ITEMS[bot.heldItemId] && ITEMS[bot.heldItemId].tool) || 'sword';
+
+        // Human swing cooldown + slight timing variance
+        const baseCd = Math.max(0.50, 0.72 - bot.botDifficulty * 0.06);
+        const jitter = Math.random() * 0.16 * (1.1 - (diff.aim || 0.8));
+        bot.attackTimer = baseCd + jitter;
+        if (didWtap) bot.wtapTimer = 0.14;
+        bot.swingFlag = true;
+        bot.timers.swing = 0.28;
+
+        if (enemy.isLocalPlayer) {
+          if (typeof damagePlayer === 'function') {
+            damagePlayer(rawDmg, bot.name, false, [kbVec.x, kbVec.y, kbVec.z], { attackerPos: [bot.pos.x, bot.pos.y, bot.pos.z], tool: botTool, crit });
+          }
+        } else if (enemy.ref) {
+          if (enemy.ref.isBot) {
+            damageBot(enemy.ref, rawDmg, bot.name, kbVec);
+          } else {
+            netSendTo(enemy.id, { t: 'dmg', target: enemy.id, amount: rawDmg, source: bot.name, kb: [kbVec.x, kbVec.y, kbVec.z], tool: botTool, crit, atk: [bot.pos.x, bot.pos.y, bot.pos.z] });
+            enemy.ref.flashHurt();
+          }
+        }
+        if (typeof SFX !== 'undefined' && typeof player !== 'undefined' && player && player.pos.distanceTo(bot.pos) < 24) {
+          SFX.hit(crit);
+        }
+      }
+    }
+
+    updateWatchdog(bot, dt, nowMs) {
+      if (!bot.lastCheckPos) {
+        bot.lastCheckPos = bot.pos.clone();
+        bot.stuckCheckTimer = 0;
+        return;
+      }
+
+      bot.stuckCheckTimer += dt;
+      if (bot.stuckCheckTimer < 0.5) return; // Check every 500ms
+
+      const activelyMoving = bot._hasMoveIntent && !bot.miningActive && !bot.isPillaringUp && bot.state !== BOT_STATES.BREAK_BED;
+      if (activelyMoving) {
+        const disp = Math.hypot(bot.pos.x - bot.lastCheckPos.x, bot.pos.z - bot.lastCheckPos.z);
+        if (disp < 0.25) {
+          bot.stuckTicks = (bot.stuckTicks || 0) + 1;
+
+          if (bot.stuckTicks === 1) {
+            // 1 tick (0.5s): Trigger jump + perpendicular strafe nudge (safe on ground)
+            if (bot.onGround && !isBotOnNarrowBridge(bot, this.grid)) {
+              bot.vel.y = BOT_JUMP_VELOCITY;
+              bot.onGround = false;
+            }
+            bot.strafeDir *= -1;
+            bot.nudgeTimer = 0.35;
+          } else if (bot.stuckTicks === 2) {
+            // 2 ticks (1.0s): Force A* path recalculation from current snapped voxel
+            const aheadX = Math.floor(bot.pos.x - Math.sin(bot.targetYaw) * 0.8);
+            const aheadZ = Math.floor(bot.pos.z - Math.cos(bot.targetYaw) * 0.8);
+            if (bot.badCells) bot.badCells.set(aheadX + ',' + aheadZ, nowMs + 6000);
+            bot.path.length = 0;
+            bot.forceRepath = true;
+          } else if (bot.stuckTicks >= 3) {
+            // 3+ ticks (1.5s): Abort target, clear path queue, transition to GATHER_GEN or DEFEND_BASE
+            bot.targetEnemy = null;
+            bot.targetTeam = null;
+            bot.path.length = 0;
+            bot.bridging = false;
+            bot.mine = null;
+            bot.miningActive = false;
+            bot.stuckTicks = 0;
+            bot.stuckAborted = true;
+            bot.stateLockUntil = 0;
+            bot.state = bot.bedThreat ? BOT_STATES.DEFEND_BASE : BOT_STATES.GATHER_GEN;
+          }
+        } else {
           bot.stuckTicks = 0;
-          bot.stuckAborted = true;
-          bot.stateLockUntil = 0;
-          bot.state = bot.bedThreat ? BOT_STATES.DEFEND_BASE : BOT_STATES.GATHER_GEN;
         }
       } else {
         bot.stuckTicks = 0;
       }
-    } else {
-      bot.stuckTicks = 0;
+
+      bot.lastCheckPos.copy(bot.pos);
+      bot.stuckCheckTimer = 0;
     }
 
-    bot.lastCheckPos.copy(bot.pos);
-    bot.stuckCheckTimer = 0;
-  }
-
-  hasSafeGroundBelow(gx, gy, gz) {
-    for (let drop = 1; drop <= 3; drop++) {
-      if (this.grid.isSolid(gx, gy - drop, gz)) return true;
+    hasSafeGroundBelow(gx, gy, gz) {
+      for (let drop = 1; drop <= 3; drop++) {
+        if (this.grid.isSolid(gx, gy - drop, gz)) return true;
+      }
+      return false;
     }
-    return false;
-  }
 
-  integratePhysics(bot, dt) {
-    const prevOnGround = bot.onGround;
+    integratePhysics(bot, dt) {
+      const prevOnGround = bot.onGround;
 
-    // Ledge Safety Clamp: when not executing an active bridge waypoint, prevent horizontal
-    // velocity from pushing the bot off an edge where (nextX, gy - 1, nextZ) is air
-    const activeBridgeWp = bot.path && bot.path.length > 0 && bot.path[0].action === 'BRIDGE';
-    if (bot.onGround && !bot.bridging && !activeBridgeWp && (bot.knockbackTime || 0) <= 0) {
-      const gy = Math.floor(bot.pos.y + 0.05);
-      const nextX = bot.pos.x + bot.vel.x * dt;
-      const nextZ = bot.pos.z + bot.vel.z * dt;
-      const curGx = Math.floor(bot.pos.x);
-      const curGz = Math.floor(bot.pos.z);
-      const nextGx = Math.floor(nextX);
-      const nextGz = Math.floor(nextZ);
+      // Ledge Safety Clamp: when not executing an active bridge waypoint or pillaring,
+      // prevent horizontal velocity from pushing the bot off an edge into air
+      const activeBridgeWp = bot.path && bot.path.length > 0 && bot.path[0].action === 'BRIDGE';
+      if (bot.onGround && !bot.bridging && !activeBridgeWp && !bot.isPillaringUp && (bot.knockbackTime || 0) <= 0) {
+        const gy = Math.floor(bot.pos.y + 0.05);
+        const nextX = bot.pos.x + bot.vel.x * dt;
+        const nextZ = bot.pos.z + bot.vel.z * dt;
+        const curGx = Math.floor(bot.pos.x);
+        const curGz = Math.floor(bot.pos.z);
+        const nextGx = Math.floor(nextX);
+        const nextGz = Math.floor(nextZ);
 
-      // Allow stepping off only if an active path waypoint explicitly routes to that cell
-      const wpAllowsCell = (gx, gz) => {
-        if (!bot.path || bot.path.length === 0) return false;
-        const w0 = bot.path[0];
-        if (Math.floor(w0.x) === gx && Math.floor(w0.z) === gz) return true;
-        if (bot.path.length > 1) {
-          const w1 = bot.path[1];
-          if (Math.floor(w1.x) === gx && Math.floor(w1.z) === gz) return true;
+        // Allow stepping off only if an active path waypoint explicitly routes to that cell
+        const wpAllowsCell = (gx, gz) => {
+          if (!bot.path || bot.path.length === 0) return false;
+          const w0 = bot.path[0];
+          if (Math.floor(w0.x) === gx && Math.floor(w0.z) === gz) return true;
+          if (bot.path.length > 1) {
+            const w1 = bot.path[1];
+            if (Math.floor(w1.x) === gx && Math.floor(w1.z) === gz) return true;
+          }
+          return false;
+        };
+
+        if (nextGx !== curGx && !this.hasSafeGroundBelow(nextGx, gy, curGz) && !wpAllowsCell(nextGx, curGz)) {
+          bot.vel.x = 0;
+          bot.sneak = true;
         }
-        return false;
-      };
-
-      if (nextGx !== curGx && !this.hasSafeGroundBelow(nextGx, gy, curGz) && !wpAllowsCell(nextGx, curGz)) {
-        bot.vel.x = 0;
-        bot.sneak = true;
-      }
-      if (nextGz !== curGz && !this.hasSafeGroundBelow(curGx, gy, nextGz) && !wpAllowsCell(curGx, nextGz)) {
-        bot.vel.z = 0;
-        bot.sneak = true;
-      }
-    }
-
-    if ((bot.knockbackTime || 0) > 0) {
-      bot.knockbackTime = Math.max(0, bot.knockbackTime - dt);
-      // Bleed off the horizontal shove so the hit reads as a push, not a slide.
-      const kbDrag = Math.max(0, 1 - dt * 4.5);
-      bot.vel.x *= kbDrag;
-      bot.vel.z *= kbDrag;
-    }
-
-    // Gravity & ladder physics
-    if (isInLadderBlock(bot.pos)) {
-      bot.vel.y = bot._hasMoveIntent ? 4.0 : 0;
-    } else {
-      bot.vel.y = Math.max(-TERMINAL_VELOCITY, bot.vel.y - BOT_GRAVITY * dt);
-    }
-
-    // Axis-by-axis AABB voxel resolution
-    bot.onGround = false;
-    bot.pos.x += bot.vel.x * dt;
-    resolveAxisFor(bot, 0, bot.vel.x * dt);
-
-    bot.pos.z += bot.vel.z * dt;
-    resolveAxisFor(bot, 2, bot.vel.z * dt);
-
-    bot.pos.y += bot.vel.y * dt;
-    resolveAxisFor(bot, 1, bot.vel.y * dt);
-
-    if (!bot.onGround && checkGroundFor(bot)) {
-      bot.onGround = true;
-    }
-
-    // Slippery ice damping vs normal ground friction
-    if (bot.onGround && isOnSlippery(bot.pos)) {
-      bot.vel.x *= 0.96;
-      bot.vel.z *= 0.96;
-    }
-
-    // Fall height & landing damage
-    if (bot.onGround || bot.vel.y > 0) {
-      if (!prevOnGround && bot.onGround) {
-        const fallDist = bot.maxFallY - bot.pos.y;
-        if (fallDist > 3.5 && performance.now() > (bot.noFallDamageUntil || 0)) {
-          damageBot(bot, Math.floor(fallDist - 3.0), 'Fall', null, true);
+        if (nextGz !== curGz && !this.hasSafeGroundBelow(curGx, gy, nextGz) && !wpAllowsCell(curGx, nextGz)) {
+          bot.vel.z = 0;
+          bot.sneak = true;
         }
       }
-      bot.maxFallY = bot.pos.y;
-    }
 
-    // Void elimination
-    if (bot.pos.y < -6) {
-      const killer = (bot.lastAttacker && (performance.now() - bot.lastAttackAt < 10000)) ? bot.lastAttacker : 'Void';
-      killBot(bot, killer);
+      if ((bot.knockbackTime || 0) > 0) {
+        bot.knockbackTime = Math.max(0, bot.knockbackTime - dt);
+        // Bleed off the horizontal shove so the hit reads as a push, not a slide.
+        const kbDrag = Math.max(0, 1 - dt * 4.5);
+        bot.vel.x *= kbDrag;
+        bot.vel.z *= kbDrag;
+      }
+
+      // Gravity & ladder physics
+      if (isInLadderBlock(bot.pos)) {
+        bot.vel.y = bot._hasMoveIntent ? 4.0 : 0;
+      } else {
+        bot.vel.y = Math.max(-TERMINAL_VELOCITY, bot.vel.y - BOT_GRAVITY * dt);
+      }
+
+      // Axis-by-axis AABB voxel resolution
+      bot.onGround = false;
+      bot.pos.x += bot.vel.x * dt;
+      resolveAxisFor(bot, 0, bot.vel.x * dt);
+
+      bot.pos.z += bot.vel.z * dt;
+      resolveAxisFor(bot, 2, bot.vel.z * dt);
+
+      bot.pos.y += bot.vel.y * dt;
+      resolveAxisFor(bot, 1, bot.vel.y * dt);
+
+      if (!bot.onGround && checkGroundFor(bot)) {
+        bot.onGround = true;
+      }
+
+      // Slippery ice damping vs normal ground friction
+      if (bot.onGround && isOnSlippery(bot.pos)) {
+        bot.vel.x *= 0.96;
+        bot.vel.z *= 0.96;
+      }
+
+      // Fall height & landing damage
+      if (bot.onGround || bot.vel.y > 0) {
+        if (!prevOnGround && bot.onGround) {
+          const fallDist = bot.maxFallY - bot.pos.y;
+          if (fallDist > 3.5 && performance.now() > (bot.noFallDamageUntil || 0)) {
+            damageBot(bot, Math.floor(fallDist - 3.0), 'Fall', null, true);
+          }
+        }
+        bot.maxFallY = bot.pos.y;
+      }
+
+      // Void elimination
+      if (bot.pos.y < -6) {
+        const killer = (bot.lastAttacker && (performance.now() - bot.lastAttackAt < 10000)) ? bot.lastAttacker : 'Void';
+        killBot(bot, killer);
+      }
     }
   }
-}
 
-const botMotor = new BotMotor(worldGrid, voxelPathfinder, botBrain);
-
+  const botMotor = new BotMotor(worldGrid, voxelPathfinder, botBrain);
 /* ============================================================================
    BOT ENTITY CLASS & LIFECYCLE INTEGRATION
    ========================================================================== */
