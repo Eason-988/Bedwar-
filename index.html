@@ -2,7 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>:root{--app-vw:100vw;--app-vh:100vh;--app-top:0px;--app-left:0px}@supports (height:100dvh){:root{--app-vh:100dvh}}*{box-sizing:border-box}html{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#8ec9ff}body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;margin:0;padding:0;overflow:hidden;overscroll-behavior:none;background:#8ec9ff;font-family:'Courier New',monospace;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}canvas{display:block;touch-action:none}#hud{position:fixed;top:var(--app-top);left:var(--app-left);width:var(--app-vw);height:var(--app-vh);pointer-events:none;color:#fff;z-index:10;overflow:hidden}#crosshair{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%)}#crosshair:before,#crosshair:after{content:'';position:absolute;background:#fff;mix-blend-mode:difference;opacity:.9}#crosshair:before{left:50%;top:0;width:2px;height:100%;transform:translateX(-50%)}#crosshair:after{top:50%;left:0;height:2px;width:100%;transform:translateY(-50%)}#cooldownBar{position:absolute;left:50%;top:calc(50% + 18px);transform:translateX(-50%);width:80px;height:5px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.35);border-radius:2px;overflow:hidden;display:none;box-shadow:0 0 4px rgba(0,0,0,.6)}#cooldownBar.show{display:block}#cooldownFill{height:100%;width:0%;background:linear-gradient(90deg,#ffe9a0,#ffd24a);transition:width .02s linear}#hotbar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:3px;padding:4px;background:rgba(0,0,0,.35);border:2px solid rgba(0,0,0,.5);border-radius:3px}.slot{width:46px;height:46px;background:rgba(255,255,255,.10);border:2px solid rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center}.slot.sel{border-color:#fff;background:rgba(255,255,255,.28)}.slot .icon{width:32px;height:32px;background-repeat:no-repeat;image-rendering:pixelated}.slot .cnt{position:absolute;right:2px;bottom:0;font-size:12px;font-weight:bold;text-shadow:1px 1px 0 #000,-1px 1px 0 #000}
+<style>:root{--app-vw:100vw;--app-vh:100vh;--app-top:0px;--app-left:0px}@supports (height:100dvh){:root{--app-vh:100dvh}}*{box-sizing:border-box}html{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#8ec9ff}body{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;margin:0;padding:0;overflow:hidden;overscroll-behavior:none;background:#8ec9ff;font-family:'Courier New',monospace;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}canvas{display:block;touch-action:none}#hud{position:fixed;top:var(--app-top);left:var(--app-left);width:var(--app-vw);height:var(--app-vh);pointer-events:none;color:#fff;z-index:10;overflow:hidden}#crosshair{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%)}#crosshair:before,#crosshair:after{content:'';position:absolute;background:#fff;mix-blend-mode:difference;opacity:.9}#crosshair:before{left:50%;top:0;width:2px;height:100%;transform:translateX(-50%)}#crosshair:after{top:50%;left:0;height:2px;width:100%;transform:translateY(-50%)}#cooldownBar{position:absolute;left:50%;top:calc(50% + 18px);transform:translateX(-50%);width:96px;height:6px;background:rgba(0,0,0,.62);border:1px solid rgba(255,255,255,.35);border-radius:2px;overflow:hidden;display:none;box-shadow:0 0 4px rgba(0,0,0,.7)}#cooldownBar.show{display:block}#cooldownBar.ready{border-color:rgba(150,255,185,.9);box-shadow:0 0 7px rgba(120,255,170,.55)}#cooldownFill{height:100%;width:0%;background:linear-gradient(90deg,#ffe9a0,#ffd24a);transition:width .02s linear}#cooldownBar.ready #cooldownFill{background:linear-gradient(90deg,#a6ffc4,#34d46e)}#cooldownTick{position:absolute;left:90%;top:0;width:1px;height:100%;background:rgba(255,255,255,.5)}#offhandSlot{position:absolute;bottom:14px;left:calc(50% - 291px);width:46px;height:46px;background:rgba(255,255,255,.10);border:2px solid rgba(0,0,0,.45);border-radius:3px;display:none;align-items:center;justify-content:center}#offhandSlot.show{display:flex}#offhandSlot.blocking{border-color:#8fe0ff;box-shadow:0 0 10px rgba(110,205,255,.75);background:rgba(120,200,255,.22)}#offhandSlot .icon{width:32px;height:32px;background-repeat:no-repeat;image-rendering:pixelated}#offhandSlot .oh-label{position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:1px;color:rgba(255,255,255,.75);white-space:nowrap}#offhandSlot .oh-dur{position:absolute;left:3px;right:3px;bottom:2px;height:4px;background:rgba(0,0,0,.72);border:1px solid rgba(0,0,0,.6);border-radius:1px;overflow:hidden;display:none}#offhandSlot .oh-dur i{display:block;height:100%;width:100%;background:#5ef07a;transition:width .12s linear,background .12s linear}#offhandSlot .oh-cd{position:absolute;inset:0;display:none;overflow:hidden;pointer-events:none;border-radius:1px}#offhandSlot.cooldown .oh-cd{display:block}#offhandSlot .oh-cd i{position:absolute;left:0;right:0;bottom:0;height:0;background:rgba(0,0,0,.68)}#offhandSlot .oh-cd b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ffb07a;font-size:11px;letter-spacing:.3px;text-shadow:1px 1px 0 #000}#hotbar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:3px;padding:4px;background:rgba(0,0,0,.35);border:2px solid rgba(0,0,0,.5);border-radius:3px}.slot{width:46px;height:46px;background:rgba(255,255,255,.10);border:2px solid rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center}.slot.sel{border-color:#fff;background:rgba(255,255,255,.28)}.slot .icon{width:32px;height:32px;background-repeat:no-repeat;image-rendering:pixelated}.slot .cnt{position:absolute;right:2px;bottom:0;font-size:12px;font-weight:bold;text-shadow:1px 1px 0 #000,-1px 1px 0 #000}
 #leftPanel{position:absolute;left:10px;top:10px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;max-width:300px;pointer-events:none}#info{font-size:13px;line-height:1.65;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.28);padding:8px 12px;border-radius:5px;transition:opacity .2s}#info.hidden{display:none}#info .k{color:#9fe0ff}#statusBar{font-size:13px;line-height:1.7;color:#fff;background:rgba(0,0,0,.4);padding:8px 12px;border-radius:5px;text-shadow:1px 1px 0 #000;min-width:168px}#statusBar .team-row{display:flex;align-items:center;gap:6px;padding:2px 0}#statusBar .team-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,.5)}#statusBar .bed-ok{color:#5eff8a;font-weight:bold}#statusBar .bed-bad{color:#ff4444;font-weight:bold}#statusBar .dead{color:#888;text-decoration:line-through}
 #healthBar{position:absolute;bottom:74px;left:calc(50% - 225px);pointer-events:none}
 #armorCanvas{display:block;margin-bottom:1px}
@@ -284,6 +284,10 @@ body.touch #hotbar{left:50%;bottom:4px;gap:2px;padding:3px;z-index:71}
 body.touch .slot{width:30px;height:30px;border-width:1px}
 body.touch .slot .icon{width:20px;height:20px;background-size:contain}
 body.touch .slot .cnt{font-size:9px;right:1px;bottom:0}
+body.touch #offhandSlot{bottom:4px;left:calc(50% - 189px);width:34px;height:34px;z-index:71}
+body.touch #offhandSlot .icon{width:22px;height:22px;background-size:contain}
+body.touch #offhandSlot .oh-label{font-size:7px;bottom:-10px}
+body.touch #offhandSlot .oh-cd b{font-size:9px}
 body.touch #healthBar{left:50%;bottom:44px;transform:translateX(-50%);z-index:71}
 body.touch #healthBar canvas{max-width:min(212px,54vw);height:auto}
 body.touch #effectDisplay{left:8px;bottom:140px;font-size:9px;padding:3px 7px}
@@ -337,6 +341,10 @@ body.touch #hint b{font-size:14px;letter-spacing:2px}
   body.touch .slot{width:23px;height:23px}
   body.touch .slot .icon{width:15px;height:15px}
   body.touch .slot .cnt{font-size:8px}
+  body.touch #offhandSlot{left:calc(50% - 145px);width:28px;height:28px}
+  body.touch #offhandSlot .icon{width:18px;height:18px}
+  body.touch #offhandSlot .oh-dur{bottom:1px;height:3px}
+  body.touch #offhandSlot .oh-cd b{font-size:8px}
   body.touch #tbMine{width:56px;height:56px;right:8px;bottom:8px;font-size:10px}
   body.touch #tbPlace{width:46px;height:46px;right:64px;bottom:70px}
   body.touch #tbJump{width:48px;height:48px;right:8px;bottom:122px}
@@ -352,6 +360,8 @@ body.touch #hint b{font-size:14px;letter-spacing:2px}
 @media (max-width:340px) and (orientation:portrait){
   body.touch .slot{width:20px;height:20px}
   body.touch .slot .icon{width:14px;height:14px}
+  body.touch #offhandSlot{left:calc(50% - 126px);width:24px;height:24px}
+  body.touch #offhandSlot .icon{width:15px;height:15px}
   body.touch #tbMine{right:6px;bottom:6px;width:52px;height:52px}
 }
 
@@ -696,7 +706,7 @@ body.mc-chat-hidden #chatPanel{display:none!important}
 </style></head><body>
 <div id="hud">
   <div id="crosshair"></div>
-  <div id="cooldownBar"><div id="cooldownFill"></div></div>
+  <div id="cooldownBar"><div id="cooldownFill"></div><div id="cooldownTick"></div></div>
   <div id="bowChargeWrap"><div id="bowChargeFill"></div></div>
   <div id="leftPanel">
     <div id="pingMeter" class="ping-idle"><span class="ping-bars"><i></i><i></i><i></i><i></i></span><span id="pingText">PING -- ms</span></div>
@@ -704,7 +714,8 @@ body.mc-chat-hidden #chatPanel{display:none!important}
       <div><span class="k">WASD</span> move &nbsp; <span class="k">Space</span> jump</div>
       <div><span class="k">Shift</span> sneak &nbsp; <span class="k">Ctrl</span>/2x W sprint</div>
       <div><span class="k">LMB</span> mine/attack &nbsp; <span class="k">RMB</span> place/use/eat/shoot/throw</div>
-      <div><span class="k">E</span> inventory/shop &nbsp; <span class="k">F5</span> camera &nbsp; <span class="k">1-9</span> hotbar</div>
+      <div><span class="k">Shield</span> off-hand &middot; hold <span class="k">RMB</span> to block &middot; axe disables it</div>
+      <div><span class="k">F</span> swap off-hand &nbsp; <span class="k">Q</span> drop &nbsp; <span class="k">E</span> inventory/shop &nbsp; <span class="k">F5</span> camera &nbsp; <span class="k">1-9</span> hotbar</div>
       <div><span class="k">T</span> chat &nbsp; <span class="k">P</span> skin (outside chat)</div>
       <div><span class="k">/developer</span> unlock testing commands in chat</div>
     </div>
@@ -718,6 +729,7 @@ body.mc-chat-hidden #chatPanel{display:none!important}
   <div id="healthBar"><canvas id="armorCanvas" width="222" height="18"></canvas><canvas id="healthCanvas" width="222" height="22"></canvas></div>
   <div id="effectDisplay"></div>
   <div id="hotbar"></div>
+  <div id="offhandSlot"><div class="icon"></div><span class="oh-label">OFF</span><div class="oh-dur"><i></i></div><div class="oh-cd"><i></i><b></b></div></div>
   <div id="inventory"><div class="panel-close" id="invClose">&times;</div><h3>INVENTORY</h3><div id="invTop"><div id="invLeft"><div id="armorSlots"></div><div id="invPreview"></div></div></div><div class="grid" id="invGrid"></div><div class="grid" id="invHotbar"></div></div>
   <div id="chestPanel"><div class="panel-close" id="chestClose">&times;</div><h3 id="chestTitle">CHEST</h3><div id="chestGrid"></div><div class="chest-sub">YOUR INVENTORY</div><div id="chestInvGrid"></div><div id="chestHotGrid"></div><div class="chest-hint">Click to move stacks &middot; Shift-click to transfer &middot; E to close</div></div>
   <div id="shop">
@@ -1055,6 +1067,10 @@ const SFX = (() => {
     pop() { if (!guard('pop', 60)) return; tone(720, 0.05, 'sine', 0.06, 1080); },
     pickup() { if (!guard('pick', 50)) return; tone(880, 0.06, 'sine', 0.06, 1280); },
     eat() { if (!guard('eat', 180)) return; tone(320, 0.06, 'triangle', 0.05, 260); },
+    sweep() { if (!guard('sweep', 60)) return; noise(0.12, 0.10, 900); tone(300, 0.10, 'sawtooth', 0.05, 520); },
+    shieldBlock() { if (!guard('shb', 70)) return; tone(180, 0.09, 'square', 0.12, 120); noise(0.08, 0.09, 1400); },
+    shieldBreak() { if (!guard('shx', 150)) return; tone(240, 0.22, 'sawtooth', 0.14, 70); noise(0.25, 0.14, 800); },
+    shieldUp() { if (!guard('shu', 90)) return; tone(420, 0.06, 'triangle', 0.05, 620); },
     click() { if (!guard('click', 40)) return; tone(520, 0.04, 'square', 0.05, 420); }
   };
 })();
@@ -1082,7 +1098,7 @@ function noiseTile(colors, seed) { const rnd = mulberry32(seed); for (let y = 0;
 const T = { grass_top: 0, dirt: 1, grass_side: 2, stone: 3, cobble: 4, sand: 5, log_side: 6, log_top: 7, planks: 8, leaves: 9, wool_red: 10, wool_blue: 11, wool_green: 12, wool_yellow: 13, bed_top_red: 14, bed_top_blue: 15, bed_top_green: 16, bed_top_yellow: 17, bed_side_red: 18, bed_side_blue: 19, bed_side_green: 20, bed_side_yellow: 21, obsidian: 22, iron_block: 23, endstone: 24, gold_block: 25, vending: 26, diamond_block: 27, emerald_block: 28, wool_white: 29, iron_ingot: 30, gold_ingot: 31, stained_clay: 98, glass: 99, ladder: 100, upgrade_machine: 102,
   sandstone_side: 103, sandstone_top: 104, cactus_side: 105, cactus_top: 106, ice: 107, snow: 108, packed_ice: 109, jungle_log_side: 110, jungle_log_top: 111, jungle_leaves: 112, stone_bricks: 113, mossy_cobble: 114, marble: 115, dark_planks: 116, spruce_planks: 117, fireball: 121, ender_pearl: 122,
   chest_top: 123, chest_side: 124, chest_front: 125, ender_chest_top: 126, ender_chest_side: 127, ender_chest_front: 128,
-  dark_oak_log_top: 129, dark_oak_log_side: 130 };
+  dark_oak_log_top: 129, dark_oak_log_side: 130, shield: 131 };
 const ITEM_START = 32;
 const PAL = { grass: ['#5d9c3f', '#579437', '#66a847', '#4f8c30'], dirt: ['#866043', '#7d5a3e', '#8f6a4b', '#78553a'], stone: ['#7f7f7f', '#787878', '#888888', '#727272'], sand: ['#dbd3a0', '#d5cc96', '#e2daa8', '#cfc78e'], end: ['#dbde9e', '#d0d394', '#e5e8a8', '#c8cb8c'], leaf: ['#3d6b28', '#345c22', '#457a2e', '#2c4f1c'], obsid: ['#1a1024', '#221535', '#150c1e', '#2a1a40'], ironb: ['#d8d8d8', '#c8c8c8', '#e8e8e8', '#bcbcbc'], log: ['#7a5a34', '#6b4f2c', '#856540', '#5e4527'], plank: ['#b08a52', '#a67f4a', '#bb945b', '#9c7743'] };
 paintTile(T.grass_top, () => noiseTile(PAL.grass, 1)); paintTile(T.dirt, () => noiseTile(PAL.dirt, 2));
@@ -1109,6 +1125,20 @@ paintTile(T.diamond_block, () => { const rnd = mulberry32(110); for (let y = 0; 
 paintTile(T.emerald_block, () => { const rnd = mulberry32(120); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { actx.fillStyle = ['#3ecb5f', '#2a9a44', '#5eff8a', '#1a6e2e'][(rnd() * 4) | 0]; actx.fillRect(x, y, 1, 1); } actx.fillStyle = '#0d3a1a'; actx.fillRect(0, 0, 16, 1); actx.fillRect(0, 15, 16, 1); actx.fillRect(0, 0, 1, 16); actx.fillRect(15, 0, 1, 16); actx.fillStyle = '#c8ffd8'; actx.fillRect(2, 2, 3, 1); actx.fillRect(2, 2, 1, 3); });
 paintTile(T.iron_ingot, () => { actx.fillStyle = '#d8d8d8'; actx.fillRect(3, 6, 10, 5); actx.fillStyle = '#a0a0a0'; actx.fillRect(3, 10, 10, 2); actx.fillStyle = '#f4f4f4'; actx.fillRect(4, 6, 8, 1); actx.fillStyle = '#b8b8b8'; actx.fillRect(2, 7, 1, 4); actx.fillRect(13, 7, 1, 4); });
 paintTile(T.gold_ingot, () => { actx.fillStyle = '#f7d354'; actx.fillRect(3, 6, 10, 5); actx.fillStyle = '#cfa530'; actx.fillRect(3, 10, 10, 2); actx.fillStyle = '#fff5b0'; actx.fillRect(4, 6, 8, 1); actx.fillStyle = '#e0b840'; actx.fillRect(2, 7, 1, 4); actx.fillRect(13, 7, 1, 4); });
+/* Shield sprite: wooden rim around a riveted iron plate with a dark cross boss. */
+paintTile(T.shield, () => {
+  actx.clearRect(0, 0, 16, 16);
+  for (let y = 1; y < 16; y++) {
+    const inset = y < 11 ? 2 : 2 + (y - 10);
+    const x0 = inset, x1 = 15 - inset;
+    if (x1 < x0) break;
+    actx.fillStyle = '#6e4a24'; actx.fillRect(x0, y, x1 - x0 + 1, 1);
+    if (x1 - x0 >= 2) { actx.fillStyle = (y === 1 || y === 15) ? '#8a6236' : '#b9c2ca'; actx.fillRect(x0 + 1, y, x1 - x0 - 1, 1); }
+  }
+  actx.fillStyle = '#8e99a5'; actx.fillRect(7, 3, 2, 8); actx.fillRect(4, 6, 8, 2);
+  actx.fillStyle = '#eef4f8'; actx.fillRect(7, 3, 1, 8); actx.fillRect(4, 6, 8, 1);
+  actx.fillStyle = '#5a6470'; actx.fillRect(8, 10, 1, 1); actx.fillRect(11, 6, 1, 1); actx.fillRect(4, 7, 1, 1);
+});
 paintTile(T.stained_clay, () => { const rnd = mulberry32(300); const cols = ['#a0522d', '#8b4513', '#b06030', '#9a4a20', '#c07040', '#7d3c14']; for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { actx.fillStyle = cols[(rnd() * cols.length) | 0]; actx.fillRect(x, y, 1, 1); } });
 paintTile(T.glass, () => { actx.clearRect(0, 0, 16, 16); actx.fillStyle = 'rgba(220,235,255,0.95)'; actx.fillRect(0, 0, 16, 1); actx.fillRect(0, 15, 16, 1); actx.fillRect(0, 0, 1, 16); actx.fillRect(15, 0, 1, 16); actx.fillStyle = 'rgba(255,255,255,0.9)'; actx.fillRect(2, 2, 1, 1); actx.fillRect(13, 2, 1, 1); actx.fillRect(2, 13, 1, 1); actx.fillRect(13, 13, 1, 1); });
 paintTile(T.ladder, () => { actx.clearRect(0, 0, 16, 16); actx.fillStyle = '#8b6a3f'; actx.fillRect(2, 0, 2, 16); actx.fillRect(12, 0, 2, 16); actx.fillStyle = '#a08050'; actx.fillRect(4, 3, 8, 1); actx.fillRect(4, 8, 8, 1); actx.fillRect(4, 13, 8, 1); });
@@ -1315,6 +1345,64 @@ const SPEC_BY_BLOCK = { 17: 0.34, 18: 0.92, 20: 0.95, 22: 0.86, 23: 0.86, 21: 0.
 const TOOL_SPEED = { wood: 2, copper: 3, stone: 4, iron: 6, diamond: 8, netherite: 9, gold: 12 };
 const TOOL_STATS = { sword: { wood: { dmg: 4, speed: 1.6 }, copper: { dmg: 5, speed: 1.6 }, stone: { dmg: 5, speed: 1.6 }, iron: { dmg: 6, speed: 1.6 }, diamond: { dmg: 7, speed: 1.6 }, netherite: { dmg: 8, speed: 1.6 } }, axe: { wood: { dmg: 7, speed: 0.8 }, copper: { dmg: 8, speed: 0.8 }, stone: { dmg: 9, speed: 0.8 }, iron: { dmg: 9, speed: 0.9 }, diamond: { dmg: 9, speed: 1.0 }, netherite: { dmg: 10, speed: 1.0 } }, pickaxe: { wood: { dmg: 2, speed: 1.2 }, copper: { dmg: 2, speed: 1.2 }, stone: { dmg: 3, speed: 1.2 }, iron: { dmg: 4, speed: 1.2 }, diamond: { dmg: 5, speed: 1.2 }, netherite: { dmg: 6, speed: 1.2 } }, shovel: { wood: { dmg: 2.5, speed: 1.0 }, copper: { dmg: 3, speed: 1.0 }, stone: { dmg: 3.5, speed: 1.0 }, iron: { dmg: 4.5, speed: 1.0 }, diamond: { dmg: 5.5, speed: 1.0 }, netherite: { dmg: 6.5, speed: 1.0 } }, hoe: { wood: { dmg: 1, speed: 1.0 }, copper: { dmg: 1, speed: 2.0 }, stone: { dmg: 1, speed: 2.0 }, iron: { dmg: 1, speed: 3.0 }, diamond: { dmg: 1, speed: 4.0 }, netherite: { dmg: 1, speed: 4.0 } }, stick: { wood: { dmg: 1, speed: 1.8 } }, shears: { iron: { dmg: 2, speed: 1.4 } } };
 
+/* ============================================================================
+   VANILLA (JAVA 1.9+) COMBAT CONFIG
+   Every value is expressed in game ticks (20 TPS), exactly like the Java
+   server. Attack speeds are cooldown lengths, so a sword needs 12.5 ticks
+   between full-power hits while a diamond axe needs 20.
+   ========================================================================== */
+const COMBAT_1_9_CONFIG = {
+  TICKS_PER_SECOND: 20,
+  TICK_MS: 50,
+  fist: { attackTicks: 5, damage: 1 },
+  sword: {
+    attackTicks: 12.5,
+    damage: { wood: 4, copper: 5, stone: 5, iron: 6, diamond: 7, netherite: 8 }
+  },
+  axe: {
+    attackTicks: { wood: 25, copper: 25, stone: 25, iron: 22.2, diamond: 20, netherite: 20 },
+    damage: { wood: 7, copper: 8, stone: 9, iron: 9, diamond: 9, netherite: 10 }
+  },
+  knockbackStick: { attackTicks: 5, damage: 1 },
+  crit: { minCharge: 0.9, multiplier: 1.5 },
+  sweep: { minCharge: 0.848, damage: 1.0, radius: 3.0, arcCos: 0.1 },
+  knockback: { base: 0.4, sprintBonus: 0.5, horizontalUnit: 15, vertical: 0.26, sprintVertical: 0.09, verticalUnit: 20 },
+  invulnerabilityTicks: 10,
+  shield: { activationTicks: 5, disableTicks: 100, knockbackScale: 0.35 },
+  /* Shield durability (1.9+): every blocked hit of 3+ raw damage costs
+     floor(damage) + 1 points. */
+  shieldMaxDurability: 336,
+  shieldMinBlockDamage: 3.0
+};
+/* Damage after full charge, armour and enchants are applied by the caller.
+   `strength` here is the raw 0..1 charge from ticksSinceLastSwing. */
+function getChargeDamageMultiplier(charge) {
+  const c = Math.min(1, Math.max(0, charge));
+  return 0.2 + 0.8 * c * c;
+}
+function getAttackTicksFor(def, stack) {
+  const cfg = COMBAT_1_9_CONFIG;
+  if (stack && stack.id === 'knockback_stick') return cfg.knockbackStick.attackTicks;
+  if (def && def.kind === 'tool') {
+    if (def.tool === 'sword') return cfg.sword.attackTicks;
+    if (def.tool === 'axe') return cfg.axe.attackTicks[def.material] ?? 25;
+    const speed = getAttackSpeed(def.tool, def.material) || 4;
+    return 20 / speed;
+  }
+  return cfg.fist.attackTicks;
+}
+function getBaseAttackDamage(def, stack) {
+  const cfg = COMBAT_1_9_CONFIG;
+  if (stack && stack.id === 'knockback_stick') return cfg.knockbackStick.damage;
+  if (def && def.kind === 'tool') {
+    if (def.tool === 'sword') return cfg.sword.damage[def.material] ?? cfg.fist.damage;
+    if (def.tool === 'axe') return cfg.axe.damage[def.material] ?? 7;
+    const stats = TOOL_STATS[def.tool]?.[def.material];
+    return stats ? stats.dmg : cfg.fist.damage;
+  }
+  return cfg.fist.damage;
+}
+
 function getAttackSpeed(tool, material) {
   if (!tool) return 4.0;
   if (tool === 'sword') return 1.6;
@@ -1349,6 +1437,9 @@ ITEMS['bow_power1'] = { id: 'bow_power1', name: 'Bow (Power I)', tile: 70, stack
 ITEMS['bow_power1_punch1'] = { id: 'bow_power1_punch1', name: 'Bow (Power I, Punch I)', tile: 71, stack: 1, kind: 'bow', enchant: { power: 1, punch: 1 } };
 ITEMS['shears'] = { id: 'shears', name: 'Shears', tile: 73, stack: 1, kind: 'tool', tool: 'shears', material: 'iron' };
 ITEMS['knockback_stick'] = { id: 'knockback_stick', name: 'Knockback Stick', tile: 94, stack: 1, kind: 'tool', tool: 'stick', material: 'wood' };
+/* Off-hand shield (1.9+ blocking). Buying it equips it straight to the
+   off-hand; a right-click with a shield in the hotbar also equips it. */
+ITEMS['shield'] = { id: 'shield', name: 'Shield', tile: T.shield, stack: 1, kind: 'shield', offhand: true, desc: 'Blocks 100% of frontal attacks. Axes disable it for 5s. 336 durability; press F to swap it between hand and off-hand.' };
 ITEMS['gold_pickaxe'] = { id: 'gold_pickaxe', name: 'Gold Pickaxe', tile: 101, stack: 1, kind: 'tool', tool: 'pickaxe', material: 'gold' };
 ITEMS['potion_speed'] = { id: 'potion_speed', name: 'Speed Potion', tile: 95, stack: 1, kind: 'consumable', heal: 0, effect: 'speed', effectDuration: 30 };
 ITEMS['potion_jump'] = { id: 'potion_jump', name: 'Jump Potion', tile: 96, stack: 1, kind: 'consumable', heal: 0, effect: 'jump', effectDuration: 30 };
@@ -4420,7 +4511,9 @@ function handleNetData(data, fromId) {
         if (bot) { damageBot(bot, data.amount, data.source || 'Player', data.kb); break; }
       }
       if (data.target === NET.myId) {
-        damagePlayer(data.amount, data.source || 'Player', false, data.kb);
+        damagePlayer(data.amount, data.source || 'Player', false, data.kb, {
+          attackerPos: data.atk, tool: data.tool, crit: !!data.crit, sweep: !!data.sweep
+        });
       } else {
         const rp = remotePlayers.find(r => r.id === data.target);
         if (rp && !rp.isBot) {
@@ -4551,6 +4644,7 @@ class RemotePlayer {
     this.height = 1.8; this.health = 20; this.maxHealth = 20; this.alive = true; this.respawning = false;
     this.onGround = true; this.sneak = false;
     this.heldItemId = 'wood_sword'; this._lastHeldId = null;
+    this.offhand = null; this.shieldBlocking = false;
     this.miningActive = false;
     this.timers = { swing: 0, flash: 0 };
     this.hurtTime = 0;
@@ -4576,6 +4670,7 @@ class RemotePlayer {
     scene.add(this.model);
     setModelHeldItem(this.model, this.heldItemId);
     this._lastHeldId = this.heldItemId;
+    setModelOffhandShield(this.model, this.offhand === 'shield');
     this.applyArmor();
   }
   buildNametag() {
@@ -4669,6 +4764,11 @@ class RemotePlayer {
     if (typeof data.mg === 'boolean') this.miningActive = data.mg;
     if (data.sw) this.timers.swing = 0.35;
     if (data.ar) { this.armor = data.ar; }
+    if (data.oh !== undefined) {
+      const oh = data.oh || null;
+      if (oh !== this.offhand) { this.offhand = oh; setModelOffhandShield(this.model, oh === 'shield'); }
+    }
+    if (typeof data.sh === 'boolean') this.shieldBlocking = data.sh;
   }
   updateInterpolation() {
     const buf = this.stateBuffer;
@@ -4754,6 +4854,7 @@ class RemotePlayer {
     }
     if (this.heldItemId !== this._lastHeldId) { this._lastHeldId = this.heldItemId; setModelHeldItem(this.model, this.heldItemId); }
     this.applyArmor();
+    updateRemoteShieldPose(this.model, this.shieldBlocking && this.alive);
     if (this.alive && !this.respawning) { this.model.visible = true; animateModel(this.model, dt, this, false); }
     else { this.model.visible = false; this.nameTag.style.display = 'none'; }
   }
@@ -6474,19 +6575,30 @@ class BotMotor {
       // Use Knockback Stick on narrow bridges, otherwise best sword
       const onBridge = !this.grid.isSolid(Math.floor(bot.pos.x) + 1, Math.floor(bot.pos.y - 0.02), Math.floor(bot.pos.z)) &&
                        !this.grid.isSolid(Math.floor(bot.pos.x) - 1, Math.floor(bot.pos.y - 0.02), Math.floor(bot.pos.z));
-      if (bot.hasKbStick && onBridge && dist <= 4.2) {
+      /* Switching to an axe against an active shield is what makes the 1.9
+         axe-disable work for bots too; it also deals axe damage on that hit. */
+      const targetShielded = !!(enemy.isLocalPlayer && typeof isShieldActive === 'function' && isShieldActive());
+      const useAxe = targetShielded && bot.axeIdx > 0;
+      if (useAxe) {
+        bot.setHeldSoon(bot.gearAxe());
+      } else if (bot.hasKbStick && onBridge && dist <= 4.2) {
         bot.setHeldSoon('knockback_stick');
       } else {
         bot.setHeldSoon(bot.gearSword());
       }
-      const swordMat = BOT_SWORD_MATS[bot.swordIdx] || 'wood';
-      const baseDmg = (TOOL_STATS.sword[swordMat] && TOOL_STATS.sword[swordMat].dmg) || 4;
+      const weaponKind = useAxe ? 'axe' : 'sword';
+      const weaponMat = useAxe ? (BOT_SWORD_MATS[bot.axeIdx - 1] || 'wood') : (BOT_SWORD_MATS[bot.swordIdx] || 'wood');
+      const baseDmg = (TOOL_STATS[weaponKind][weaponMat] && TOOL_STATS[weaponKind][weaponMat].dmg) || 4;
       const sharpLvl = (teamUpgrades[bot.teamName] && teamUpgrades[bot.teamName].sharpness) || 0;
       const crit = !bot.onGround && bot.vel.y < -0.5;
-      const rawDmg = (baseDmg + sharpLvl * 1.25) * (crit ? 1.35 : 1.0) * diff.damage * (bot.botTalent.dmg || 1.0);
+      const rawDmg = (baseDmg + sharpLvl * 1.25) * (crit ? COMBAT_1_9_CONFIG.crit.multiplier : 1.0) * diff.damage * (bot.botTalent.dmg || 1.0);
 
-      const kbHoriz = (bot.heldItemId === 'knockback_stick' ? 13.5 : 7.8) + (bot.wtapTimer <= 0 ? 1.6 : 0);
-      const kbVec = new THREE.Vector3(dirX * kbHoriz, 4.4, dirZ * kbHoriz);
+      /* Sprint-reset knockback follows the same 0.4 + 0.5 config as the player. */
+      const botSprint = bot.wtapTimer <= 0;
+      const kbHoriz = bot.heldItemId === 'knockback_stick' ? 22 : knockbackFromSprint(botSprint);
+      const kbVert = bot.heldItemId === 'knockback_stick' ? 8.5 : knockbackVerticalFromSprint(botSprint);
+      const kbVec = new THREE.Vector3(dirX * kbHoriz, kbVert, dirZ * kbHoriz);
+      const botTool = (ITEMS[bot.heldItemId] && ITEMS[bot.heldItemId].tool) || 'sword';
 
       bot.attackTimer = Math.max(0.45, 0.65 - bot.botDifficulty * 0.06);
       bot.wtapTimer = 0.14; // W-tap sprint reset for extra knockback
@@ -6495,13 +6607,13 @@ class BotMotor {
 
       if (enemy.isLocalPlayer) {
         if (typeof damagePlayer === 'function') {
-          damagePlayer(rawDmg, bot.name, false, [kbVec.x, kbVec.y, kbVec.z]);
+          damagePlayer(rawDmg, bot.name, false, [kbVec.x, kbVec.y, kbVec.z], { attackerPos: [bot.pos.x, bot.pos.y, bot.pos.z], tool: botTool, crit });
         }
       } else if (enemy.ref) {
         if (enemy.ref.isBot) {
           damageBot(enemy.ref, rawDmg, bot.name, kbVec);
         } else {
-          netSendTo(enemy.id, { t: 'dmg', target: enemy.id, amount: rawDmg, source: bot.name, kb: [kbVec.x, kbVec.y, kbVec.z] });
+          netSendTo(enemy.id, { t: 'dmg', target: enemy.id, amount: rawDmg, source: bot.name, kb: [kbVec.x, kbVec.y, kbVec.z], tool: botTool, crit, atk: [bot.pos.x, bot.pos.y, bot.pos.z] });
           enemy.ref.flashHurt();
         }
       }
@@ -6937,15 +7049,21 @@ function damageBot(bot, amount, sourceName, kb, silent) {
   if (!silent && (now < bot.invulnUntil || now < bot.spawnProtectUntil)) return;
 
   const armorPts = BOT_ARMOR_PTS[bot.armorIdx] || 0;
+  /* Same 1.9+ armour/toughness curve as the local player (bot sets estimate
+     toughness from their tier: leather 0, chain 1, iron 2, diamond 8). */
+  const botTough = [0, 1, 2, 8][bot.armorIdx] || 0;
   const protLvl = (teamUpgrades[bot.teamName] && teamUpgrades[bot.teamName].protection) || 0;
-  const mult = Math.max(0.20, 1 - armorPts * 0.032 - protLvl * 0.04) * (bot.botTalent.taken || 1.0);
+  const effectiveArmor = Math.min(20, Math.max(armorPts / 5, armorPts - amount / (2 + botTough / 4)));
+  let mult = (1 - effectiveArmor / 25);
+  if (protLvl > 0) mult *= (1 - Math.min(0.8, protLvl * 0.04));
+  mult *= (bot.botTalent.taken || 1.0);
   const finalDmg = Math.max(0.5, amount * mult);
 
   bot.health = Math.max(0, bot.health - finalDmg);
   bot.timeSinceDamage = 0;
   bot.damageInterrupt = true;
   if (!silent) {
-    bot.invulnUntil = now + 450;
+    bot.invulnUntil = now + COMBAT_1_9_CONFIG.invulnerabilityTicks * COMBAT_1_9_CONFIG.TICK_MS;
     bot.flashHurt();
   }
   if (sourceName && sourceName !== 'Fall' && sourceName !== 'Void') {
@@ -7129,7 +7247,17 @@ const player = {
   absorption: 0, absorptionTimer: 0, regenTimer: 0, regenTick: 0,
   eating: false, eatProgress: 0, eliminated: false,
   attackStrengthTicker: 999, attackCooldownMax: 1.0,
-  invulnerableTime: 0, lastHurt: 0,
+  /* --- 1.9+ combat state, all advanced on the fixed 20 TPS tick --- */
+  ticksSinceLastSwing: 999, attackTicksMax: 12.5,
+  hurtTicks: 0, lastHurt: 0,
+  offhand: null,                 // off-hand item id ('shield' blocks; other ids are carried)
+  offhandCount: 0,               // stack size held in the off-hand
+  shieldDurability: 0,           // remaining durability of the off-hand shield
+  shieldRaised: false,           // right mouse held with a shield in the off-hand
+  isBlocking: false,             // alias of shieldRaised, required by the combat handlers
+  shieldRaisedTicks: 0,          // ticks the shield has been up (active at 5)
+  shieldDisabledTicks: 0,        // set to 100 when an axe lands on the shield
+  invulnerableTime: 0,
   /* Wall-clock deadlines instead of dt-decayed counters: a tab that stops
      ticking (background throttle, freeze, hitch) must never keep stale
      invulnerability, otherwise hiding the tab becomes a free damage shield. */
@@ -7162,12 +7290,197 @@ function applyKnockbackImpulse(vx, vy, vz, duration) {
   player.fallDistance = 0;
 }
 
+/* ---- 1.9+ fixed-tick combat clock -----------------------------------------
+   Render frames never touch these counters directly: runCombatTicks() replays
+   whole 50 ms ticks from the same accumulator the physics uses, so a 240 Hz
+   monitor and a throttled background tab see identical combat timing. */
+const COMBAT_TICK_MS = COMBAT_1_9_CONFIG.TICK_MS;
+let combatTickAccumulator = 0;
+function getHeldCombatProfile() {
+  const stack = heldStack();
+  const def = stack ? ITEMS[stack.id] : null;
+  return {
+    stack, def,
+    attackTicks: getAttackTicksFor(def, stack),
+    damage: getBaseAttackDamage(def, stack),
+    sword: !!(def && def.kind === 'tool' && def.tool === 'sword'),
+    axe: !!(def && def.kind === 'tool' && def.tool === 'axe'),
+    knockbackStick: !!(stack && stack.id === 'knockback_stick')
+  };
+}
+/* Vanilla 1.9 curve: 0.2 + 0.8 * min(1, (t + 0.5) / T)^2. The partial tick
+   keeps the crosshair meter smooth between the 20 Hz simulation steps. */
+function getAttackCharge(profile, partialTicks) {
+  const pr = profile || getHeldCombatProfile();
+  const partial = typeof partialTicks === 'number' ? partialTicks : (combatTickAccumulator / COMBAT_TICK_MS);
+  const ticks = player.ticksSinceLastSwing + partial;
+  const progress = clamp((ticks + 0.5) / Math.max(1e-6, pr.attackTicks), 0, 1);
+  /* The 1.9 damage multiplier curve: a freshly swung weapon starts at 20%
+     and only reaches full power when the attack cooldown has fully recharged. */
+  return getChargeDamageMultiplier(progress);
+}
 function getAttackCooldownFraction() {
-  const def = heldDef();
-  const speed = (def && def.kind === 'tool') ? getAttackSpeed(def.tool, def.material) : 4.0;
-  const cooldownTime = 1 / speed;
-  player.attackCooldownMax = cooldownTime;
-  return clamp(player.attackStrengthTicker / cooldownTime, 0, 1);
+  const profile = getHeldCombatProfile();
+  player.attackCooldownMax = profile.attackTicks / COMBAT_1_9_CONFIG.TICKS_PER_SECOND;
+  player.attackTicksMax = profile.attackTicks;
+  return getAttackCharge(profile);
+}
+function getAttackStrength() { return getAttackCharge(); }
+function resetSwingCooldown() {
+  player.ticksSinceLastSwing = 0;
+  player.attackStrengthTicker = 0;
+}
+/* Horizontal knockback in blocks/second: 1.9's 0.4 base impulse plus the
+   0.5 sprint-reset bonus, scaled to this game's velocity units. */
+function knockbackFromSprint(sprinting) {
+  const c = COMBAT_1_9_CONFIG.knockback;
+  return (c.base + (sprinting ? c.sprintBonus : 0)) * c.horizontalUnit;
+}
+function knockbackVerticalFromSprint(sprinting) {
+  const c = COMBAT_1_9_CONFIG.knockback;
+  return (c.vertical + (sprinting ? c.sprintVertical : 0)) * c.verticalUnit;
+}
+/* One fixed tick of combat timers, called 20 times per simulated second. */
+function stepCombatTimers() {
+  player.ticksSinceLastSwing = Math.min(1e6, player.ticksSinceLastSwing + 1);
+  player.attackStrengthTicker = player.ticksSinceLastSwing / COMBAT_1_9_CONFIG.TICKS_PER_SECOND;
+  if (player.hurtTicks > 0) {
+    player.hurtTicks--;
+    player.hurtTime = player.hurtTicks / COMBAT_1_9_CONFIG.TICKS_PER_SECOND;
+    if (player.hurtTicks === 0) player.lastHurt = 0;
+  }
+  if (player.shieldRaised && player.shieldDisabledTicks <= 0) {
+    player.isBlocking = true;
+    if (player.shieldRaisedTicks < COMBAT_1_9_CONFIG.shield.activationTicks) {
+      player.shieldRaisedTicks++;
+      if (player.shieldRaisedTicks === COMBAT_1_9_CONFIG.shield.activationTicks) SFX.shieldUp();
+    }
+  } else {
+    player.shieldRaisedTicks = 0;
+    player.isBlocking = false;
+  }
+  if (player.shieldDisabledTicks > 0) {
+    player.shieldDisabledTicks--;
+    if (player.shieldDisabledTicks === 0) showMessage('Shield enabled again', '#8fe0ff');
+  }
+}
+function runCombatTicks(dt) {
+  combatTickAccumulator += dt * 1000;
+  let guard = 0;
+  while (combatTickAccumulator >= COMBAT_TICK_MS && guard++ < 40) {
+    combatTickAccumulator -= COMBAT_TICK_MS;
+    stepCombatTimers();
+  }
+  /* A huge stall must not replay minutes of ticks in one frame; the physics
+     step already clamps dt, so dropping the remainder is safest. */
+  if (guard >= 40) combatTickAccumulator = 0;
+}
+/* ---- Shield helpers ------------------------------------------------------- */
+function hasOffhandShield() { return player.offhand === 'shield'; }
+function isShieldActive() {
+  return hasOffhandShield() && player.isBlocking &&
+    player.shieldRaisedTicks >= COMBAT_1_9_CONFIG.shield.activationTicks &&
+    player.shieldDisabledTicks <= 0;
+}
+function raiseShield() {
+  if (!hasOffhandShield() || player.shieldDisabledTicks > 0) return false;
+  if (player.shieldRaised) return true;
+  player.shieldRaised = true;
+  player.isBlocking = true;
+  player.shieldRaisedTicks = 0;
+  return true;
+}
+/* Releasing RMB immediately drops the block and the startup progress, so the
+   next raise always pays the full 5-tick delay again. */
+function lowerShield() {
+  player.shieldRaised = false;
+  player.isBlocking = false;
+  player.shieldRaisedTicks = 0;
+}
+function disableShield() {
+  player.shieldRaised = false;
+  player.isBlocking = false;
+  player.shieldRaisedTicks = 0;
+  player.shieldDisabledTicks = COMBAT_1_9_CONFIG.shield.disableTicks;
+  SFX.shieldBreak();
+  showMessage('Shield disabled! (5.0s)', '#ff8844');
+}
+function getShieldDurability() {
+  return typeof player.shieldDurability === 'number' ? player.shieldDurability : 0;
+}
+/* Durability is only consumed by hits that were actually blocked. */
+function damageShieldDurability(rawDamage) {
+  if (!hasOffhandShield() || !(rawDamage >= COMBAT_1_9_CONFIG.shieldMinBlockDamage)) return;
+  const loss = Math.floor(rawDamage) + 1;
+  player.shieldDurability = Math.max(0, getShieldDurability() - loss);
+  if (player.shieldDurability > 0) { updateOffhandUI(); return; }
+  /* The shield broke on this hit. The hit itself was still blocked. */
+  setOffhandItem(null);
+  SFX.shieldBreak();
+  showMessage('Your shield broke!', '#ff8866');
+}
+/* Central off-hand owner: keeps the id, stack count, durability, HUD, models
+   and the blocking flags in sync no matter how the item got there. */
+function setOffhandItem(id, count, durability) {
+  player.offhand = id || null;
+  player.offhandCount = id ? Math.max(1, count | 0) : 0;
+  player.shieldDurability = (id === 'shield')
+    ? (typeof durability === 'number' && durability > 0 ? durability : COMBAT_1_9_CONFIG.shieldMaxDurability)
+    : 0;
+  lowerShield();
+  updateOffhandUI();
+  updateOffhandModel();
+  if (typeof playerModel !== 'undefined' && playerModel) setModelOffhandShield(playerModel, id === 'shield');
+  updateOffhandCooldownUI();
+}
+/* Swap the selected hotbar stack with the off-hand item (vanilla F). */
+function swapOffhandWithHotbar() {
+  if (!NET.started || player.eliminated || player.spectator || player.respawnCooldown > 0) return false;
+  const hot = inv[selectedSlot] || null;
+  const ohId = player.offhand;
+  if (!hot && !ohId) return false;
+  const ohCount = player.offhandCount || 1;
+  const ohDur = player.shieldDurability;
+  if (hot) setOffhandItem(hot.id, hot.count, hot.durability);
+  else setOffhandItem(null);
+  if (ohId) {
+    const st = { id: ohId, count: ohCount };
+    if (ohId === 'shield') st.durability = ohDur > 0 ? ohDur : COMBAT_1_9_CONFIG.shieldMaxDurability;
+    inv[selectedSlot] = st;
+  } else inv[selectedSlot] = null;
+  updateUI();
+  SFX.click();
+  showMessage(player.offhand ? ('Off-hand: ' + (ITEMS[player.offhand] ? ITEMS[player.offhand].name : player.offhand)) : 'Off-hand emptied', '#8fe0ff');
+  return true;
+}
+/* Front-facing check against the attacker's position (the attacker's client
+   sends the coordinates in the damage packet). */
+function isFrontalAttack(attackerPos) {
+  if (!attackerPos) return false;
+  const ax = Array.isArray(attackerPos) ? attackerPos[0] : attackerPos.x;
+  const ay = Array.isArray(attackerPos) ? attackerPos[1] : attackerPos.y;
+  const az = Array.isArray(attackerPos) ? attackerPos[2] : attackerPos.z;
+  if (!Number.isFinite(ax) || !Number.isFinite(az)) return false;
+  const dx = ax - player.pos.x, dz = az - player.pos.z;
+  const dist = Math.hypot(dx, dz);
+  if (dist < 1e-4) return true;
+  const look = getLookDir();
+  const flat = Math.hypot(look.x, look.z) || 1;
+  return (dx / dist) * (look.x / flat) + (dz / dist) * (look.z / flat) > 0.05;
+}
+function equipShield(durability) {
+  /* Do not clear shieldDisabledTicks here: swapping a disabled shield out and
+     back in must not skip the 5 s cooldown. */
+  setOffhandItem('shield', 1, durability);
+  showMessage('Shield equipped to off-hand (RMB to block, F to swap)', '#8fe0ff');
+}
+function unequipShield(dropAt) {
+  if (!hasOffhandShield()) return false;
+  const dur = getShieldDurability();
+  setOffhandItem(null);
+  if (dropAt) addItemStack({ id: 'shield', count: 1, durability: dur });
+  if (dropAt) updateUI();
+  return true;
 }
 
 const keys = {};
@@ -7212,6 +7525,7 @@ addEventListener('keydown', e => {
   if (code === 'F5') { camMode = (camMode + 1) % 3; camYaw = player.yaw; camPitch = player.pitch; e.preventDefault(); }
   if (code === 'KeyW') { const now = performance.now(); if (now - lastW < 320) player.sprint = true; lastW = now; }
   if (code === 'KeyQ') { dropHeldItem(); e.preventDefault(); }
+  if (code === 'KeyF') { swapOffhandWithHotbar(); e.preventDefault(); }
   if (code === 'KeyT') { openChat(); e.preventDefault(); return; }
   if (code === 'KeyP') { openSkinPicker(); e.preventDefault(); }
   if (code.startsWith('Digit')) {
@@ -7220,7 +7534,7 @@ addEventListener('keydown', e => {
       if (selectedSlot !== n - 1) {
         player.eating = false;
         selectedSlot = n - 1;
-        player.attackStrengthTicker = 0;
+        resetSwingCooldown();
       }
       updateUI();
     }
@@ -7261,9 +7575,15 @@ renderer.domElement.addEventListener('mousedown', e => {
     rightMouseHeld = true;
     e.preventDefault();
     const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
-    if (def && def.kind === 'bow') startBowCharge();
+    if (def && def.kind === 'shield') equipShieldFromSlot();
+    else if (def && def.kind === 'bow') startBowCharge();
     else if (def && def.kind === 'throwable') throwHeldItem();
-    else if (!tryStartEating()) tryInteract();
+    else if (!tryStartEating()) {
+      /* Main-hand use has priority, exactly like Java: only raise the shield
+         when the held item did not consume the click. */
+      const used = tryInteract();
+      if (!used && hasOffhandShield()) raiseShield();
+    }
   }
 });
 addEventListener('mouseup', e => {
@@ -7271,9 +7591,10 @@ addEventListener('mouseup', e => {
   if (e.button === 2) {
     rightMouseHeld = false;
     if (player.bowCharging) releaseBow(); player.eating = false;
+    lowerShield();
   }
 });
-addEventListener('blur', () => { mining = false; rightMouseHeld = false; });
+addEventListener('blur', () => { mining = false; rightMouseHeld = false; lowerShield(); });
 addEventListener('contextmenu', e => e.preventDefault());
 
 /* ---- Contextual "use" button -------------------------------------------
@@ -7344,7 +7665,7 @@ function updateTouchInteract(dt) {
     e.preventDefault(); e.stopPropagation();
     selectedSlot = idx;
     player.eating = false;
-    player.attackStrengthTicker = 0;
+    resetSwingCooldown();
     updateUI();
   }, true);
   const stickZone = document.getElementById('touchStickZone');
@@ -7446,13 +7767,18 @@ function updateTouchInteract(dt) {
   bindTouchBtn('tbPlace', () => {
     if (!NET.started || player.eliminated || player.respawnCooldown > 0) return;
     const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
-    if (def && def.kind === 'bow') startBowCharge();
+    if (def && def.kind === 'shield') equipShieldFromSlot();
+    else if (def && def.kind === 'bow') startBowCharge();
     else if (def && def.kind === 'throwable') throwHeldItem();
-    else if (!tryStartEating()) tryInteract();
+    else if (!tryStartEating()) {
+      const used = tryInteract();
+      if (!used && hasOffhandShield()) raiseShield();
+    }
   }, () => {
     rightMouseHeld = false;
     if (player.bowCharging) releaseBow();
     player.eating = false;
+    lowerShield();
   });
   bindTouchBtn('tbJump', () => { keys['Space'] = true; }, () => { keys['Space'] = false; });
   bindTouchBtn('tbSneak', () => { keys['ShiftLeft'] = !keys['ShiftLeft']; });
@@ -7553,6 +7879,62 @@ const cursorEl = document.getElementById('cursorItem');
 const tooltipEl = document.getElementById('tooltip');
 const cooldownBarEl = document.getElementById('cooldownBar');
 const cooldownFillEl = document.getElementById('cooldownFill');
+const offhandSlotEl = document.getElementById('offhandSlot');
+/* Crosshair attack indicator: width is the 1.9 charge, the marker sits at the
+   0.9 critical-hit threshold and the bar turns green once a crit is possible. */
+function updateCooldownMeter(charge) {
+  const c = clamp(charge, 0, 1);
+  if (c >= 0.999) { cooldownBarEl.classList.remove('show', 'ready'); return; }
+  cooldownFillEl.style.width = (c * 100).toFixed(1) + '%';
+  cooldownBarEl.classList.toggle('ready', c >= COMBAT_1_9_CONFIG.crit.minCharge);
+  cooldownBarEl.classList.add('show');
+}
+function updateOffhandUI() {
+  if (!offhandSlotEl) return;
+  const id = player.offhand;
+  const def = id ? ITEMS[id] : null;
+  const has = !!def;
+  offhandSlotEl.classList.toggle('show', has);
+  const icon = offhandSlotEl.querySelector('.icon');
+  if (icon) {
+    if (!has) icon.style.backgroundImage = 'none';
+    else {
+      const t = def.tile, col = t % TPR, row = Math.floor(t / TPR);
+      icon.style.backgroundImage = `url(${atlasURL})`;
+      icon.style.backgroundPosition = `-${col * 32}px -${row * 32}px`;
+      icon.style.backgroundSize = `${TPR * 32}px ${TPR * 32}px`;
+    }
+  }
+  /* Durability bar: only shields currently have durability. */
+  const durEl = offhandSlotEl.querySelector('.oh-dur');
+  if (durEl) {
+    const dur = hasOffhandShield() ? getShieldDurability() : 0;
+    durEl.style.display = hasOffhandShield() ? 'block' : 'none';
+    if (hasOffhandShield()) {
+      const max = COMBAT_1_9_CONFIG.shieldMaxDurability;
+      const pct = clamp(dur / max, 0, 1);
+      const fill = durEl.firstElementChild;
+      if (fill) {
+        fill.style.width = (pct * 100).toFixed(1) + '%';
+        fill.style.background = pct > 0.5 ? '#5ef07a' : pct > 0.25 ? '#ffd35e' : '#ff6a5e';
+      }
+    }
+  }
+  updateOffhandCooldownUI();
+}
+/* Axe disable overlay: a dark wipe that shrinks as the 100-tick cooldown runs down. */
+function updateOffhandCooldownUI() {
+  if (!offhandSlotEl) return;
+  const cd = Math.max(0, player.shieldDisabledTicks || 0);
+  const active = hasOffhandShield() && cd > 0;
+  offhandSlotEl.classList.toggle('cooldown', active);
+  const cdEl = offhandSlotEl.querySelector('.oh-cd');
+  if (!cdEl) return;
+  const fill = cdEl.querySelector('i');
+  const label = cdEl.querySelector('b');
+  if (fill) fill.style.height = active ? ((cd / COMBAT_1_9_CONFIG.shield.disableTicks) * 100).toFixed(1) + '%' : '0%';
+  if (label) label.textContent = active ? (cd / COMBAT_1_9_CONFIG.TICKS_PER_SECOND).toFixed(1) : '';
+}
 const bowChargeWrapEl = document.getElementById('bowChargeWrap');
 const bowChargeFillEl = document.getElementById('bowChargeFill');
 const hotbarSlots = [], invSlots = [], invHotSlots = [], armorSlots = [];
@@ -7744,17 +8126,25 @@ function showTooltip(index, kind) {
   const def = ITEMS[stack.id]; if (!def) { hideTooltip(); return; }
   let html = `<div class="tt-name">${def.name}</div>`;
   if (def.kind === 'tool') {
-    const stats = TOOL_STATS[def.tool]?.[def.material];
     const sharp = teamUpgrades[PLAYER_TEAM.name] ? teamUpgrades[PLAYER_TEAM.name].sharpness : 0;
-    if (stats) {
-      let dmg = stats.dmg;
-      if (sharp > 0 && (def.tool === 'sword' || def.tool === 'axe' || def.tool === 'pickaxe')) dmg += 1.25 * sharp;
-      html += `<div class="tt-stat">Attack Damage: <span>${dmg.toFixed(2)}</span></div>`;
-      html += `<div class="tt-stat">Attack Speed: <span>${stats.speed}</span></div>`;
-      if (def.tool !== 'sword' && def.tool !== 'stick') { const mine = TOOL_SPEED[def.material] || 1; html += `<div class="tt-stat">Mining Speed: <span>${mine}</span></div>`; }
-    }
+    let dmg = getBaseAttackDamage(def, stack);
+    if (sharp > 0 && (def.tool === 'sword' || def.tool === 'axe' || def.tool === 'pickaxe')) dmg += 1.25 * sharp;
+    const atkTicks = getAttackTicksFor(def, stack);
+    html += `<div class="tt-stat">Attack Damage: <span>${dmg.toFixed(2)}</span></div>`;
+    html += `<div class="tt-stat">Attack Speed: <span>${(COMBAT_1_9_CONFIG.TICKS_PER_SECOND / atkTicks).toFixed(1)}</span></div>`;
+    html += `<div class="tt-stat">Cooldown: <span>${atkTicks.toFixed(1)} ticks</span></div>`;
+    if (def.tool !== 'sword' && def.tool !== 'stick') { const mine = TOOL_SPEED[def.material] || 1; html += `<div class="tt-stat">Mining Speed: <span>${mine}</span></div>`; }
     html += `<div class="tt-tier">Tier: ${cap(def.material)}</div>`;
     if (sharp > 0 && (def.tool === 'sword' || def.tool === 'axe' || def.tool === 'pickaxe')) html += `<div class="tt-ench">Sharpness ${sharp}</div>`;
+  } else if (def.kind === 'shield') {
+    const maxDur = COMBAT_1_9_CONFIG.shieldMaxDurability;
+    const dur = typeof stack.durability === 'number' ? stack.durability : maxDur;
+    html += `<div class="tt-stat">Slot: <span>Off-hand</span></div>`;
+    html += `<div class="tt-stat">Block: <span>100% frontal</span></div>`;
+    html += `<div class="tt-stat">Durability: <span>${Math.max(0, dur)} / ${maxDur}</span></div>`;
+    html += `<div class="tt-stat">Activation: <span>5 ticks (0.25s)</span></div>`;
+    html += `<div class="tt-stat">Axe hit: <span>disabled 100 ticks</span></div>`;
+    html += `<div class="tt-stat">Hold <span>RMB</span> to block</div>`;
   } else if (def.kind === 'block') { html += `<div class="tt-stat">Type: <span>Block</span></div>`; }
   else if (def.kind === 'material') { html += `<div class="tt-stat">Type: <span>Material</span></div>`; }
   else if (def.kind === 'bow') { html += `<div class="tt-stat">Draw: <span>Hold RMB</span></div>`; const dmgBase = 5 + def.enchant.power * 4; html += `<div class="tt-stat">Damage: <span>${dmgBase} (full draw)</span></div>`; if (def.enchant.power > 0) html += `<div class="tt-ench">Enchantment: Power ${def.enchant.power}</div>`; if (def.enchant.punch > 0) html += `<div class="tt-ench">Enchantment: Punch ${def.enchant.punch}</div>`; }
@@ -7764,7 +8154,7 @@ function showTooltip(index, kind) {
     else if (def.throwType === 'ender_pearl') { html += `<div class="tt-stat">Teleports you next to the hit point</div><div class="tt-stat">Self-Damage: <span>5 HP</span></div>`; }
     html += `<div class="tt-stat">RMB to throw</div>`;
   }
-  else if (def.kind === 'armor') { const prot = teamUpgrades[PLAYER_TEAM.name] ? teamUpgrades[PLAYER_TEAM.name].protection : 0; html += `<div class="tt-stat">Armor Points: <span>${def.armorPoints}</span></div>`; html += `<div class="tt-stat">Damage Reduction: <span>${Math.round((def.armorPoints * 0.04 + prot * 0.04) * 100)}%</span></div>`; if (def.toughness) html += `<div class="tt-stat">Toughness: <span>+${def.toughness}</span></div>`; html += `<div class="tt-tier">Tier: ${cap(def.tierName)} · ${def.slotName}</div>`; if (prot > 0) html += `<div class="tt-ench">Protection ${prot}</div>`; html += `<div class="tt-stat">RMB to equip</div>`; }
+  else if (def.kind === 'armor') { const prot = teamUpgrades[PLAYER_TEAM.name] ? teamUpgrades[PLAYER_TEAM.name].protection : 0; html += `<div class="tt-stat">Armor Points: <span>${def.armorPoints}</span></div>`; html += `<div class="tt-stat">Damage Reduction: <span>up to ${Math.round(def.armorPoints * 0.04 * 100)}%</span></div>`; if (def.toughness) html += `<div class="tt-stat">Toughness: <span>+${def.toughness}</span></div>`; html += `<div class="tt-tier">Tier: ${cap(def.tierName)} · ${def.slotName}</div>`; if (prot > 0) html += `<div class="tt-ench">Protection ${prot}</div>`; html += `<div class="tt-stat">RMB to equip</div>`; }
   tooltipEl.innerHTML = html; tooltipEl.style.display = 'block';
 }
 function hideTooltip() { tooltipEl.style.display = 'none'; }
@@ -7800,6 +8190,7 @@ function updateUI() {
   applyPlayerArmorToModel(playerModel);
   applyPlayerArmorToModel(invPreviewModel);
   setFPArm(currentSkinTex, currentSkinSlim);
+  updateOffhandUI();
   if (chestOpen) refreshChestUI();
 }
 function syncArmorDisplay() { for (let i = 0; i < 4; i++) { const id = player.armor[ARMOR_SLOT_ORDER[i]]; armorInv[i] = id ? { id, count: 1 } : null; paintSlot(armorSlots[i], armorInv[i]); } }
@@ -7810,10 +8201,11 @@ function getArmorPoints() { let n = 0; for (const k of ARMOR_SLOT_ORDER) { const
    the damage; the victim's authoritative state packet corrects it. */
 function estimateRemoteDamage(rp, amount) {
   if (!rp || !rp.armor) return amount;
-  let armorPoints = 0;
-  for (const k of ARMOR_SLOT_ORDER) { const id = rp.armor[k]; if (id && ITEMS[id] && ITEMS[id].armorPoints) armorPoints += ITEMS[id].armorPoints; }
+  let armorPoints = 0, toughness = 0;
+  for (const k of ARMOR_SLOT_ORDER) { const id = rp.armor[k]; if (id && ITEMS[id] && ITEMS[id].armorPoints) { armorPoints += ITEMS[id].armorPoints; toughness += (ITEMS[id].toughness || 0); } }
   if (armorPoints <= 0) return amount;
-  return Math.max(0.5, amount * (1 - Math.min(0.8, armorPoints * 0.04)));
+  const effective = Math.min(20, Math.max(armorPoints / 5, armorPoints - amount / (2 + toughness / 4)));
+  return Math.max(0.5, amount * (1 - effective / 25));
 }
 function getArmorToughness() { let t = 0; for (const k of ARMOR_SLOT_ORDER) { const id = player.armor[k]; if (id && ITEMS[id]) t += (ITEMS[id].toughness || 0); } return t; }
 document.addEventListener('mousemove', e => { cursorEl.style.left = e.clientX + 'px'; cursorEl.style.top = e.clientY + 'px'; });
@@ -7843,6 +8235,7 @@ function rmbInventorySlot(index) {
   if (cursorItem) return;
   const stack = inv[index]; if (!stack) return;
   const def = ITEMS[stack.id];
+  if (def && def.kind === 'shield') { equipShieldFromIndex(index); return; }
   if (!def || def.kind !== 'armor') { splitSlot(index); return; }
   equipArmorFromSlot(index, def);
 }
@@ -7860,6 +8253,7 @@ function splitSlot(index) {
   const stack = inv[index]; if (!stack) return;
   const half = Math.ceil(stack.count / 2);
   cursorItem = { id: stack.id, count: half };
+  if (typeof stack.durability === 'number') cursorItem.durability = stack.durability;
   stack.count -= half;
   if (stack.count <= 0) inv[index] = null;
   updateUI();
@@ -7873,7 +8267,9 @@ function gatherItem(index) {
   cursorItem = null;
   let targetCount = stack.count + curCount;
   for (const pos of positions) { const s = inv[pos]; const room = max - targetCount; if (room <= 0) break; const moved = Math.min(room, s.count); targetCount += moved; s.count -= moved; if (s.count <= 0) inv[pos] = null; }
-  inv[index] = { id, count: targetCount };
+  const merged = { id, count: targetCount };
+  if (typeof stack.durability === 'number') merged.durability = stack.durability;
+  inv[index] = merged;
   updateUI();
 }
 function toggleInventory() {
@@ -7893,7 +8289,7 @@ function addItemStack(stack) {
   const def = ITEMS[stack.id]; if (!def) return stack.count;
   const max = def.stack; let count = stack.count;
   for (let i = 0; i < 36 && count > 0; i++) { const s = inv[i]; if (s && s.id === stack.id && s.count < max) { const m = Math.min(max - s.count, count); s.count += m; count -= m; } }
-  for (let i = 0; i < 36 && count > 0; i++) { if (!inv[i]) { const m = Math.min(max, count); inv[i] = { id: stack.id, count: m }; count -= m; } }
+  for (let i = 0; i < 36 && count > 0; i++) { if (!inv[i]) { const m = Math.min(max, count); const st = { id: stack.id, count: m }; if (typeof stack.durability === 'number') st.durability = stack.durability; inv[i] = st; count -= m; } }
   return count;
 }
 function addItem(id, count = 1) { addItemStack({ id, count }); updateUI(); }
@@ -8063,7 +8459,7 @@ class Arrow {
             if (rp.isBot && NET.mode === 'host') {
               damageBot(rp, amount, NET.myName, kb);
             } else {
-              const msg = { t: 'dmg', target: rp.id, amount, source: NET.myName, kb, _from: NET.myId };
+              const msg = { t: 'dmg', target: rp.id, amount, source: NET.myName, kb, tool: 'arrow', atk: [this.pos.x, this.pos.y, this.pos.z], _from: NET.myId };
               netSend(msg);
               rp.flashHurt();
             }
@@ -8527,7 +8923,7 @@ function breakBlock(hit) {
     addEventMessage(`<b style="color:#ff8888">${def.bed}'s bed</b> was destroyed by <b>${NET.myName}</b>`, '#ff6666');
     broadcastBedDestroyed(def.bed, NET.myName);
     updateStatusBar();
-    player.attackStrengthTicker = 0;
+    resetSwingCooldown();
     return;
   }
   if (def && def.cactus) {
@@ -8540,14 +8936,14 @@ function breakBlock(hit) {
       dropItemLocal('b' + id, 1, hit.x + 0.5, y + 0.4, hit.z + 0.5, null, 0.6);
       y++;
     }
-    player.attackStrengthTicker = 0;
+    resetSwingCooldown();
     return;
   }
   setBlock(hit.x, hit.y, hit.z, 0); markDirty(hit.x, hit.y, hit.z);
   broadcastBlock(hit.x, hit.y, hit.z, 0);
   if (def) dropItemLocal('b' + id, 1, hit.x + 0.5, hit.y + 0.4, hit.z + 0.5, null, 0.6);
   SFX.breakBlock();
-  player.attackStrengthTicker = 0;
+  resetSwingCooldown();
 }
 function tryStartEating() {
   if (invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return false;
@@ -8573,59 +8969,72 @@ function updateEating(dt) {
   }
 }
 function tryInteract() {
-  if (invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return;
+  if (invOpen || shopOpen || upgradeOpen || chestOpen || player.eliminated || player.respawnCooldown > 0 || player.spectator) return false;
   const { entity, block } = getCrosshairTarget();
-  if (entity) return;
-  if (!block) return;
-  if (block.id === 21) { openShop(); return; }
-  if (block.id === 29) { openUpgradeShop(); return; }
-  if (block.id === 44) { openChestAt(block.x, block.y, block.z, 'normal'); return; }
-  if (block.id === 45) { openChestAt(block.x, block.y, block.z, 'ender'); return; }
-  placeBlock(block);
+  if (entity) return false;
+  if (!block) return false;
+  if (block.id === 21) { openShop(); return true; }
+  if (block.id === 29) { openUpgradeShop(); return true; }
+  if (block.id === 44) { openChestAt(block.x, block.y, block.z, 'normal'); return true; }
+  if (block.id === 45) { openChestAt(block.x, block.y, block.z, 'ender'); return true; }
+  return placeBlock(block);
 }
 let lastPlaceTime = 0;
 function placeBlock(hit) {
-  const stack = heldStack(); if (!stack) return;
+  const stack = heldStack(); if (!stack) return false;
   const def = ITEMS[stack.id];
-  if (!def || !def.block) return;
+  if (!def || !def.block) return false;
   /* Debounce duplicate right-clicks from mouse chatter / OS double-clicks.
      Only block placement is debounced, so using tools is never delayed. */
   const now = performance.now();
-  if (now - lastPlaceTime < 100) return;
+  if (now - lastPlaceTime < 100) return true;
   lastPlaceTime = now;
   const nx = hit.x + hit.face[0];
   const ny = hit.y + hit.face[1];
   const nz = hit.z + hit.face[2];
-  if (getBlock(nx, ny, nz)) return;
+  if (getBlock(nx, ny, nz)) return false;
   const blockId = def.block;
   const blockDef = BLOCKS[blockId];
   const isBed = blockDef && blockDef.bed;
   const p = player.pos, r = 0.3, h = player.height;
   if (blockDef && blockDef.ladder) {
     const hasWall = (getBlock(nx + 1, ny, nz) && !isLadderBlock(getBlock(nx + 1, ny, nz))) || (getBlock(nx - 1, ny, nz) && !isLadderBlock(getBlock(nx - 1, ny, nz))) || (getBlock(nx, ny, nz + 1) && !isLadderBlock(getBlock(nx, ny, nz + 1))) || (getBlock(nx, ny, nz - 1) && !isLadderBlock(getBlock(nx, ny, nz - 1)));
-    if (!hasWall) { showMessage('Ladder needs a wall!', '#ffcc44'); return; }
+    if (!hasWall) { showMessage('Ladder needs a wall!', '#ffcc44'); return false; }
   }
   if (blockDef && blockDef.cactus) {
     const below = getBlock(nx, ny - 1, nz);
-    if (!below || (BLOCKS[below] && BLOCKS[below].trans)) { showMessage('Cactus needs solid ground', '#ffcc44'); return; }
+    if (!below || (BLOCKS[below] && BLOCKS[below].trans)) { showMessage('Cactus needs solid ground', '#ffcc44'); return false; }
     const neighbors = [getBlock(nx + 1, ny, nz), getBlock(nx - 1, ny, nz), getBlock(nx, ny, nz + 1), getBlock(nx, ny, nz - 1)];
-    for (const nid of neighbors) { if (nid && BLOCKS[nid] && !BLOCKS[nid].trans) { showMessage('Cactus cannot touch other blocks', '#ffcc44'); return; } }
+    for (const nid of neighbors) { if (nid && BLOCKS[nid] && !BLOCKS[nid].trans) { showMessage('Cactus cannot touch other blocks', '#ffcc44'); return false; } }
   }
   if (isBed) {
-    if (getBlock(nx, ny, nz + 1)) return;
-    for (const zOff of [0, 1]) { if (nx + 1 > p.x - r && nx < p.x + r && ny + 1 > p.y && ny < p.y + h && nz + zOff + 1 > p.z - r && nz + zOff < p.z + r) return; }
+    if (getBlock(nx, ny, nz + 1)) return false;
+    for (const zOff of [0, 1]) { if (nx + 1 > p.x - r && nx < p.x + r && ny + 1 > p.y && ny < p.y + h && nz + zOff + 1 > p.z - r && nz + zOff < p.z + r) return false; }
     setBlock(nx, ny, nz, blockId); setBlock(nx, ny, nz + 1, blockId);
     markDirty(nx, ny, nz); markDirty(nx, ny, nz + 1);
     broadcastBlock(nx, ny, nz, blockId); broadcastBlock(nx, ny, nz + 1, blockId);
   } else {
-    if (nx + 1 > p.x - r && nx < p.x + r && ny + 1 > p.y && ny < p.y + h && nz + 1 > p.z - r && nz < p.z + r) return;
+    if (nx + 1 > p.x - r && nx < p.x + r && ny + 1 > p.y && ny < p.y + h && nz + 1 > p.z - r && nz < p.z + r) return false;
     if (blockDef && blockDef.tnt) { primeTNT(nx, ny, nz, TNT_FUSE, true); }
     else { setBlock(nx, ny, nz, blockId); markDirty(nx, ny, nz); broadcastBlock(nx, ny, nz, blockId); }
   }
   stack.count--; if (stack.count <= 0) inv[selectedSlot] = null;
   SFX.place();
   updateUI(); startSwing();
+  return true;
 }
+/* Equip the shield currently held in the hotbar into the off-hand. */
+function equipShieldFromIndex(index) {
+  const stack = inv[index];
+  if (!stack || stack.id !== 'shield') return false;
+  if (hasOffhandShield()) { showMessage('A shield is already equipped', '#ffcc44'); return false; }
+  stack.count--; if (stack.count <= 0) inv[index] = null;
+  equipShield(stack.durability);
+  updateUI();
+  SFX.buy();
+  return true;
+}
+function equipShieldFromSlot() { return equipShieldFromIndex(selectedSlot); }
 function updateMining(dt) {
   const locked = isPlayLocked();
   const canMine = mining && !invOpen && !shopOpen && !upgradeOpen && !chestOpen && locked && camMode !== 2 && !player.eliminated && !player.eating && !player.bowCharging && player.respawnCooldown <= 0 && !player.spectator;
@@ -8831,61 +9240,117 @@ function updateEnchantedGlint(dt) {
 }
 
 /* ============================================================================
-   19. COMBAT
+   19. COMBAT  (Vanilla Java 1.9+ rules)
    ========================================================================== */
-function getHeldAttackStats() {
-  const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
-  if (def && def.kind === 'tool') {
-    const stats = TOOL_STATS[def.tool]?.[def.material];
-    if (stats) {
-      let dmg = stats.dmg;
-      const sharp = (teamUpgrades[PLAYER_TEAM.name] && teamUpgrades[PLAYER_TEAM.name].sharpness) || 0;
-      if (sharp > 0 && (def.tool === 'sword' || def.tool === 'axe' || def.tool === 'pickaxe')) dmg += 1.25 * sharp;
-      return { damage: dmg, speed: getAttackSpeed(def.tool, def.material), kind: def.tool, material: def.material };
-    }
-  }
-  return { damage: 1, speed: 4.0, kind: null, material: null };
+const SWEEP_VISUALS = [];
+function spawnSweepCrescent() {
+  const geo = new THREE.RingGeometry(0.75, 2.35, 22, 1, Math.PI / 2 - Math.PI * 0.45, Math.PI * 0.9);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.rotation.x = -Math.PI / 2;
+  const grp = new THREE.Group();
+  grp.add(mesh);
+  const dir = getLookDir();
+  grp.position.set(player.pos.x + dir.x * 0.9, player.pos.y + 1.05, player.pos.z + dir.z * 0.9);
+  grp.rotation.y = player.yaw;
+  grp.scale.setScalar(0.62);
+  scene.add(grp);
+  SWEEP_VISUALS.push({ grp, mat, life: 0.26, maxLife: 0.26 });
 }
-function getAttackStrength(cooldownMax) { return clamp(player.attackStrengthTicker / cooldownMax, 0, 1); }
+function updateSweepVisuals(dt) {
+  for (let i = SWEEP_VISUALS.length - 1; i >= 0; i--) {
+    const s = SWEEP_VISUALS[i];
+    s.life -= dt;
+    if (s.life <= 0) { scene.remove(s.grp); s.grp.traverse(o => { o.geometry?.dispose?.(); }); s.mat.dispose(); SWEEP_VISUALS.splice(i, 1); continue; }
+    const t = 1 - s.life / s.maxLife;
+    s.grp.scale.setScalar(0.62 + t * 0.72);
+    s.mat.opacity = 0.85 * (1 - t);
+  }
+}
+function getHeldAttackStats() {
+  const profile = getHeldCombatProfile();
+  const sharp = (teamUpgrades[PLAYER_TEAM.name] && teamUpgrades[PLAYER_TEAM.name].sharpness) || 0;
+  let dmg = profile.damage;
+  if (sharp > 0 && profile.def && (profile.def.tool === 'sword' || profile.def.tool === 'axe' || profile.def.tool === 'pickaxe')) dmg += 1.25 * sharp;
+  return { damage: dmg, attackTicks: profile.attackTicks, speed: COMBAT_1_9_CONFIG.TICKS_PER_SECOND / profile.attackTicks, kind: profile.def ? profile.def.tool : null };
+}
+
+/* Apply a 1.9 sweep to every other enemy in the arc in front of the player. */
+function performSweepAttack(primary, profile, charge) {
+  const sweepCfg = COMBAT_1_9_CONFIG.sweep;
+  if (!profile.sword || !player.onGround || player.sprint) return;
+  if (charge < sweepCfg.minCharge) return;
+  const look = getLookDir();
+  const flat = Math.hypot(look.x, look.z) || 1;
+  const lx = look.x / flat, lz = look.z / flat;
+  const targets = [];
+  for (const rp of remotePlayers) {
+    if (!rp || rp === primary || !rp.alive || rp.respawning) continue;
+    const dx = rp.renderPos.x - player.pos.x, dz = rp.renderPos.z - player.pos.z;
+    const dist = Math.hypot(dx, dz);
+    if (dist > sweepCfg.radius || dist < 1e-4) continue;
+    const dy = rp.renderPos.y - player.pos.y;
+    if (dy < -2.2 || dy > 2.6) continue;
+    if ((dx / dist) * lx + (dz / dist) * lz < sweepCfg.arcCos) continue;
+    targets.push({ rp, dx: dx / dist, dz: dz / dist });
+  }
+  if (targets.length === 0) return;
+  const kbStr = COMBAT_1_9_CONFIG.knockback.base * COMBAT_1_9_CONFIG.knockback.horizontalUnit;
+  for (const { rp, dx, dz } of targets) {
+    const kb = [dx * kbStr, 4.6, dz * kbStr];
+    const amount = sweepCfg.damage;
+    if (rp.isBot && NET.mode === 'host') {
+      damageBot(rp, amount, NET.myName, kb);
+    } else {
+      netSend({ t: 'dmg', target: rp.id, amount, source: NET.myName, kb, p: charge, tool: 'sword', sweep: true, atk: [player.pos.x, player.pos.y, player.pos.z], _from: NET.myId });
+      rp.flashHurt();
+      rp.applyOptimisticDamage(amount, remoteIsStalled(rp));
+    }
+    spawnCritParticles(rp.renderPos.x, rp.renderPos.y + 1.1, rp.renderPos.z);
+  }
+  spawnSweepCrescent();
+  SFX.sweep();
+}
 
 function attackEntityTarget(hit) {
+  /* A raised shield occupies the use action: no melee swings while blocking. */
+  if (player.isBlocking || player.shieldRaisedTicks > 0) return false;
   if (player.eliminated || player.eating || player.respawnCooldown > 0 || player.spectator) return false;
   if (!hit || !hit.entity) return false;
   const rp = hit.entity; if (!rp.alive) return false;
 
-  const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
-  const isKbStick = stack && stack.id === 'knockback_stick';
+  const profile = getHeldCombatProfile();
+  const charge = getAttackCharge(profile);
+  player.attackCooldownMax = profile.attackTicks / COMBAT_1_9_CONFIG.TICKS_PER_SECOND;
+  player.attackTicksMax = profile.attackTicks;
 
-  const attackSpeed = (def && def.kind === 'tool') ? getAttackSpeed(def.tool, def.material) : 4.0;
-  const cooldownTime = 1 / attackSpeed;
-  player.attackCooldownMax = cooldownTime;
-  const p = clamp(player.attackStrengthTicker / cooldownTime, 0, 1);
+  /* Sprint-reset hits (W-tap) trade the sweep for extra knockback, exactly
+     like Java: sprinting attacks never crit and never sweep. */
+  const sprintHit = player.sprint && !player.sneak && Math.hypot(player.vel.x, player.vel.z) > 1.2;
+  const isCrit = charge > COMBAT_1_9_CONFIG.crit.minCharge && !player.onGround && player.vel.y < 0 && !sprintHit;
 
-  let baseDmg = 1;
-  if (def && def.kind === 'tool') { const stats = TOOL_STATS[def.tool]?.[def.material]; if (stats) baseDmg = stats.dmg; }
-  if (isKbStick) baseDmg = 1;
   const sharp = (teamUpgrades[PLAYER_TEAM.name] && teamUpgrades[PLAYER_TEAM.name].sharpness) || 0;
-  const sharpBonus = (sharp > 0 && def && (def.tool === 'sword' || def.tool === 'axe' || def.tool === 'pickaxe')) ? 1.25 * sharp : 0;
-  let damage = baseDmg * (0.2 + 0.8 * p * p) + sharpBonus * p;
+  const sharpBonus = (sharp > 0 && profile.def && (profile.def.tool === 'sword' || profile.def.tool === 'axe' || profile.def.tool === 'pickaxe')) ? 1.25 * sharp : 0;
+  /* getAttackCharge already applies the 1.9 multiplier curve. */
+  let damage = (profile.damage + sharpBonus) * charge;
+  if (isCrit) damage *= COMBAT_1_9_CONFIG.crit.multiplier;
 
-  const fullCharge = p >= 0.848;
-  const sprintHit = player.sprint && Math.hypot(player.vel.x, player.vel.z) > 1.2 && fullCharge;
-  const isCrit = !player.onGround && player.vel.y < 0 && player.fallDistance > 0 && !sprintHit && fullCharge && !isKbStick;
-  if (isCrit) damage *= 1.5;
-
-  player.attackStrengthTicker = 0;
+  resetSwingCooldown();
   startSwing();
   SFX.hit(isCrit);
 
   let dxv = rp.renderPos.x - player.pos.x, dzv = rp.renderPos.z - player.pos.z;
   const dd = Math.hypot(dxv, dzv) || 1; dxv /= dd; dzv /= dd;
   let kbStr, kbVert;
-  if (isKbStick) { kbStr = 22; kbVert = 8.5; }
-  else if (sprintHit) { kbStr = 13.5; kbVert = 7.0; }
-  else { kbStr = 8.0; kbVert = 5.2; }
+  if (profile.knockbackStick) { kbStr = 22; kbVert = 8.5; }
+  else { kbStr = knockbackFromSprint(sprintHit); kbVert = knockbackVerticalFromSprint(sprintHit); }
   const kb = [dxv * kbStr, kbVert, dzv * kbStr];
 
-  const msg = { t: 'dmg', target: rp.id, amount: damage, source: NET.myName, kb, p, _from: NET.myId };
+  const msg = {
+    t: 'dmg', target: rp.id, amount: damage, source: NET.myName, kb, p: charge,
+    tool: profile.def ? (profile.def.tool || 'fist') : 'fist',
+    crit: isCrit, atk: [player.pos.x, player.pos.y, player.pos.z], _from: NET.myId
+  };
   if (rp.isBot && NET.mode === 'host') {
     /* Bots are simulated here; their state packet would never echo our own
        broadcast back, so apply the authoritative hit directly. */
@@ -8900,10 +9365,14 @@ function attackEntityTarget(hit) {
   }
 
   if (isCrit) { spawnCritParticles(rp.renderPos.x, rp.renderPos.y + 1.2, rp.renderPos.z); showMessage('CRITICAL HIT!', '#ffd966'); }
+  else performSweepAttack(rp, profile, charge);
+  /* A landed sprint hit ends the sprint, forcing the player to W-tap again. */
+  if (sprintHit) player.sprint = false;
   return true;
 }
 function updateAutoAttack(dt) {
   if (!mining) return;
+  if (player.isBlocking || player.shieldRaisedTicks > 0) return;
   if (invOpen || shopOpen || upgradeOpen || chestOpen || camMode === 2) return;
   if (player.eliminated || player.eating || player.bowCharging || player.respawnCooldown > 0 || player.spectator) return;
   if (!isPlayLocked()) return;
@@ -8913,6 +9382,7 @@ function updateAutoAttack(dt) {
   if (entity) attackEntityTarget(entity);
 }
 function tryManualAttack() {
+  if (player.isBlocking || player.shieldRaisedTicks > 0) return;
   if (player.eliminated || player.eating || player.respawnCooldown > 0 || player.spectator) return;
   const { entity } = getCrosshairTarget();
   if (entity) attackEntityTarget(entity);
@@ -8927,7 +9397,7 @@ const NET_SEND_INTERVAL = 0.033;          // 30 Hz while moving: smooth without 
 const NET_IDLE_SEND_INTERVAL = 0.75;      // standing still: a keep-alive every 750 ms is enough
 const NET_KEYFRAME_INTERVAL = 1000;       // repeat the optional fields once a second so a lost packet self-heals
 let netSeqCounter = 0;
-const _lastSentState = { px: 99999, py: 99999, pz: 99999, yaw: 999, pitch: 999, hp: -1, item: null, sneak: null, mining: null, sw: null, ar: '', rs: null, lastTime: 0, lastFull: 0 };
+const _lastSentState = { px: 99999, py: 99999, pz: 99999, yaw: 999, pitch: 999, hp: -1, item: null, sneak: null, mining: null, sw: null, ar: '', rs: null, oh: null, sh: null, lastTime: 0, lastFull: 0 };
 function sendLocalState() {
   if (!NET.started) return;
   if (NET.mode !== 'host' && NET.mode !== 'client') return;
@@ -8938,20 +9408,23 @@ function sendLocalState() {
   const item = inv[selectedSlot] ? inv[selectedSlot].id : null;
   const sw = swinging && swingT < 0.22;
   const arKey = (player.armor.helmet || '') + '|' + (player.armor.chest || '') + '|' + (player.armor.legs || '') + '|' + (player.armor.boots || '');
+  const ohKey = player.offhand || '';
+  const shKey = !!(player.isBlocking && hasOffhandShield());
   const mg = !!(mining && mineTarget);
   const rs = !!player.respawning;
   const now = performance.now();
   const distSq = (px - _lastSentState.px) ** 2 + (py - _lastSentState.py) ** 2 + (pz - _lastSentState.pz) ** 2;
   const rotChanged = Math.abs(ry - _lastSentState.yaw) > 0.02 || Math.abs(rp - _lastSentState.pitch) > 0.02;
-  const changed = distSq > 0.0016 || rotChanged || hp !== _lastSentState.hp || item !== _lastSentState.item || player.sneak !== _lastSentState.sneak || mg !== _lastSentState.mining || sw !== _lastSentState.sw || arKey !== _lastSentState.ar || rs !== _lastSentState.rs || now - _lastSentState.lastTime > (NET_IDLE_SEND_INTERVAL * 1000);
+  const changed = distSq > 0.0016 || rotChanged || hp !== _lastSentState.hp || item !== _lastSentState.item || player.sneak !== _lastSentState.sneak || mg !== _lastSentState.mining || sw !== _lastSentState.sw || arKey !== _lastSentState.ar || rs !== _lastSentState.rs || ohKey !== _lastSentState.oh || shKey !== _lastSentState.sh || now - _lastSentState.lastTime > (NET_IDLE_SEND_INTERVAL * 1000);
   if (!changed) return;
   const keyframe = now - _lastSentState.lastFull >= NET_KEYFRAME_INTERVAL;
   if (keyframe) _lastSentState.lastFull = now;
-  const prevItem = _lastSentState.item, prevSneak = _lastSentState.sneak, prevMg = _lastSentState.mining, prevSw = _lastSentState.sw, prevAr = _lastSentState.ar, prevRs = _lastSentState.rs;
+  const prevItem = _lastSentState.item, prevSneak = _lastSentState.sneak, prevMg = _lastSentState.mining, prevSw = _lastSentState.sw, prevAr = _lastSentState.ar, prevRs = _lastSentState.rs, prevOh = _lastSentState.oh, prevSh = _lastSentState.sh;
   _lastSentState.px = px; _lastSentState.py = py; _lastSentState.pz = pz;
   _lastSentState.yaw = ry; _lastSentState.pitch = rp;
   _lastSentState.hp = hp; _lastSentState.item = item; _lastSentState.sneak = player.sneak;
   _lastSentState.mining = mg; _lastSentState.sw = sw; _lastSentState.ar = arKey; _lastSentState.rs = rs;
+  _lastSentState.oh = ohKey; _lastSentState.sh = shKey;
   _lastSentState.lastTime = now;
   netSeqCounter++;
   /* Only send the optional animation/appearance fields when they actually
@@ -8964,6 +9437,8 @@ function sendLocalState() {
   if (keyframe || sw !== prevSw) s.sw = sw;
   if (keyframe || rs !== prevRs) s.rs = rs;
   if (keyframe || arKey !== prevAr) s.ar = { helmet: player.armor.helmet, chest: player.armor.chest, legs: player.armor.legs, boots: player.armor.boots };
+  if (keyframe || ohKey !== prevOh) s.oh = ohKey;
+  if (keyframe || shKey !== prevSh) s.sh = shKey;
   netSend(s);
 }
 function updateSpectator(dt) {
@@ -9000,9 +9475,9 @@ function updatePlayer(dt) {
     return;
   }
   if (player.spawnProtection > 0) player.spawnProtection = Math.max(0, (player.spawnProtectUntil - performance.now()) / 1000);
-  if (player.hurtTime > 0) player.hurtTime = Math.max(0, player.hurtTime - dt);
+  /* hurtTime, attack cooldown and shield timers are advanced by
+     stepCombatTimers() on the fixed 20 TPS clock. */
   if (player.knockbackTime > 0) player.knockbackTime = Math.max(0, player.knockbackTime - dt);
-  player.attackStrengthTicker = Math.min(player.attackStrengthTicker + dt, 2.0);
   if (player.invulnerableTime > 0) player.invulnerableTime = Math.max(0, player.invulnerableTime - dt);
   for (const k of ['speed', 'jump', 'invis']) { if (player.effects[k] > 0) player.effects[k] = Math.max(0, player.effects[k] - dt); }
   const wantSneak = !!(keys['ShiftLeft'] || keys['ShiftRight']);
@@ -9080,9 +9555,8 @@ function updatePlayer(dt) {
     else startRespawnCooldown();
     return;
   }
-  const p = getAttackCooldownFraction();
-  if (p < 1) { cooldownFillEl.style.width = (p * 100).toFixed(1) + '%'; cooldownBarEl.classList.add('show'); }
-  else cooldownBarEl.classList.remove('show');
+  const charge = getAttackCooldownFraction();
+  updateCooldownMeter(charge);
   if (player.bowCharging) {
     const stack = heldStack(); const def = stack ? ITEMS[stack.id] : null;
     if (!def || def.kind !== 'bow') { player.bowCharging = false; player.bowCharge = 0; }
@@ -9219,6 +9693,8 @@ function respawnPlayer() {
   player.vel.set(0, 0, 0);
   player.lastDamageSource = null; player.lastDamageTime = 0; player.hurtTime = 0;
   player.invulnerableTime = 0; player.lastHurt = 0;
+  player.hurtTicks = 0;
+  player.shieldRaised = false; player.isBlocking = false; player.shieldRaisedTicks = 0; player.shieldDisabledTicks = 0;
   player.invulnerableUntil = 0;
   player.spawnProtection = 5.0;
   player.spawnProtectUntil = performance.now() + 5000;
@@ -9241,6 +9717,7 @@ function startRespawnCooldown() {
   maxFallY = player.pos.y;
   updateHealthBar();
   mining = false; player.eating = false; player.bowCharging = false;
+  lowerShield();
   if (chestOpen) closeChest();
   player.effects.speed = 0; player.effects.jump = 0; player.effects.invis = 0;
   document.getElementById('respawnOverlay').classList.add('show');
@@ -9252,6 +9729,7 @@ function eliminatePlayer() {
   player.spectator = false;
   updateHealthBar();
   mining = false; player.eating = false; player.bowCharging = false;
+  lowerShield();
   if (chestOpen) closeChest();
   document.exitPointerLock();
   document.getElementById('deadOverlay').classList.add('show');
@@ -9266,31 +9744,60 @@ function flashHurtOverlay() {
   clearTimeout(ov._t);
   ov._t = setTimeout(() => ov.classList.remove('show'), 220);
 }
-function damagePlayer(amount, source, bypassArmor, kb) {
+/* opts = { attackerPos:[x,y,z], tool:'sword'|'axe'..., crit, sweep } */
+function damagePlayer(amount, source, bypassArmor, kb, opts) {
   if (amount <= 0 || player.eliminated || player.respawnCooldown > 0 || player.spectator) return false;
   const nowMs = performance.now();
   if (nowMs < player.spawnProtectUntil) return false;
+  const attackOpts = opts || {};
+  /* --- Shield blocking (1.9+) -------------------------------------------
+     A raised, fully-activated shield blocks 100% of frontal attacks. An axe
+     hit bypasses the block and disables the shield for 100 ticks (5 s). */
+  if (!bypassArmor && isShieldActive() && isFrontalAttack(attackOpts.attackerPos)) {
+    if (attackOpts.tool === 'axe') {
+      disableShield();
+      flashHurtOverlay();
+    } else {
+      SFX.shieldBlock();
+      if (source) { player.lastDamageSource = source; player.lastDamageTime = nowMs; }
+      if (kb && kb.length === 3) {
+        const s = COMBAT_1_9_CONFIG.shield.knockbackScale;
+        applyKnockbackImpulse(kb[0] * s, Math.min(kb[1] * s, 3.0), kb[2] * s, 0.22);
+      }
+      /* The hit was blocked, but the shield still wears down (and can break). */
+      damageShieldDurability(amount);
+      return false;
+    }
+  }
   let applyAmount = amount;
   let freshHit = false;
-  /* Invulnerability is a real-time window, not a tick counter: when this tab
-     is in the background it may only tick once a second, and the old
-     dt-decayed timer made every hit after the first one nearly free. */
-  if (nowMs < player.invulnerableUntil) {
+  /* 10-tick invulnerability frames, advanced by the fixed combat clock. A
+     stronger hit inside the window still lands, minus the damage already
+     taken, exactly like Java's EntityLivingBase#attackEntityFrom. */
+  if (player.hurtTicks > 0) {
     if (amount <= player.lastHurt) return false;
     applyAmount = amount - player.lastHurt; player.lastHurt = amount;
   } else {
-    player.lastHurt = amount; player.invulnerableUntil = nowMs + 500;
-    player.invulnerableTime = 0.5; player.hurtTime = 0.5; freshHit = true;
+    player.lastHurt = amount;
+    player.hurtTicks = COMBAT_1_9_CONFIG.invulnerabilityTicks;
+    player.hurtTime = COMBAT_1_9_CONFIG.invulnerabilityTicks / COMBAT_1_9_CONFIG.TICKS_PER_SECOND;
+    player.invulnerableTime = player.hurtTime;
+    player.invulnerableUntil = nowMs + COMBAT_1_9_CONFIG.invulnerabilityTicks * COMBAT_1_9_CONFIG.TICK_MS;
+    freshHit = true;
   }
   if (source) { player.lastDamageSource = source; player.lastDamageTime = performance.now(); }
   let afterArmor = applyAmount;
   if (!bypassArmor) {
+    /* Java 1.9+ armour + toughness penetration:
+       effective = clamp(armour - damage / (2 + toughness / 4), armour / 5, 20)
+       reduction = effective / 25                                             */
     const armorPoints = getArmorPoints();
     const toughness = getArmorToughness();
-    const effectiveArmor = Math.max(0, armorPoints - applyAmount / (2 + toughness / 4));
+    const effectiveArmor = Math.min(20, Math.max(armorPoints / 5, armorPoints - applyAmount / (2 + toughness / 4)));
+    afterArmor = applyAmount * (1 - effectiveArmor / 25);
+    /* Protection is applied after armour, 4% per level, capped at 80%. */
     const protLvl = (teamUpgrades[PLAYER_TEAM.name] && teamUpgrades[PLAYER_TEAM.name].protection) || 0;
-    const armorReduction = Math.min(0.8, effectiveArmor * 0.04 + protLvl * 0.04);
-    afterArmor = applyAmount * (1 - armorReduction);
+    if (protLvl > 0) afterArmor *= (1 - Math.min(0.8, protLvl * 0.04));
   }
   let remaining = afterArmor;
   if (player.absorption > 0) {
@@ -9826,6 +10333,79 @@ function updateItemMesh() {
   if (glintOn) applyGlintToMesh(currentItemMesh);
   itemHolder.add(currentItemMesh);
 }
+/* ---- Off-hand shield rendering -------------------------------------------
+   A shield is a 1.9+ off-hand item, so it is rendered beside the first-person
+   arm and on the left arm of every remote model. The face uses the atlas
+   sprite, with a thin wooden backing so it reads as a solid board edge-on. */
+function makeShieldMesh(scale) {
+  const s = scale || 1;
+  const grp = new THREE.Group();
+  const w = 0.40 * s, h = 0.48 * s;
+  const geo = new THREE.PlaneGeometry(w, h);
+  const uv = geo.attributes.uv;
+  const t = T.shield, col = t % TPR, row = Math.floor(t / TPR);
+  uv.setXY(0, col / TPR, 1 - (row + 1) / TPR); uv.setXY(1, (col + 1) / TPR, 1 - (row + 1) / TPR);
+  uv.setXY(2, col / TPR, 1 - row / TPR); uv.setXY(3, (col + 1) / TPR, 1 - row / TPR);
+  uv.needsUpdate = true;
+  const mat = new THREE.MeshStandardMaterial({ map: atlasTex, alphaTest: 0.5, transparent: true, side: THREE.DoubleSide, roughness: 0.55, metalness: 0.30, envMapIntensity: 0.7 });
+  const face = new THREE.Mesh(geo, mat); face.castShadow = true;
+  const back = new THREE.Mesh(new THREE.BoxGeometry(w * 0.92, h * 0.88, 0.035), new THREE.MeshStandardMaterial({ color: 0x6e4a24, roughness: 0.88, metalness: 0.02 }));
+  back.position.z = -0.028;
+  grp.add(back, face);
+  return grp;
+}
+const offhandGroup = new THREE.Group();
+camera.add(offhandGroup);
+const OFFHAND_REST_POS = new THREE.Vector3(-0.36, -0.33, -0.55);
+const OFFHAND_REST_ROT = new THREE.Euler(0.05, 0.62, -0.12);
+const OFFHAND_BLOCK_POS = new THREE.Vector3(-0.20, -0.20, -0.46);
+const OFFHAND_BLOCK_ROT = new THREE.Euler(0.02, 0.12, 0.06);
+offhandGroup.position.copy(OFFHAND_REST_POS);
+offhandGroup.rotation.copy(OFFHAND_REST_ROT);
+let fpShieldMesh = null;
+let offhandRaiseLerp = 0;
+function updateOffhandModel() {
+  const has = hasOffhandShield();
+  if (has && !fpShieldMesh) { fpShieldMesh = makeShieldMesh(1); offhandGroup.add(fpShieldMesh); }
+  if (fpShieldMesh) fpShieldMesh.visible = has;
+  offhandGroup.visible = has;
+}
+function updateOffhandShield(dt) {
+  const has = hasOffhandShield();
+  const raised = has && player.shieldRaised && player.shieldDisabledTicks <= 0;
+  offhandRaiseLerp += ((raised ? 1 : 0) - offhandRaiseLerp) * Math.min(1, dt * 16);
+  const f = offhandRaiseLerp;
+  offhandGroup.visible = has && camMode === 0 && !player.spectator && !player.eliminated;
+  offhandGroup.position.set(
+    OFFHAND_REST_POS.x + (OFFHAND_BLOCK_POS.x - OFFHAND_REST_POS.x) * f,
+    OFFHAND_REST_POS.y + (OFFHAND_BLOCK_POS.y - OFFHAND_REST_POS.y) * f,
+    OFFHAND_REST_POS.z + (OFFHAND_BLOCK_POS.z - OFFHAND_REST_POS.z) * f
+  );
+  offhandGroup.rotation.set(
+    OFFHAND_REST_ROT.x + (OFFHAND_BLOCK_ROT.x - OFFHAND_REST_ROT.x) * f,
+    OFFHAND_REST_ROT.y + (OFFHAND_BLOCK_ROT.y - OFFHAND_REST_ROT.y) * f,
+    OFFHAND_REST_ROT.z + (OFFHAND_BLOCK_ROT.z - OFFHAND_REST_ROT.z) * f
+  );
+  if (offhandSlotEl) offhandSlotEl.classList.toggle('blocking', isShieldActive());
+  updateOffhandCooldownUI();
+}
+function setModelOffhandShield(model, equipped) {
+  const parts = model.userData.parts; if (!parts || !parts.armL) return;
+  if (!equipped) {
+    if (model.userData.offhandMesh) { parts.armL.remove(model.userData.offhandMesh); model.userData.offhandMesh = null; }
+    return;
+  }
+  if (model.userData.offhandMesh) return;
+  const mesh = makeShieldMesh(0.9);
+  mesh.position.set(-0.02, -0.66, -0.14);
+  mesh.rotation.set(0, Math.PI, 0);
+  parts.armL.add(mesh);
+  model.userData.offhandMesh = mesh;
+}
+function updateRemoteShieldPose(model, raised) {
+  const mesh = model && model.userData.offhandMesh; if (!mesh) return;
+  mesh.rotation.x += ((raised ? -0.55 : 0) - mesh.rotation.x) * 0.25;
+}
 const ARM_BASE_POS = new THREE.Vector3(0.34, -0.30, -0.42);
 const ARM_BASE_ROT = new THREE.Euler(0.10, -0.35, 0.45);
 armGroup.position.copy(ARM_BASE_POS);
@@ -9886,6 +10466,7 @@ function rebuildLocalPlayerModel() {
   playerModel.userData.heldItemId = heldId;
   scene.add(playerModel);
   if (heldId) setModelHeldItem(playerModel, heldId);
+  if (hasOffhandShield()) setModelOffhandShield(playerModel, true);
   applyPlayerArmorToModel(playerModel);
 }
 function setPlayerSkin(skinTex, slim, dataUrl) {
@@ -10041,7 +10622,13 @@ function animateModel(model, dt, e, isPlayer) {
   }
 }
 function updateModel(dt) {
-  if (camMode !== 0 && !player.spectator) { const stack = heldStack(); const id = stack ? stack.id : null; if (playerModel.userData.heldItemId !== id) { setModelHeldItem(playerModel, id); playerModel.userData.heldItemId = id; } }
+  if (camMode !== 0 && !player.spectator) {
+    const stack = heldStack(); const id = stack ? stack.id : null;
+    if (playerModel.userData.heldItemId !== id) { setModelHeldItem(playerModel, id); playerModel.userData.heldItemId = id; }
+    /* Third-person off-hand shield: attach/remove and mirror the block pose. */
+    setModelOffhandShield(playerModel, hasOffhandShield());
+    updateRemoteShieldPose(playerModel, player.shieldRaised && player.shieldDisabledTicks <= 0);
+  }
   if (camMode === 0 || player.spectator) return;
   animateModel(playerModel, dt, player, true);
 }
@@ -10165,7 +10752,8 @@ const SHOP_CATS = [
       { giveId: 'stone_sword', giveCount: 1, costId: 'iron_ingot', costCount: 10, desc: 'A reliable upgrade from your wooden sword.' },
       { giveId: 'iron_sword', giveCount: 1, costId: 'gold_ingot', costCount: 7, desc: 'Iron sword. Harder hits for the mid game.' },
       { giveId: 'diamond_sword', giveCount: 1, costId: 'emerald', costCount: 4, desc: 'Diamond sword. The strongest blade in the shop.' },
-      { giveId: 'knockback_stick', giveCount: 1, costId: 'gold_ingot', costCount: 5, desc: 'Knockback I. Send enemies flying off the edge.' }
+      { giveId: 'knockback_stick', giveCount: 1, costId: 'gold_ingot', costCount: 5, desc: 'Knockback I. Send enemies flying off the edge.' },
+      { giveId: 'shield', giveCount: 1, costId: 'gold_ingot', costCount: 8, desc: 'Equips to the off-hand. Hold RMB for 0.25s to block 100% of frontal attacks. An axe hit disables it for 5s.' }
     ]
   },
   {
@@ -10222,6 +10810,7 @@ function getEntryName(entry) { return entry.armorSet ? (cap(entry.armorSet) + ' 
 function getEntryCount(entry) { return entry.armorSet ? 4 : entry.giveCount; }
 function getSetTier(entry) { return ARMOR_TIERS.findIndex(t => t.key === entry.armorSet) + 1; }
 function isEntryOwned(entry) {
+  if (entry.giveId === 'shield') return hasOffhandShield();
   if (!entry.armorSet) return false;
   const tier = getSetTier(entry);
   return ARMOR_SLOT_ORDER.every(slot => { const cur = player.armor[slot]; return cur && ITEMS[cur] && ITEMS[cur].tier >= tier; });
@@ -10351,6 +10940,16 @@ function buyItem(entry) {
   }
   const def = ITEMS[getEntryIconId(entry)]; if (!def) return;
   if (countItem(entry.costId) < entry.costCount) { showMessage('Not enough ' + meta.label, '#ff6666'); return; }
+  /* The shield is worn in the off-hand, so buying it equips it directly
+     instead of dropping a second copy into the hotbar. */
+  if (getEntryGiveId(entry) === 'shield') {
+    if (hasOffhandShield()) { showMessage('You already have a shield', '#ffcc44'); return; }
+    consumeItem(entry.costId, entry.costCount);
+    equipShield();
+    SFX.buy();
+    updateShopUI();
+    return;
+  }
   consumeItem(entry.costId, entry.costCount);
   addItem(getEntryGiveId(entry), entry.giveCount);
   showMessage('Purchased ' + def.name, '#7fe0a0');
@@ -10491,6 +11090,8 @@ function stepWorld(dt, now) {
      behind the blurred backdrop. */
   if (optionsPaused) return;
   if (NET.started) {
+    /* 20 TPS combat clock: independent of render FPS and of any open GUI. */
+    runCombatTicks(dt);
     if (!invOpen && !shopOpen && !upgradeOpen && !chestOpen && !chatInputWrap.classList.contains('show')) updatePlayer(dt);
     updateEating(dt); updateMining(dt); updateAutoAttack(dt); updateGenerators(dt);
     updateBots(dt);
@@ -10501,6 +11102,7 @@ function stepWorld(dt, now) {
     if (netSendAccum >= NET_SEND_INTERVAL) { netSendAccum = 0; sendLocalState(); }
   }
   updateCamera(dt); updateTouchInteract(dt); updateArm(dt); updateModel(dt);
+  updateOffhandShield(dt); updateSweepVisuals(dt);
   updateArrows(dt); updateThrowables(dt);
   updateCritParticles(dt); updateEatParticles(dt); updateTrailParticles(dt);
   updateGlintParticles(dt); updateEnchantedGlint(dt); updateTNT(dt);
@@ -10609,6 +11211,7 @@ function releaseInputs() {
   player.eating = false;
   player.bowCharging = false; player.bowCharge = 0;
   player.sprint = false;
+  lowerShield();
 }
 function startBackgroundMode() {
   if (bgActive) return;
